@@ -12,9 +12,8 @@ private:
 public:
 	MediaDecoder(const AVCodec* codec, AVHWDeviceType type);
 	~MediaDecoder();
-	AVFrame* Decode(const AVPacket* packet);
+	bool Init();
+	bool Decode(const AVPacket* packet,[OUT] AVFrame** received);
+	AVHWDeviceContext* GetHWDeviceContext();
 };
 #endif // !MediaDecoder_H
-
-
-

@@ -22,25 +22,47 @@ MediaDecoder::~MediaDecoder() {
 	av_frame_free(&_decoding_frame);
 	av_frame_free(&_transfer_frame);
 }
+bool MediaDecoder::Init() {
+	_codec_ctx = avcodec_alloc_context3(this->_codec);
+	if (_codec_ctx == NULL) return false;
 
-AVFrame* MediaDecoder::Decode(const AVPacket* packet) {
-	assert(avcodec_send_packet(_codec_ctx, packet) >= 0);
+	if (this->_hwType != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
+	{
+		if (!avcheck(av_hwdevice_ctx_create(
+			&_codec_ctx->hw_device_ctx, 
+			this->_hwType, 
+			nullptr, 
+			nullptr, 
+			0))) return false;
+		
+		_transfer_frame = av_frame_alloc();
+		if (_transfer_frame == NULL) return false;
+	}
+}
+
+AVHWDeviceContext* MediaDecoder::GetHWDeviceContext() {
+	if (this->_hwType != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
+		return (AVHWDeviceContext*)_codec_ctx->hw_device_ctx->data;
+	else return NULL;
+}
+
+bool MediaDecoder::Decode(const AVPacket* packet, AVFrame** frame) {
+	if (!avcheck(avcodec_send_packet(_codec_ctx, packet))) return false;
 	av_frame_unref(_decoding_frame);
 	av_frame_unref(_transfer_frame);
-	assert(avcodec_receive_frame(_codec_ctx, _decoding_frame) >= 0);
+	if (!avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame))) return false;
 
 	switch (_hwType)
 	{
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2:
-		assert(av_hwframe_transfer_data(_transfer_frame, _decoding_frame, 0) >= 0);
-		return av_frame_clone(_transfer_frame);
+		if (!avcheck(av_hwframe_transfer_data(_transfer_frame, _decoding_frame, 0))) return false;
 
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_NONE:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_QSV:
-		return av_frame_clone(_decoding_frame);
-
-	default: return av_frame_clone(_decoding_frame);// not tested
+	default: // not tested
+		*frame = av_frame_clone(_transfer_frame);
+		return *frame != nullptr;
 	}
 }
