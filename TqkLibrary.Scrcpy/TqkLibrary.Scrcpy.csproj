@@ -10,4 +10,17 @@
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 	</PropertyGroup>
 
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="TqkLibrary.ScrcpyNative.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.dll" Link="TqkLibrary.ScrcpyNative.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+	</ItemGroup>
 </Project>

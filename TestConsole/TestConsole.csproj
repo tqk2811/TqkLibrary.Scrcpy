@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFrameworks>net462;net5.0-windows;net6.0-windows</TargetFrameworks>
+		<LangVersion>10.0</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avcodec-59.dll" Link="avcodec-59.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avdevice-59.dll" Link="avdevice-59.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avfilter-8.dll" Link="avfilter-8.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avformat-59.dll" Link="avformat-59.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avutil-57.dll" Link="avutil-57.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\postproc-56.dll" Link="postproc-56.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swresample-4.dll" Link="swresample-4.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swscale-6.dll" Link="swscale-6.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="TqkLibrary.ScrcpyNative.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.dll" Link="TqkLibrary.ScrcpyNative.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\TqkLibrary.Scrcpy\TqkLibrary.Scrcpy.csproj" />
+	</ItemGroup>
+
+</Project>
