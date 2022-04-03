@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <d3d11.h>
 #include "libav.h"
 
 #include "Utils.h"

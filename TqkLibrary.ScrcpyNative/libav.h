@@ -10,6 +10,6 @@ extern "C" {
 #include <libavutil/imgutils.h>
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_d3d11va.h>
-#include <libavutil/hwcontext_cuda.h>
+//#include <libavutil/hwcontext_cuda.h>
 }
 #endif // libav_H
