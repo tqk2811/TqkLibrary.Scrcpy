@@ -5,7 +5,7 @@ class Scrcpy
 public:
 	Scrcpy(LPCWSTR deviceId);
 	~Scrcpy();
-	bool Connect(LPCWSTR config, const ScrcpyNativeConfig* nativeConfig);
+	bool Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig);
 private:
 	std::wstring _deviceId;
 	SOCKET _video{ INVALID_SOCKET };

@@ -12,7 +12,7 @@ Scrcpy* ScrcpyAlloc(LPCWSTR deviceId) {
 void ScrcpyFree(Scrcpy* scrcpy) {
 	delete scrcpy;
 }
-bool ScrcpyConnect(Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig* nativeConfig) {
+bool ScrcpyConnect(Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	return scrcpy->Connect(config, nativeConfig);
 }
 

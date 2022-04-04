@@ -3,26 +3,37 @@
 #include "ws2tcpip.h"
 #include "Scrcpy.h"
 
+#pragma comment(lib,"ws2_32.lib")
+
+#define IPV4_LOCALHOST 0x7F000001
 const wchar_t* adbPath = L"adb.exe";
 const int portMin = 5000;
 const int portMax = 65535;
 const int sockTimeoutSecond = 5;
-SOCKET CreateListenSock(int port) {
-	SOCKET sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+SOCKET CreateListenSock(int port, int backlog) {
+	SOCKET sock = socket(AF_INET, SOCK_STREAM, NULL);
 	if (sock == INVALID_SOCKET) {
+		return INVALID_SOCKET;
+	}
+
+	int reuse = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*)&reuse, sizeof(reuse)) == SOCKET_ERROR) {
+		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	InetPton(AF_INET,L"127.0.0.1",&addr.sin_addr);
+	addr.sin_addr.s_addr = htonl(IPV4_LOCALHOST);
+	//InetPton(AF_INET, L"127.0.0.1", &addr.sin_addr);
 	if (bind(sock, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 
-	if (listen(sock, 1) == SOCKET_ERROR) {
+	if (listen(sock, backlog) == SOCKET_ERROR) {
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
@@ -30,21 +41,15 @@ SOCKET CreateListenSock(int port) {
 	return sock;
 }
 
-SOCKET FindPort(int& port, int maxTry = 100) {
+SOCKET FindPort(int& port, int backlog, int maxTry = 100) {
 	SOCKET sock = INVALID_SOCKET;
 	port = -1;
 	for (int i = 0; i < maxTry && sock == INVALID_SOCKET; i++) {
 		int range = portMax - portMin + 1;
 		port = rand() % range + portMin;
-		sock = CreateListenSock(port);
+		sock = CreateListenSock(port, backlog);
 	}
-	
-	timeval timeout = { sockTimeoutSecond, 0 };
-	fd_set fds;
-	FD_ZERO(&fds);
-	FD_SET(sock, &fds);
-	select(sock + 1, &fds, NULL, NULL, &timeout);
-	
+
 	return sock;
 }
 
@@ -72,23 +77,30 @@ Scrcpy::~Scrcpy() {
 	}
 }
 
-bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig* nativeConfig) {
+bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
+
+	WSAData wsaData{ 0 };
+	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if (res != 0) {
+		return false;
+	}
 
 	RunAdbProcess(L"reverse --remove localabstract:scrcpy");
+	RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
+
+	int backlog = 1;
+	if (nativeConfig.IsControl) backlog = 2;
 
 	int port = -1;
-	SOCKET sock = FindPort(port);
-	if (sock == INVALID_SOCKET) 
+	SOCKET sock = FindPort(port, backlog);
+	if (sock == INVALID_SOCKET)
 		return false;
 
-	RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
-	
-	
 	std::wstring arg(L"reverse localabstract:scrcpy tcp:");
-	arg += port;
+	arg.append(std::to_wstring(port));
 	RunAdbProcess(arg.c_str());
 
-	
+
 	//run main process
 	LPCWSTR cmds[]
 	{
@@ -106,13 +118,13 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig* nativeConfig) {
 	}
 	this->_process = new ProcessWrapper((LPWSTR)args.c_str());
 
-		
+
 	this->_video = AcceptConnection(sock);
 	if (this->_video == INVALID_SOCKET) {
 		closesocket(sock);
 		return false;
 	}
-	if (nativeConfig->IsControl) {
+	if (nativeConfig.IsControl) {
 		this->_control = AcceptConnection(sock);
 		if (this->_control == INVALID_SOCKET) {
 			closesocket(this->_video);
