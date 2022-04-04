@@ -11,7 +11,7 @@ const int portMin = 5000;
 const int portMax = 65535;
 const int sockTimeoutSecond = 5;
 
-SOCKET CreateListenSock(int port, int backlog) {
+SOCKET CreateListenSock(int port, int backlog, const timeval timeout) {
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, NULL);
 	if (sock == INVALID_SOCKET) {
 		return INVALID_SOCKET;
@@ -37,17 +37,24 @@ SOCKET CreateListenSock(int port, int backlog) {
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	FD_SET(sock, &rfds);
+	if (select(sock, &rfds, NULL, NULL, &timeout) == SOCKET_ERROR) {
+		closesocket(sock);
+		return INVALID_SOCKET;
+	}
 
 	return sock;
 }
 
-SOCKET FindPort(int& port, int backlog, int maxTry = 100) {
+SOCKET FindPort(int& port, int backlog, const timeval timeout, int maxTry = 100) {
 	SOCKET sock = INVALID_SOCKET;
 	port = -1;
 	for (int i = 0; i < maxTry && sock == INVALID_SOCKET; i++) {
 		int range = portMax - portMin + 1;
 		port = rand() % range + portMin;
-		sock = CreateListenSock(port, backlog);
+		sock = CreateListenSock(port, backlog, timeout);
 	}
 
 	return sock;
@@ -90,9 +97,10 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 
 	int backlog = 1;
 	if (nativeConfig.IsControl) backlog = 2;
+	const timeval timeout{ 1 , 0 };
 
 	int port = -1;
-	SOCKET sock = FindPort(port, backlog);
+	SOCKET sock = FindPort(port, backlog, timeout);
 	if (sock == INVALID_SOCKET)
 		return false;
 
