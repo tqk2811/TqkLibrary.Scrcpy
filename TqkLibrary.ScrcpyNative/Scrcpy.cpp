@@ -79,36 +79,28 @@ Scrcpy::Scrcpy(LPCWSTR deviceId) {
 Scrcpy::~Scrcpy() {
 	//kill thread
 
-
+	Stop();
 	if (this->_process != nullptr)
 	{
 		delete this->_process;
 		this->_process = nullptr;
 	}
-	if (this->_video != nullptr)
-	{
-		delete this->_video;
-		this->_video = nullptr;
-	}
-	if (this->_control != nullptr)
-	{
-		delete this->_control;
-		this->_control = nullptr;
-	}
 }
 
 bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
-	if (this->_video != nullptr) return false;
+	if (this->_video != nullptr || this->_control != nullptr) return false;
 
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (res != 0) {
 		return false;
 	}
-
-	RunAdbProcess(L"reverse --remove localabstract:scrcpy");
-	RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
-
+	
+	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
+	exitCode = RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
+	if (exitCode != 0)
+		return false;
+	
 	int backlog = 1;
 	if (nativeConfig.IsControl) backlog = 2;
 	const timeval timeout{ 1 , 0 };
@@ -120,8 +112,9 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 
 	std::wstring arg(L"reverse localabstract:scrcpy tcp:");
 	arg.append(std::to_wstring(port));
-	RunAdbProcess(arg.c_str());
-
+	exitCode = RunAdbProcess(arg.c_str());
+	if (exitCode != 0)
+		return false;
 
 	//run main process
 	LPCWSTR cmds[]
@@ -155,22 +148,14 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 			return false;
 		}
 	}
-
+	closesocket(sock);
+	
 	//work with socket in thread
-
 	this->_video = new Video(video, nativeConfig.PacketBufferLength, nativeConfig.HwType);
 	if (nativeConfig.IsControl) this->_control = new Control(control);
 
-
-
-
-
-
-
-
-
-	closesocket(sock);
 	this->_video->Start();
+	if (nativeConfig.IsControl) this->_control->Start();
 	return true;
 }
 
@@ -194,7 +179,7 @@ void Scrcpy::Stop() {
 }
 
 
-void Scrcpy::RunAdbProcess(LPCWSTR argument)
+DWORD Scrcpy::RunAdbProcess(LPCWSTR argument)
 {
 	LPCWSTR cmds[]
 	{
@@ -209,5 +194,5 @@ void Scrcpy::RunAdbProcess(LPCWSTR argument)
 		args.append(cmds[i]);
 	}
 	ProcessWrapper p((LPWSTR)args.c_str());
-	p.WaitForExit();
+	return p.GetExitCode();
 }

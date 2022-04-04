@@ -70,6 +70,14 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
+        public void Stop()
+        {
+            NativeWrapper.ScrcpyStop(Handle);
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
         /// <returns></returns>
         public Bitmap GetScreenShot()
         {

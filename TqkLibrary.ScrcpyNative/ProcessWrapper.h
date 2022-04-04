@@ -7,6 +7,8 @@ public:
 	~ProcessWrapper();
 
 	bool WaitForExit(DWORD timeout = INFINITE);
+	bool GetExitCodeProcess(LPDWORD lpExitCode);
+	DWORD GetExitCode();
 	/*int WriteStdIn(const BYTE* buff, int buffSize);
 	int ReadStdOut(BYTE* buff, int buffSize);
 	int ReadStdErr(BYTE* buff, int buffSize);*/

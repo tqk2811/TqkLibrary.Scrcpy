@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TqkLibrary.Scrcpy", "TqkLibrary.Scrcpy\TqkLibrary.Scrcpy.csproj", "{0F8B38B4-8893-415B-BD8E-5E9EC076631C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D31EA18-664A-4F98-8A70-1CBF2247D5DA} = {3D31EA18-664A-4F98-8A70-1CBF2247D5DA}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TqkLibrary.ScrcpyNative", "TqkLibrary.ScrcpyNative\TqkLibrary.ScrcpyNative.vcxproj", "{3D31EA18-664A-4F98-8A70-1CBF2247D5DA}"
 EndProject

@@ -15,7 +15,9 @@ void ScrcpyFree(Scrcpy* scrcpy) {
 bool ScrcpyConnect(Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	return scrcpy->Connect(config, nativeConfig);
 }
-
+void ScrcpyStop(Scrcpy* scrcpy) {
+	scrcpy->Stop();
+}
 bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& y) {
 	return true;
 }

@@ -12,7 +12,7 @@ private:
 	ProcessWrapper* _process{ nullptr };
 	Video* _video{ nullptr };
 	Control* _control{ nullptr };
-	void RunAdbProcess(LPCWSTR argument);
+	DWORD RunAdbProcess(LPCWSTR argument);
 };
 
 #endif

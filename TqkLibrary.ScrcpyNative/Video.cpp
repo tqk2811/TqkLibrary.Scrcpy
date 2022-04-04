@@ -3,11 +3,12 @@
 #include "libav.h"
 #include "ParsePacket.h"
 #include "MediaDecoder.h"
-const int HEADER_SIZE = 12;
+#define HEADER_SIZE 12
+#define DEVICE_NAME_SIZE 64
 #define NO_PTS UINT64_MAX
 Video::Video(SOCKET sock, int buffSize, AVHWDeviceType hwType) {
 	assert(buffSize > 0);
-	this->buffSize = buffSize;
+	this->_buffSize = buffSize;
 	this->_videoSock = new SocketWrapper(sock);
 	this->_videoBuffer = new BYTE[buffSize];
 	const AVCodec* h264_decoder = avcodec_find_decoder(AV_CODEC_ID_H264);
@@ -16,81 +17,93 @@ Video::Video(SOCKET sock, int buffSize, AVHWDeviceType hwType) {
 }
 
 Video::~Video() {
+	delete this->_parsePacket;
+	delete this->_h264_mediaDecoder;
 	delete this->_videoSock;
 	delete this->_videoBuffer;
-	av_frame_unref(&this->tempFrame);
+	av_frame_unref(&this->_tempFrame);
+	CloseHandle(this->_threadHandle);
 }
-
-
-
 void Video::Start() {
 	//
-	this->threadStart();
+	this->_threadHandle =
+		CreateThread(
+			NULL,                   // default security attributes
+			0,                      // use default stack size  
+			MyThreadFunction,       // thread function name
+			this,					// argument to thread function 
+			0,                      // use default creation flags 
+			&_threadId);
 }
-
-
-
-void Video::Stop() { 
+void Video::Stop() {
 	this->_videoSock->Stop();
+	this->_isStop = true;
+	WaitForSingleObject(this->_threadHandle, INFINITE);
+}
+DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
+	((Video*)lpParam)->threadStart();
+	return 0;
 }
 
 void Video::threadStart() {
-	assert(this->_videoSock->ReadAll(this->_videoBuffer, 64) == 64);//device name
-	std::string name((const char*)this->_videoBuffer, 64);
-	printf(name.c_str());
+	if (this->_videoSock->ReadAll(this->_videoBuffer, DEVICE_NAME_SIZE) != DEVICE_NAME_SIZE)//device name
+		return;
+	this->_deviceName.append(std::string((const char*)this->_videoBuffer, 64));
+
+	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//width
+		return;
+	this->_width = sc_read16be(this->_videoBuffer);
+
+	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//height
+		return;
+	this->_height = sc_read16be(this->_videoBuffer);
+
+#if _DEBUG
+	printf(this->_deviceName.c_str());
 	printf("\r\n");
-
-	assert(this->_videoSock->ReadAll(this->_videoBuffer, 2) == 2);//width
-	UINT16 width = sc_read16be(this->_videoBuffer);
-	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
-
-	assert(this->_videoSock->ReadAll(this->_videoBuffer, 2) == 2);//height
-	UINT16 height = sc_read16be(this->_videoBuffer);
-	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
-
-	while (true)
+	printf(std::string("width:").append(std::to_string(this->_width)).append("\r\n").c_str());
+	printf(std::string("height:").append(std::to_string(this->_height)).append("\r\n").c_str());
+#endif
+	while (!this->_isStop)
 	{
-		assert(this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) == HEADER_SIZE);
+		if (this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) != HEADER_SIZE)
+			return;
 
 		UINT64 pts = sc_read64be(this->_videoBuffer);
 		INT32 len = sc_read32be(&this->_videoBuffer[8]);
-		assert(len > 0 && len <= this->buffSize);
+		assert(len > 0 && len <= this->_buffSize);
 
-		if ((pts == NO_PTS || (pts & AV_NOPTS_VALUE) == 0) && len > 0)
-		{
-			if (this->_videoSock->ReadAll(this->_videoBuffer, len) != len)
-				return;
+		if (!((pts == NO_PTS || (pts & AV_NOPTS_VALUE) == 0) && len > 0))
+			return;
+		if (this->_videoSock->ReadAll(this->_videoBuffer, len) != len)
+			return;
 #if _DEBUG
-			printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
+		printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
 #endif
 
-			AVPacket packet;
-			int err = av_new_packet(&packet, len);
-			if (err < 0)
-				return;
-
-			memcpy(packet.data, this->_videoBuffer, len);
-			packet.pts = pts != NO_PTS ? (INT64)pts : AV_NOPTS_VALUE;
-
-			if (this->_parsePacket->ParserPushPacket(&packet))
-			{
-				AVFrame* frame{ nullptr };
-				if (this->_h264_mediaDecoder->Decode(&packet, &frame)) {
-
-					//lock ref to frame
-					mtx.lock();
-					av_frame_ref(&this->tempFrame, frame);
-					mtx.unlock();
-
-					av_frame_unref(frame);
-					av_frame_free(&frame);
-				}
-			}
-			av_packet_unref(&packet);
-		}
-		else
-		{
+		AVPacket packet;
+		int err = av_new_packet(&packet, len);
+		if (err < 0)
 			return;
+
+		memcpy(packet.data, this->_videoBuffer, len);
+		packet.pts = pts != NO_PTS ? (INT64)pts : AV_NOPTS_VALUE;
+
+		if (this->_parsePacket->ParserPushPacket(&packet))
+		{
+			AVFrame* frame{ nullptr };
+			if (this->_h264_mediaDecoder->Decode(&packet, &frame)) {
+
+				//lock ref to frame
+				_mtx.lock();
+				av_frame_unref(&this->_tempFrame);
+				av_frame_ref(&this->_tempFrame, frame);
+				_mtx.unlock();
+
+				av_frame_unref(frame);
+				av_frame_free(&frame);
+			}
 		}
+		av_packet_unref(&packet);
 	}
 }
