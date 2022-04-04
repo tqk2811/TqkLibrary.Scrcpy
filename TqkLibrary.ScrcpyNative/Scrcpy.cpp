@@ -77,14 +77,28 @@ Scrcpy::Scrcpy(LPCWSTR deviceId) {
 }
 
 Scrcpy::~Scrcpy() {
+	//kill thread
+
+
 	if (this->_process != nullptr)
 	{
 		delete this->_process;
 		this->_process = nullptr;
 	}
+	if (this->_video != nullptr)
+	{
+		delete this->_video;
+		this->_video = nullptr;
+	}
+	if (this->_control != nullptr)
+	{
+		delete this->_control;
+		this->_control = nullptr;
+	}
 }
 
 bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
+	if (this->_video != nullptr) return false;
 
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -127,21 +141,25 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	this->_process = new ProcessWrapper((LPWSTR)args.c_str());
 
 
-	this->_video = AcceptConnection(sock);
-	if (this->_video == INVALID_SOCKET) {
+	SOCKET video = AcceptConnection(sock);
+	if (video == INVALID_SOCKET) {
 		closesocket(sock);
 		return false;
 	}
+	SOCKET control = INVALID_SOCKET;
 	if (nativeConfig.IsControl) {
-		this->_control = AcceptConnection(sock);
-		if (this->_control == INVALID_SOCKET) {
-			closesocket(this->_video);
+		control = AcceptConnection(sock);
+		if (control == INVALID_SOCKET) {
+			closesocket(video);
 			closesocket(sock);
 			return false;
 		}
 	}
 
 	//work with socket in thread
+
+	this->_video = new Video(video, nativeConfig.PacketBufferLength, nativeConfig.HwType);
+	if (nativeConfig.IsControl) this->_control = new Control(control);
 
 
 
@@ -152,11 +170,28 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 
 
 	closesocket(sock);
+	this->_video->Start();
 	return true;
 }
 
 
+void Scrcpy::Stop() {
+	if (this->_video != nullptr)
+		this->_video->Stop();
+	if (this->_control != nullptr)
+		this->_control->Stop();
 
+
+	if (this->_video != nullptr) {
+		delete this->_video;
+		this->_video = nullptr;
+	}
+
+	if (this->_control != nullptr) {
+		delete this->_control;
+		this->_control = nullptr;
+	}
+}
 
 
 void Scrcpy::RunAdbProcess(LPCWSTR argument)

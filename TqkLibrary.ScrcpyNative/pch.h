@@ -14,9 +14,15 @@ typedef class Scrcpy;
 typedef struct ScrcpyNativeConfig;
 
 #ifdef TQKLIBRARYSCRCPYNATIVE_EXPORTS
+typedef class SocketWrapper;
+typedef class Control;
+typedef class Video;
+typedef class ParsePacket;
+typedef class MediaDecoder;
 #include <windows.h>
 #include <string>
 #include <winsock2.h>
+#include <mutex>
 #include <assert.h>
 #include <stdlib.h>
 #include <d3d11.h>
@@ -43,6 +49,8 @@ struct ScrcpyNativeConfig {
 #include "ProcessWrapper.h"
 #include "SocketWrapper.h"
 #include "Utils.h"
+#include "Video.h"
+#include "Control.h"
 #include "Scrcpy.h"
 #endif //TQKLIBRARYSCRCPYNATIVE_EXPORTS
 

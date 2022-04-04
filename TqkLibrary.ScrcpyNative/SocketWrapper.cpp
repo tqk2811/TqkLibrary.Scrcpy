@@ -3,6 +3,7 @@
 #include "SocketWrapper.h"
 
 SocketWrapper::SocketWrapper(SOCKET sock) {
+	assert(sock != INVALID_SOCKET);
 	this->_sock = sock;
 }
 
@@ -15,4 +16,8 @@ int SocketWrapper::ReadAll(BYTE* buff, int length) {
 }
 int SocketWrapper::Write(const BYTE* buff, int length) {
 	return send(this->_sock, (const char*)buff, length, NULL);//MSG_OOB
+}
+
+void SocketWrapper::Stop() {
+	shutdown(this->_sock, SD_BOTH);
 }

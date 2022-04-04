@@ -33,7 +33,7 @@ bool ParsePacket::ParserPushPacket(AVPacket* packet) {
 
 			//increase size pending packet for copy at start pointer + pending->size
 			//pending: [------------|       add size packet->size     ]
-			assert(av_grow_packet(_pending, packet->size) > 0);
+			assert(av_grow_packet(_pending, packet->size) == 0);
 
 			//pending: [------------|    packet->data copy to here    ]
 			memcpy(_pending->data + offset, packet->data, packet->size);

@@ -37,7 +37,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// Default: true
         /// </summary>
-        public bool IsControl { get; set; } = true;
+        public bool IsControl { get; set; } = false;
 
         /// <summary>
         /// Default: 0 (unlimit)

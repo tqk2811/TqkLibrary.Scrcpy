@@ -90,6 +90,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Control.h" />
     <ClInclude Include="Exports.h" />
     <ClInclude Include="libav.h" />
     <ClInclude Include="MediaDecoder.h" />
@@ -101,8 +102,10 @@
     <ClInclude Include="Scrcpy.h" />
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="Video.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Control.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Exports.cpp" />
     <ClCompile Include="MediaDecoder.cpp" />
@@ -115,6 +118,7 @@
     <ClCompile Include="ProcessWrapper.cpp" />
     <ClCompile Include="Scrcpy.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
+    <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
