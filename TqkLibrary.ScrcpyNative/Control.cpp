@@ -34,14 +34,19 @@ DWORD WINAPI Control::MyThreadFunction(LPVOID lpParam) {
 	((Control*)lpParam)->threadStart();
 	return 0;
 }
-
+bool Control::ControlCommand(const BYTE* command, const int sizeInByte) {
+	if (this->_sockControl->Write(command, sizeInByte) == SOCKET_ERROR) {
+		return false;
+	}
+	return true;
+}
 
 void Control::threadStart() {
 	while (!this->_isStop) {
-		
+
 		if (this->_sockControl->ReadAll(this->_buffer, 1) != 1)
 			return;
-		
+
 		ScrcpyControlReceivedType type = (ScrcpyControlReceivedType)this->_buffer[0];
 
 		switch (type)
@@ -50,16 +55,16 @@ void Control::threadStart() {
 		{
 			if (this->_sockControl->ReadAll(this->_buffer, 4) != 4)
 				return;
-			
+
 			UINT32 len = sc_read32be(this->_buffer);
 			if (len == 0) break;
 			assert(len > CONTROL_MSG_MAX_SIZE);
-			
+
 			if (this->_sockControl->ReadAll(this->_buffer, len) != len)
 				return;
 
 			//send to c#
-			
+
 			break;
 		}
 		default:

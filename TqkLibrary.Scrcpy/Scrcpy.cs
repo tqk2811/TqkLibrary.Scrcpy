@@ -74,23 +74,27 @@ namespace TqkLibrary.Scrcpy
         {
             NativeWrapper.ScrcpyStop(Handle);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
         public Bitmap GetScreenShot()
         {
-            int length = NativeWrapper.ScrcpyGetScreenBufferSize(Handle);
-            if (length <= 0) return null;
+            Size size = ScreenSize;
+            Bitmap bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, size.Width, size.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
 
-            byte[] buffer = new byte[length];
-            if (NativeWrapper.ScrcpyGetScreenShot(Handle, buffer, length) == length)
-            {
-                Size size = ScreenSize;
-                return new Bitmap(size.Width, size.Height, size.Width, PixelFormat.Format32bppArgb, Marshal.UnsafeAddrOfPinnedArrayElement(buffer, 0));
-            }
-            return null;
+            NativeWrapper.ScrcpyGetScreenShot(
+                Handle,
+                bitmapData.Scan0,
+                size.Width * size.Height * 4,
+                size.Width,
+                size.Height,
+                bitmapData.Stride);//ARGB only
+
+            bitmap.UnlockBits(bitmapData);
+            return bitmap;//blank
         }
 
 

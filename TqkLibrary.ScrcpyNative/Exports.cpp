@@ -18,18 +18,18 @@ bool ScrcpyConnect(Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nat
 void ScrcpyStop(Scrcpy* scrcpy) {
 	scrcpy->Stop();
 }
-bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& y) {
-	return true;
+bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& h) {
+	return scrcpy->GetScreenSize(w, h);
 }
 
-bool ScrcpyControl(Scrcpy* scrcpy, const BYTE* command, const int sizeInByte) {
-	return true;
+bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command, const int sizeInByte) {
+	return scrcpy->ControlCommand(command, sizeInByte);
 }
 
-int ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte) {
-	return 0;
+bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, int w, int h, int lineSize) {
+	return scrcpy->GetScreenShot(buffer, sizeInByte, w, h, lineSize);
 }
 
 int ScrcpyGetScreenBufferSize(Scrcpy* scrcpy) {
-	return 0;
+	return scrcpy->GetScreenBufferSize();
 }

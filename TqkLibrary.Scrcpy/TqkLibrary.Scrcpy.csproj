@@ -8,6 +8,7 @@
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
 		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.dll" Link="TqkLibrary.ScrcpyNative.dll">

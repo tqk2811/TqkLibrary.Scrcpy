@@ -95,12 +95,12 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	if (res != 0) {
 		return false;
 	}
-	
+
 	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
 	exitCode = RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
 	if (exitCode != 0)
 		return false;
-	
+
 	int backlog = 1;
 	if (nativeConfig.IsControl) backlog = 2;
 	const timeval timeout{ 1 , 0 };
@@ -149,7 +149,7 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 		}
 	}
 	closesocket(sock);
-	
+
 	//work with socket in thread
 	this->_video = new Video(video, nativeConfig.PacketBufferLength, nativeConfig.HwType);
 	if (nativeConfig.IsControl) this->_control = new Control(control);
@@ -167,17 +167,34 @@ void Scrcpy::Stop() {
 		this->_control->Stop();
 
 
+	_videoMutext.lock();
 	if (this->_video != nullptr) {
 		delete this->_video;
 		this->_video = nullptr;
 	}
+	_videoMutext.unlock();
 
+
+	_controlMutext.lock();
 	if (this->_control != nullptr) {
 		delete this->_control;
 		this->_control = nullptr;
 	}
+	_controlMutext.unlock();
 }
 
+bool Scrcpy::ControlCommand(const BYTE* command, const int sizeInByte) {
+	_controlMutext.lock();
+
+	bool result = false;
+	if (this->_control != nullptr) {
+		result = this->_control->ControlCommand(command, sizeInByte);
+	}
+
+	_controlMutext.unlock();
+
+	return result;
+}
 
 DWORD Scrcpy::RunAdbProcess(LPCWSTR argument)
 {
@@ -195,4 +212,33 @@ DWORD Scrcpy::RunAdbProcess(LPCWSTR argument)
 	}
 	ProcessWrapper p((LPWSTR)args.c_str());
 	return p.GetExitCode();
+}
+
+int Scrcpy::GetScreenBufferSize() {
+	_videoMutext.lock();
+	int result = 0;
+	if (this->_video != nullptr) {
+		result = this->_video->GetScreenBufferSize();
+	}
+	_videoMutext.unlock();
+	return result;
+}
+bool Scrcpy::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int lineSize) {
+	_videoMutext.lock();
+	bool result = false;
+	if (this->_video != nullptr) {
+		result = this->_video->GetScreenShot(buffer, sizeInByte, w, h, lineSize);
+	}
+	_videoMutext.unlock();
+	return result;
+}
+
+bool Scrcpy::GetScreenSize(int& w, int& h) {
+	_videoMutext.lock();
+	bool result = false;
+	if (this->_video != nullptr) {
+		result = this->_video->GetScreenSize(w, h);
+	}
+	_videoMutext.unlock();
+	return result;
 }

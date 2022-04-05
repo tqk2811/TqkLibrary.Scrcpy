@@ -21,9 +21,11 @@ Video::~Video() {
 	delete this->_h264_mediaDecoder;
 	delete this->_videoSock;
 	delete this->_videoBuffer;
-	av_frame_unref(&this->_tempFrame);
+	av_frame_unref(this->_tempFrame);
+	av_frame_free(&this->_tempFrame);
 	CloseHandle(this->_threadHandle);
 }
+
 void Video::Start() {
 	//
 	this->_threadHandle =
@@ -35,11 +37,13 @@ void Video::Start() {
 			0,                      // use default creation flags 
 			&_threadId);
 }
+
 void Video::Stop() {
 	this->_videoSock->Stop();
 	this->_isStop = true;
 	WaitForSingleObject(this->_threadHandle, INFINITE);
 }
+
 DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
 	((Video*)lpParam)->threadStart();
 	return 0;
@@ -50,20 +54,30 @@ void Video::threadStart() {
 		return;
 	this->_deviceName.append(std::string((const char*)this->_videoBuffer, 64));
 
+
+#if _DEBUG
 	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//width
 		return;
-	this->_width = sc_read16be(this->_videoBuffer);
+	int width = sc_read16be(this->_videoBuffer);
 
 	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//height
 		return;
-	this->_height = sc_read16be(this->_videoBuffer);
+	int height = sc_read16be(this->_videoBuffer);
 
-#if _DEBUG
+
 	printf(this->_deviceName.c_str());
 	printf("\r\n");
-	printf(std::string("width:").append(std::to_string(this->_width)).append("\r\n").c_str());
-	printf(std::string("height:").append(std::to_string(this->_height)).append("\r\n").c_str());
+	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
+	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
+#else
+	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//width
+		return;
+	if (this->_videoSock->ReadAll(this->_videoBuffer, 2) != 2)//height
+		return;
 #endif
+
+
+
 	while (!this->_isStop)
 	{
 		if (this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) != HEADER_SIZE)
@@ -96,14 +110,85 @@ void Video::threadStart() {
 
 				//lock ref to frame
 				_mtx.lock();
-				av_frame_unref(&this->_tempFrame);
-				av_frame_ref(&this->_tempFrame, frame);
+				av_frame_unref(this->_tempFrame);
+				av_frame_free(&this->_tempFrame);
+				this->_tempFrame = frame;
 				_mtx.unlock();
-
-				av_frame_unref(frame);
-				av_frame_free(&frame);
+				this->_ishaveFrame = true;
 			}
 		}
 		av_packet_unref(&packet);
 	}
+}
+
+bool Video::GetScreenSize(int& w, int& h) {
+	if (!_ishaveFrame)
+		return false;
+
+	_mtx.lock();
+	w = this->_tempFrame->width;
+	h = this->_tempFrame->height;
+	_mtx.unlock();
+
+	return true;
+}
+
+int Video::GetScreenBufferSize() {
+	if (!_ishaveFrame)
+		return 0;
+	_mtx.lock();
+	int result = GetArgbBufferSize(this->_tempFrame->width, this->_tempFrame->height);
+	_mtx.unlock();
+	return result;
+}
+
+bool Video::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int lineSize) {
+	if (!_ishaveFrame)
+		return false;
+
+	AVFrame* clone_frame = nullptr;
+
+	_mtx.lock();
+	clone_frame = av_frame_clone(this->_tempFrame);
+	_mtx.unlock();
+
+	if (clone_frame == nullptr)
+		return false;
+
+	bool result = SwsScale(clone_frame, buffer, sizeInByte, w, h, lineSize, AV_PIX_FMT_BGRA);// -> bitmap c# Format32bppArgb
+
+	av_frame_unref(clone_frame);
+	av_frame_free(&clone_frame);
+	return result;
+}
+
+bool Video::SwsScale(const AVFrame* frame, BYTE* buffer, const int sizeInByte, int w, int h, int lineSize, AVPixelFormat target/* = AV_PIX_FMT_BGRA*/) {
+	if (w <= 0 || w % 2 != 0) {
+		return false;
+	}
+	if (h <= 0 || h % 2 != 0) {
+		return false;
+	}
+	if (GetArgbBufferSize(w, h) != sizeInByte)
+		return false;
+	
+	int linesizes[4]{ 0 };
+	BYTE* const arr[1]{
+		buffer
+	};
+	int err = av_image_fill_linesizes(linesizes, target, w);
+	if(err < 0)
+		return false;
+	if(linesizes[0] != lineSize)
+		return false;
+
+	SwsContext* sws = sws_getContext(	frame->width, frame->height, (AVPixelFormat)frame->format,
+										w, h, target,
+										SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+	if (sws == nullptr)
+		return false;
+
+	if (err >= 0) err = sws_scale(sws, frame->data, frame->linesize, 0, frame->height, arr, linesizes);
+	sws_freeContext(sws);
+	return err >= 0;
 }
