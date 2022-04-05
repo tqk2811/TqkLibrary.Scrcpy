@@ -19,6 +19,7 @@ typedef class Control;
 typedef class Video;
 typedef class ParsePacket;
 typedef class MediaDecoder;
+typedef class NV12ToRgbShader;
 #include <windows.h>
 #include <string>
 #include <winsock2.h>
@@ -49,6 +50,7 @@ struct ScrcpyNativeConfig {
 #include "ProcessWrapper.h"
 #include "SocketWrapper.h"
 #include "Utils.h"
+
 #include "Video.h"
 #include "Control.h"
 #include "Scrcpy.h"

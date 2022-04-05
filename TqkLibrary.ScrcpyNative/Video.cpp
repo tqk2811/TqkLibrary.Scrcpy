@@ -155,8 +155,27 @@ bool Video::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int 
 	if (clone_frame == nullptr)
 		return false;
 
-	bool result = SwsScale(clone_frame, buffer, sizeInByte, w, h, lineSize, AV_PIX_FMT_BGRA);// -> bitmap c# Format32bppArgb
-
+	bool result = false;
+	switch ((AVPixelFormat)clone_frame->format)
+	{
+	case AV_PIX_FMT_BGRA:
+	{
+		//check & copy to output
+		if (w == clone_frame->width &&
+			h == clone_frame->height &&
+			lineSize == clone_frame->linesize[0] &&
+			GetArgbBufferSize(w, h) == sizeInByte)
+		{
+			memcpy(buffer, clone_frame->data[0], lineSize);
+			result = true;
+			break;
+		}
+	}
+	default:
+	{
+		result = SwsScale(clone_frame, buffer, sizeInByte, w, h, lineSize, AV_PIX_FMT_BGRA);// -> bitmap c# Format32bppArgb
+	}
+	}
 	av_frame_unref(clone_frame);
 	av_frame_free(&clone_frame);
 	return result;
@@ -171,20 +190,20 @@ bool Video::SwsScale(const AVFrame* frame, BYTE* buffer, const int sizeInByte, i
 	}
 	if (GetArgbBufferSize(w, h) != sizeInByte)
 		return false;
-	
+
 	int linesizes[4]{ 0 };
 	BYTE* const arr[1]{
 		buffer
 	};
 	int err = av_image_fill_linesizes(linesizes, target, w);
-	if(err < 0)
+	if (err < 0)
 		return false;
-	if(linesizes[0] != lineSize)
+	if (linesizes[0] != lineSize)
 		return false;
 
-	SwsContext* sws = sws_getContext(	frame->width, frame->height, (AVPixelFormat)frame->format,
-										w, h, target,
-										SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+	SwsContext* sws = sws_getContext(frame->width, frame->height, (AVPixelFormat)frame->format,
+		w, h, target,
+		SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 	if (sws == nullptr)
 		return false;
 

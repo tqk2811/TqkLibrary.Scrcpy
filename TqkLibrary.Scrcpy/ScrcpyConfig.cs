@@ -69,7 +69,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
-        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
+        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA;
 
         /// <summary>
         /// 

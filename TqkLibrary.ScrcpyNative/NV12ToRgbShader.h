@@ -8,7 +8,7 @@ public:
 
 	bool Init();
 
-	bool Convert(const AVFrame* frame, BYTE* buff, int buffSize);
+	bool Convert(const AVFrame* source, AVFrame** received);
 private:
 	AVHWDeviceContext* _avhw_deviceCtx{ NULL };
 	AVD3D11VADeviceContext* _av_d3d11_vaDeviceCtx{ NULL };

@@ -9,11 +9,13 @@ private:
 	const AVCodec* _codec = nullptr;
 	AVHWDeviceType _hwType;
 
+	NV12ToRgbShader* _d3d11Shader = nullptr;
+
+	AVHWDeviceContext* GetHWDeviceContext();
+	bool Init();
 public:
 	MediaDecoder(const AVCodec* codec, AVHWDeviceType type);
 	~MediaDecoder();
-	bool Init();
 	bool Decode(const AVPacket* packet,AVFrame** received);
-	AVHWDeviceContext* GetHWDeviceContext();
 };
 #endif // !MediaDecoder_H

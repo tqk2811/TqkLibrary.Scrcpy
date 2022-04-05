@@ -1,23 +1,12 @@
 #include "pch.h"
 #include "libav.h"
 #include "MediaDecoder.h"
+#include "NV12ToRgbShader.h"
 
 MediaDecoder::MediaDecoder(const AVCodec* codec, AVHWDeviceType type) {
 	this->_codec = codec;
 	this->_hwType = type;
-	this->_codec_ctx = avcodec_alloc_context3(codec);
-	assert(this->_codec_ctx != nullptr);
-
-	this->_decoding_frame = av_frame_alloc();
-	assert(this->_decoding_frame != nullptr);
-
-	if (type != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
-	{
-		assert(av_hwdevice_ctx_create(&this->_codec_ctx->hw_device_ctx, type, nullptr, nullptr, 0) >= 0);
-		this->_transfer_frame = av_frame_alloc();
-		assert(this->_transfer_frame != nullptr);
-	}
-	assert(avcodec_open2(this->_codec_ctx, codec, nullptr) >= 0);
+	Init();
 }
 
 MediaDecoder::~MediaDecoder() {
@@ -25,10 +14,21 @@ MediaDecoder::~MediaDecoder() {
 	avcodec_free_context(&_codec_ctx);
 	av_frame_free(&_decoding_frame);
 	av_frame_free(&_transfer_frame);
+	if (this->_d3d11Shader != nullptr)
+		delete this->_d3d11Shader;
 }
 bool MediaDecoder::Init() {
-	_codec_ctx = avcodec_alloc_context3(this->_codec);
-	if (_codec_ctx == NULL) return false;
+	this->_codec_ctx = avcodec_alloc_context3(this->_codec);
+	if (this->_codec_ctx == NULL)
+		return false;
+
+	this->_decoding_frame = av_frame_alloc();
+	if (this->_decoding_frame == NULL)
+		return false;
+
+	int err = avcodec_open2(this->_codec_ctx, this->_codec, nullptr);
+	if (err < 0)
+		return false;
 
 	if (this->_hwType != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
 	{
@@ -41,7 +41,18 @@ bool MediaDecoder::Init() {
 
 		_transfer_frame = av_frame_alloc();
 		if (_transfer_frame == NULL) return false;
+
+		switch (this->_hwType) 
+		{
+		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
+		{
+			this->_d3d11Shader = new NV12ToRgbShader(GetHWDeviceContext());
+			break;
+		}
+		default: break;
+		}
 	}
+	return true;
 }
 
 AVHWDeviceContext* MediaDecoder::GetHWDeviceContext() {
@@ -59,12 +70,15 @@ bool MediaDecoder::Decode(const AVPacket* packet, AVFrame** frame) {
 	switch (_hwType)
 	{
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
+	{
+		return this->_d3d11Shader->Convert(_decoding_frame, frame);
+	}
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2:
 		if (!avcheck(av_hwframe_transfer_data(_transfer_frame, _decoding_frame, 0))) return false;
 		*frame = av_frame_clone(_transfer_frame);
 		return *frame != nullptr;
-		
+
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_NONE:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_QSV:
 	default: // not tested

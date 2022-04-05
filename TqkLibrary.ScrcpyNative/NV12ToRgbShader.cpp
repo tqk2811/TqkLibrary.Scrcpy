@@ -77,16 +77,15 @@ bool NV12ToRgbShader::InitShader() {
 	return true;
 }
 
-
-bool NV12ToRgbShader::Convert(const AVFrame* frame, BYTE* buff, int buffSize) {
-	if (frame == NULL) return false;
-	if (buff == NULL) return false;
-	if (frame->format != AV_PIX_FMT_NV12) return false;
-	if (!frame->hw_frames_ctx) return false;
+//https://medium.com/swlh/streaming-video-with-ffmpeg-and-directx-11-7395fcb372c4
+bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
+	if (source == NULL) return false;
+	if (source->format != AV_PIX_FMT_D3D11) return false;
+	if (!source->hw_frames_ctx) return false;
 	if (this->_avhw_deviceCtx == nullptr) return false;
 
 	//For hwaccel-format frames, this should be a reference to the AVHWFramesContext describing the frame.
-	AVHWFramesContext* frameCtx = (AVHWFramesContext*)frame->hw_frames_ctx->data;
+	AVHWFramesContext* frameCtx = (AVHWFramesContext*)source->hw_frames_ctx->data;
 	if (frameCtx->device_ctx != _avhw_deviceCtx) return false;
 
 	//process frame
@@ -129,8 +128,10 @@ bool NV12ToRgbShader::Convert(const AVFrame* frame, BYTE* buff, int buffSize) {
 	hr = _d3d11_device->OpenSharedResource(shared_handle, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
 	if (FAILED(hr)) return false;
 
-	ID3D11Texture2D* new_texture = (ID3D11Texture2D*)frame->data[0];
-	const int texture_index = frame->data[1][0];
+	AVFrame* temp_received = av_frame_alloc();
+
+	ID3D11Texture2D* new_texture = (ID3D11Texture2D*)*temp_received->data[0];
+	const int texture_index = temp_received->data[1][0];
 	_d3d11_deviceCtx->CopySubresourceRegion(texture, 0, 0, 0, 0, new_texture, texture_index, nullptr);
 
 	return true;
