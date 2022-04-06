@@ -162,7 +162,7 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	closesocket(sock);
 
 	//work with socket in thread
-	this->_video = new Video(video, nativeConfig.PacketBufferLength, nativeConfig.HwType);
+	this->_video = new Video(video, nativeConfig.HwType);
 	if (!this->_video->Init()) {
 		_allMutext.unlock();
 		Stop();

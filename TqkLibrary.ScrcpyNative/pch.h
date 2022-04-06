@@ -40,9 +40,7 @@ enum Orientations : int
 	Clockwise90 = 3
 };
 struct ScrcpyNativeConfig {
-	Orientations Orientation;//int
 	AVHWDeviceType HwType;//int
-	int PacketBufferLength;
 	bool ForceAdbForward;
 	bool IsControl;
 };

@@ -12,13 +12,6 @@ namespace TqkLibrary.Scrcpy
     /// </summary>
     public class ScrcpyConfig
     {
-        //public int WaitConnectionTimeout { get; set; } = 5000;
-
-        /// <summary>
-        /// Default: 1MB
-        /// </summary>
-        public int PacketBufferLength { get; set; } = 1024 * 1024;
-
         /// <summary>
         /// Default: false
         /// </summary>
@@ -69,7 +62,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
-        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA;
+        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
         /// <summary>
         /// 
@@ -116,9 +109,7 @@ namespace TqkLibrary.Scrcpy
         {
             return new ScrcpyNativeConfig
             {
-                Orientation = this.Orientation,
                 HwType = this.HwType,
-                PacketBufferLength = this.PacketBufferLength,
                 ForceAdbForward = this.ForceAdbForward,
                 IsControl = this.IsControl
             };

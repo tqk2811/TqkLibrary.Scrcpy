@@ -38,16 +38,20 @@ bool MediaDecoder::Init() {
 			this->_hwType,
 			nullptr,
 			nullptr,
-			0))) return false;
+			0))) 
+			return false;
 
 		_transfer_frame = av_frame_alloc();
 		if (_transfer_frame == NULL) return false;
 
-		switch (this->_hwType) 
+		switch (this->_hwType)
 		{
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
 		{
 			this->_d3d11Shader = new NV12ToRgbShader(GetHWDeviceContext());
+			if (!this->_d3d11Shader->Init()) {
+				return false;
+			}
 			break;
 		}
 		default: break;

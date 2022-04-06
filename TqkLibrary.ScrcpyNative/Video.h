@@ -4,7 +4,7 @@
 class Video
 {
 public:
-	Video(SOCKET sock, int buffSize, AVHWDeviceType hwType);
+	Video(SOCKET sock, AVHWDeviceType hwType);
 	~Video();
 	void Start();
 	void Stop();
@@ -14,7 +14,6 @@ public:
 	int GetScreenBufferSize();
 	bool GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int lineSize);
 private:
-	int _buffSize{ 0 };
 	std::string _deviceName{};
 	bool _ishaveFrame{ false };
 	ParsePacket* _parsePacket{ nullptr };

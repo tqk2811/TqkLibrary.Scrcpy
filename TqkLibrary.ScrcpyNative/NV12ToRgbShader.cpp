@@ -44,27 +44,30 @@ min16float4 PS(PixelShaderInput input) : SV_TARGET\
 
 
 NV12ToRgbShader::NV12ToRgbShader(AVHWDeviceContext* deviceContext) {
-	if (deviceContext != nullptr &&
-		deviceContext->type == AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA) {
-
-		this->_avhw_deviceCtx = deviceContext;
-		//This struct is allocated as AVHWDeviceContext.hwctx
-		this->_av_d3d11_vaDeviceCtx = (AVD3D11VADeviceContext*)deviceContext->hwctx;
-		this->_d3d11_deviceCtx = this->_av_d3d11_vaDeviceCtx->device_context;
-		this->_d3d11_device = _av_d3d11_vaDeviceCtx->device;
-	}
+	this->_avhw_deviceCtx = deviceContext;
 }
 
 NV12ToRgbShader::~NV12ToRgbShader() {
-	if (this->_d3d11_pixelShader != nullptr) this->_d3d11_pixelShader->Release();
+	if (this->_d3d11_pixelShader != nullptr)
+		this->_d3d11_pixelShader->Release();
 }
 
 bool NV12ToRgbShader::Init() {
-	if (!InitShader()) return false;
+	if (this->_avhw_deviceCtx == nullptr ||
+		this->_avhw_deviceCtx->type != AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA)
+		return false;
+
+	this->_av_d3d11_vaDeviceCtx = (AVD3D11VADeviceContext*)this->_avhw_deviceCtx->hwctx;
+	this->_d3d11_deviceCtx = this->_av_d3d11_vaDeviceCtx->device_context;
+	this->_d3d11_device = _av_d3d11_vaDeviceCtx->device;
+
+	if (!InitShader())
+		return false;
 }
 
 bool NV12ToRgbShader::InitShader() {
-	if (this->_d3d11_device == nullptr) return false;
+	if (this->_d3d11_device == nullptr)
+		return false;
 
 	HRESULT hr = this->_d3d11_device->CreatePixelShader(
 		shaderStr,
@@ -72,7 +75,8 @@ bool NV12ToRgbShader::InitShader() {
 		NULL,
 		&this->_d3d11_pixelShader);
 
-	if (FAILED(hr)) return false;
+	if (FAILED(hr))
+		return false;
 
 	return true;
 }
@@ -91,12 +95,12 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 	//process frame
 	//This struct is allocated as AVHWFramesContext.hwctx
 	AVD3D11VAFramesContext* d3dFrameCtx = (AVD3D11VAFramesContext*)frameCtx->hwctx;
-	
+
 	ID3D11Texture2D* texture = d3dFrameCtx->texture;
 	D3D11_TEXTURE2D_DESC textureDesc{ 0 };
 	texture->GetDesc(&textureDesc);
 	HRESULT hr = 0;
-	
+
 	/*D3D11_MAPPED_SUBRESOURCE ms{ 0 };
 	HRESULT hr = _d3d11_deviceCtx->Map(texture, 0, D3D11_MAP_READ, 0, &ms);
 	if (FAILED(hr)) return false;*/

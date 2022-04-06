@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 using TqkLibrary.Scrcpy;
 
-//string deviceId = "a29bc285";
-string deviceId = "5793d2f39905";
+string deviceId = "a29bc285";
+//string deviceId = "5793d2f39905";
 
 
 int i = 0;
@@ -35,5 +35,7 @@ while (true)
     }
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Disposesed");
     GC.Collect();
-    await Task.Delay(5000);
+    GC.WaitForPendingFinalizers();
+    Console.WriteLine($"{DateTime.Now:mm:ss.fff} GC cleared");
+    //await Task.Delay(5000);
 }

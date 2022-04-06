@@ -6,11 +6,9 @@
 #define HEADER_SIZE 12
 #define DEVICE_NAME_SIZE 64
 #define NO_PTS UINT64_MAX
-Video::Video(SOCKET sock, int buffSize, AVHWDeviceType hwType) {
-	assert(buffSize > 0);
-	this->_buffSize = buffSize;
+Video::Video(SOCKET sock, AVHWDeviceType hwType) {
 	this->_videoSock = new SocketWrapper(sock);
-	this->_videoBuffer = new BYTE[buffSize];
+	this->_videoBuffer = new BYTE[DEVICE_NAME_SIZE];
 	const AVCodec* h264_decoder = avcodec_find_decoder(AV_CODEC_ID_H264);
 	this->_parsePacket = new ParsePacket(h264_decoder);
 	this->_h264_mediaDecoder = new MediaDecoder(h264_decoder, hwType);
@@ -96,22 +94,24 @@ void Video::threadStart() {
 
 		UINT64 pts = sc_read64be(this->_videoBuffer);
 		INT32 len = sc_read32be(&this->_videoBuffer[8]);
-		assert(len > 0 && len <= this->_buffSize);
 
 		if (!((pts == NO_PTS || (pts & AV_NOPTS_VALUE) == 0) && len > 0))
 			return;
-		if (this->_videoSock->ReadAll(this->_videoBuffer, len) != len)
-			return;
-#if _DEBUG
-		printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
-#endif
-
+		
 		AVPacket packet;
 		int err = av_new_packet(&packet, len);
 		if (err < 0)
 			return;
-
-		memcpy(packet.data, this->_videoBuffer, len);
+		
+		if (this->_videoSock->ReadAll(packet.data, len) != len)
+		{
+			av_packet_unref(&packet);
+			return;
+		}
+		
+#if _DEBUG
+		printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
+#endif
 		packet.pts = pts != NO_PTS ? (INT64)pts : AV_NOPTS_VALUE;
 
 		if (this->_parsePacket->ParserPushPacket(&packet))
