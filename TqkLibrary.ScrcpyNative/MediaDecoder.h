@@ -2,6 +2,13 @@
 #define MediaDecoder_H
 class MediaDecoder
 {
+public:
+	MediaDecoder(const AVCodec* codec, AVHWDeviceType type);
+	~MediaDecoder();
+	bool Init();
+
+	
+	bool Decode(const AVPacket* packet,AVFrame** received);
 private:
 	AVFrame* _decoding_frame = nullptr;
 	AVFrame* _transfer_frame = nullptr;
@@ -12,10 +19,6 @@ private:
 	NV12ToRgbShader* _d3d11Shader = nullptr;
 
 	AVHWDeviceContext* GetHWDeviceContext();
-	bool Init();
-public:
-	MediaDecoder(const AVCodec* codec, AVHWDeviceType type);
-	~MediaDecoder();
-	bool Decode(const AVPacket* packet,AVFrame** received);
+	
 };
 #endif // !MediaDecoder_H

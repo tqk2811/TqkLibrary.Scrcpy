@@ -95,7 +95,7 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 	ID3D11Texture2D* texture = d3dFrameCtx->texture;
 	D3D11_TEXTURE2D_DESC textureDesc{ 0 };
 	texture->GetDesc(&textureDesc);
-	HRESULT hr;
+	HRESULT hr = 0;
 	
 	/*D3D11_MAPPED_SUBRESOURCE ms{ 0 };
 	HRESULT hr = _d3d11_deviceCtx->Map(texture, 0, D3D11_MAP_READ, 0, &ms);

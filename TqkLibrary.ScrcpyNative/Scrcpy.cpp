@@ -77,29 +77,30 @@ Scrcpy::Scrcpy(LPCWSTR deviceId) {
 }
 
 Scrcpy::~Scrcpy() {
-	//kill thread
-
 	Stop();
-	if (this->_process != nullptr)
-	{
-		delete this->_process;
-		this->_process = nullptr;
-	}
 }
 
 bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
-	if (this->_video != nullptr || this->_control != nullptr) return false;
+	_allMutext.lock();
+
+	if (this->_video != nullptr || this->_control != nullptr) {
+		_allMutext.unlock();
+		return false;
+	}
 
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (res != 0) {
+		_allMutext.unlock();
 		return false;
 	}
 
 	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
 	exitCode = RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
-	if (exitCode != 0)
+	if (exitCode != 0) {
+		_allMutext.unlock();
 		return false;
+	}
 
 	int backlog = 1;
 	if (nativeConfig.IsControl) backlog = 2;
@@ -107,14 +108,18 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 
 	int port = -1;
 	SOCKET sock = FindPort(port, backlog, timeout);
-	if (sock == INVALID_SOCKET)
+	if (sock == INVALID_SOCKET) {
+		_allMutext.unlock();
 		return false;
+	}
 
 	std::wstring arg(L"reverse localabstract:scrcpy tcp:");
 	arg.append(std::to_wstring(port));
 	exitCode = RunAdbProcess(arg.c_str());
-	if (exitCode != 0)
+	if (exitCode != 0) {
+		_allMutext.unlock();
 		return false;
+	}
 
 	//run main process
 	LPCWSTR cmds[]
@@ -137,6 +142,9 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	SOCKET video = AcceptConnection(sock);
 	if (video == INVALID_SOCKET) {
 		closesocket(sock);
+		delete this->_process;
+		this->_process = nullptr;
+		_allMutext.unlock();
 		return false;
 	}
 	SOCKET control = INVALID_SOCKET;
@@ -145,6 +153,9 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 		if (control == INVALID_SOCKET) {
 			closesocket(video);
 			closesocket(sock);
+			delete this->_process;
+			this->_process = nullptr;
+			_allMutext.unlock();
 			return false;
 		}
 	}
@@ -152,35 +163,46 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 
 	//work with socket in thread
 	this->_video = new Video(video, nativeConfig.PacketBufferLength, nativeConfig.HwType);
+	if (!this->_video->Init()) {
+		_allMutext.unlock();
+		Stop();
+		return false;
+	}
 	if (nativeConfig.IsControl) this->_control = new Control(control);
 
 	this->_video->Start();
 	if (nativeConfig.IsControl) this->_control->Start();
+	_allMutext.unlock();
 	return true;
 }
 
 
 void Scrcpy::Stop() {
-	if (this->_video != nullptr)
-		this->_video->Stop();
-	if (this->_control != nullptr)
-		this->_control->Stop();
+	_allMutext.lock();
 
-
-	_videoMutext.lock();
-	if (this->_video != nullptr) {
-		delete this->_video;
-		this->_video = nullptr;
+	if (this->_process != nullptr) {
+		delete this->_process;
+		this->_process = nullptr;
 	}
-	_videoMutext.unlock();
 
-
-	_controlMutext.lock();
+	this->_controlMutext.lock();
 	if (this->_control != nullptr) {
+		this->_control->Stop();
 		delete this->_control;
 		this->_control = nullptr;
 	}
-	_controlMutext.unlock();
+	this->_controlMutext.unlock();
+
+
+	this->_videoMutext.lock();
+	if (this->_video != nullptr) {
+		this->_video->Stop();
+		delete this->_video;
+		this->_video = nullptr;
+	}
+	this->_videoMutext.unlock();
+
+	_allMutext.unlock();
 }
 
 bool Scrcpy::ControlCommand(const BYTE* command, const int sizeInByte) {
@@ -214,6 +236,9 @@ DWORD Scrcpy::RunAdbProcess(LPCWSTR argument)
 	return p.GetExitCode();
 }
 
+
+
+
 int Scrcpy::GetScreenBufferSize() {
 	_videoMutext.lock();
 	int result = 0;
@@ -232,7 +257,6 @@ bool Scrcpy::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int
 	_videoMutext.unlock();
 	return result;
 }
-
 bool Scrcpy::GetScreenSize(int& w, int& h) {
 	_videoMutext.lock();
 	bool result = false;

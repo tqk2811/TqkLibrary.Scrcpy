@@ -5,6 +5,9 @@ class ParsePacket
 public:
 	ParsePacket(const AVCodec* codec_decoder);
 	~ParsePacket();
+
+	bool Init();
+	
 	/// <summary>
 	/// 
 	/// </summary>
@@ -12,6 +15,7 @@ public:
 	/// <returns>True when packet are done, else pending</returns>
 	bool ParserPushPacket(AVPacket* packet);
 private:
+	const AVCodec* _codec_decoder = nullptr;
 	AVCodecContext* _codec_ctx = nullptr;
 	AVCodecParserContext* _parser = nullptr;
 	bool has_pending = false;

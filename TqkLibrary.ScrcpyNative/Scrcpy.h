@@ -14,6 +14,8 @@ public:
 	bool GetScreenSize(int& w, int& h);
 private:
 	std::wstring _deviceId;
+
+	std::mutex _allMutext;
 	std::mutex _controlMutext;
 	std::mutex _videoMutext;
 

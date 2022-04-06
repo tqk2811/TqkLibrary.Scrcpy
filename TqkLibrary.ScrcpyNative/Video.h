@@ -8,6 +8,7 @@ public:
 	~Video();
 	void Start();
 	void Stop();
+	bool Init();
 
 	bool GetScreenSize(int& w, int& h);
 	int GetScreenBufferSize();
@@ -26,7 +27,7 @@ private:
 
 	bool _isStop = false;
 	DWORD _threadId{ 0 };
-	HANDLE _threadHandle{ 0 };
+	HANDLE _threadHandle{ INVALID_HANDLE_VALUE };
 	static DWORD WINAPI MyThreadFunction(LPVOID lpParam);
 
 	bool SwsScale(const AVFrame* frame, BYTE* buffer, const int sizeInByte, int w, int h, int lineSize, AVPixelFormat target);

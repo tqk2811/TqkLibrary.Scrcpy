@@ -3,15 +3,7 @@
 #include "ParsePacket.h"
 
 ParsePacket::ParsePacket(const AVCodec* codec_decoder) {
-	_codec_ctx = avcodec_alloc_context3(codec_decoder);
-	assert(_codec_ctx != nullptr);
-
-	_parser = av_parser_init(codec_decoder->id);
-	assert(_parser != nullptr);
-	_parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
-
-	_pending = av_packet_alloc();
-	assert(_pending != nullptr);
+	this->_codec_decoder = codec_decoder;
 }
 
 ParsePacket::~ParsePacket() {
@@ -23,6 +15,27 @@ ParsePacket::~ParsePacket() {
 	avcodec_close(_codec_ctx);
 	avcodec_free_context(&_codec_ctx);
 }
+bool ParsePacket::Init() {
+	this->_codec_ctx = avcodec_alloc_context3(this->_codec_decoder);
+	if (this->_codec_ctx == nullptr)
+		return false;
+
+	
+	this->_parser = av_parser_init(this->_codec_decoder->id);
+	if (this->_parser == nullptr)
+		return false;
+	this->_parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
+
+	
+	this->_pending = av_packet_alloc();
+	if (this->_pending == nullptr)
+		return false;
+
+	return true;
+}
+
+
+
 
 bool ParsePacket::ParserPushPacket(AVPacket* packet) {
 	bool is_config = packet->pts == AV_NOPTS_VALUE;

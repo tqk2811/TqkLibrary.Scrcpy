@@ -28,7 +28,8 @@ void Control::Start() {
 void Control::Stop() {
 	this->_sockControl->Stop();
 	this->_isStop = true;
-	WaitForSingleObject(this->_threadHandle, INFINITE);
+	if(this->_threadHandle != INVALID_HANDLE_VALUE) 
+		WaitForSingleObject(this->_threadHandle, INFINITE);
 }
 DWORD WINAPI Control::MyThreadFunction(LPVOID lpParam) {
 	((Control*)lpParam)->threadStart();

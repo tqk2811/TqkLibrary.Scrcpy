@@ -41,7 +41,18 @@ void Video::Start() {
 void Video::Stop() {
 	this->_videoSock->Stop();
 	this->_isStop = true;
-	WaitForSingleObject(this->_threadHandle, INFINITE);
+	if(this->_threadHandle != INVALID_HANDLE_VALUE) 
+		WaitForSingleObject(this->_threadHandle, INFINITE);
+}
+
+bool Video::Init() {
+	if (!this->_parsePacket->Init())
+		return false;
+
+	if (!this->_h264_mediaDecoder->Init())
+		return false;
+	
+	return true;
 }
 
 DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {

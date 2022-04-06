@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
 using TqkLibrary.Scrcpy;
 
-string deviceId = "a29bc285";
-//string deviceId = "5793d2f39905";
+//string deviceId = "a29bc285";
+string deviceId = "5793d2f39905";
 
 
 int i = 0;

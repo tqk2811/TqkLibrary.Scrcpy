@@ -6,7 +6,6 @@
 MediaDecoder::MediaDecoder(const AVCodec* codec, AVHWDeviceType type) {
 	this->_codec = codec;
 	this->_hwType = type;
-	Init();
 }
 
 MediaDecoder::~MediaDecoder() {
@@ -17,6 +16,8 @@ MediaDecoder::~MediaDecoder() {
 	if (this->_d3d11Shader != nullptr)
 		delete this->_d3d11Shader;
 }
+
+
 bool MediaDecoder::Init() {
 	this->_codec_ctx = avcodec_alloc_context3(this->_codec);
 	if (this->_codec_ctx == NULL)

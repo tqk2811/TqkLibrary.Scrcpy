@@ -17,7 +17,7 @@ private:
 
 	bool _isStop = false;
 	DWORD _threadId{ 0 };
-	HANDLE _threadHandle{ 0 };
+	HANDLE _threadHandle{ INVALID_HANDLE_VALUE };
 	static DWORD WINAPI MyThreadFunction(LPVOID lpParam);
 };
 
