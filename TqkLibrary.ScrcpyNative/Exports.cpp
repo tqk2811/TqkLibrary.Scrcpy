@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Exports.h"
+#include "Scrcpy.h"
 
 bool LoadKey(const BYTE* key, const int sizeInByte) {
 	return true;
@@ -28,8 +29,4 @@ bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command, const int sizeInB
 
 bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, int w, int h, int lineSize) {
 	return scrcpy->GetScreenShot(buffer, sizeInByte, w, h, lineSize);
-}
-
-int ScrcpyGetScreenBufferSize(Scrcpy* scrcpy) {
-	return scrcpy->GetScreenBufferSize();
 }

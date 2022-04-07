@@ -19,7 +19,7 @@ ProcessWrapper::ProcessWrapper(wchar_t* args) {
 ProcessWrapper::~ProcessWrapper() {
 	if (_isCreateSuccess)
 	{
-		if (!WaitForExit(0)); TerminateProcess(this->_pi.hProcess, -1);
+		if (!WaitForExit(0)) TerminateProcess(this->_pi.hProcess, -1);
 		CloseHandle(this->_pi.hProcess);
 	}
 }

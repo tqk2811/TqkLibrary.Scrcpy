@@ -92,6 +92,7 @@
   <ItemGroup>
     <ClInclude Include="Control.h" />
     <ClInclude Include="Exports.h" />
+    <ClInclude Include="FrameConventer.h" />
     <ClInclude Include="libav.h" />
     <ClInclude Include="MediaDecoder.h" />
     <ClInclude Include="NV12ToRgbShader.h" />
@@ -100,6 +101,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="ProcessWrapper.h" />
     <ClInclude Include="Scrcpy.h" />
+    <ClInclude Include="ScrcpyWorking.h" />
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="Video.h" />
@@ -108,6 +110,7 @@
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Exports.cpp" />
+    <ClCompile Include="FrameConventer.cpp" />
     <ClCompile Include="MediaDecoder.cpp" />
     <ClCompile Include="NV12ToRgbShader.cpp" />
     <ClCompile Include="ParsePacket.cpp" />
@@ -117,6 +120,7 @@
     </ClCompile>
     <ClCompile Include="ProcessWrapper.cpp" />
     <ClCompile Include="Scrcpy.cpp" />
+    <ClCompile Include="ScrcpyWorking.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
     <ClCompile Include="Video.cpp" />
   </ItemGroup>

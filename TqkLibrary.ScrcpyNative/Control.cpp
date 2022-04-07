@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "Control.h"
+#include "SocketWrapper.h"
+#include "Utils.h"
+
 #define CONTROL_MSG_MAX_SIZE 1 << 18//256k
 enum ScrcpyControlReceivedType : BYTE
 {

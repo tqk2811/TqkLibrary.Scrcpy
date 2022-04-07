@@ -9,5 +9,4 @@ ScrcpyNativeExport void ScrcpyStop(Scrcpy* scrcpy);
 ScrcpyNativeExport bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& h);
 ScrcpyNativeExport bool ScrcpyControlCommand(Scrcpy* scrcpy, BYTE* command, int sizeInByte);
 ScrcpyNativeExport bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, int sizeInByte, int w, int h, int lineSize);
-ScrcpyNativeExport int ScrcpyGetScreenBufferSize(Scrcpy* scrcpy);
 #endif // !ScrcpyNativeExports_H

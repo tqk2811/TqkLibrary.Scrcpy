@@ -3,6 +3,9 @@
 #include "libav.h"
 #include "ParsePacket.h"
 #include "MediaDecoder.h"
+#include "SocketWrapper.h"
+#include "Utils.h"
+
 #define HEADER_SIZE 12
 #define DEVICE_NAME_SIZE 64
 #define NO_PTS UINT64_MAX
@@ -39,7 +42,7 @@ void Video::Start() {
 void Video::Stop() {
 	this->_videoSock->Stop();
 	this->_isStop = true;
-	if(this->_threadHandle != INVALID_HANDLE_VALUE) 
+	if (this->_threadHandle != INVALID_HANDLE_VALUE)
 		WaitForSingleObject(this->_threadHandle, INFINITE);
 }
 
@@ -49,7 +52,7 @@ bool Video::Init() {
 
 	if (!this->_h264_mediaDecoder->Init())
 		return false;
-	
+
 	return true;
 }
 
@@ -97,18 +100,18 @@ void Video::threadStart() {
 
 		if (!((pts == NO_PTS || (pts & AV_NOPTS_VALUE) == 0) && len > 0))
 			return;
-		
+
 		AVPacket packet;
 		int err = av_new_packet(&packet, len);
 		if (err < 0)
 			return;
-		
+
 		if (this->_videoSock->ReadAll(packet.data, len) != len)
 		{
 			av_packet_unref(&packet);
 			return;
 		}
-		
+
 #if _DEBUG
 		printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
 #endif
@@ -144,81 +147,13 @@ bool Video::GetScreenSize(int& w, int& h) {
 	return true;
 }
 
-int Video::GetScreenBufferSize() {
-	if (!_ishaveFrame)
-		return 0;
-	_mtx.lock();
-	int result = GetArgbBufferSize(this->_tempFrame->width, this->_tempFrame->height);
-	_mtx.unlock();
-	return result;
-}
-
-bool Video::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int lineSize) {
+bool Video::RefCurrentFrame(AVFrame* frame) {
 	if (!_ishaveFrame)
 		return false;
 
-	AVFrame* clone_frame = nullptr;
-
 	_mtx.lock();
-	clone_frame = av_frame_clone(this->_tempFrame);
+	int result = av_frame_ref(frame, this->_tempFrame);
 	_mtx.unlock();
 
-	if (clone_frame == nullptr)
-		return false;
-
-	bool result = false;
-	switch ((AVPixelFormat)clone_frame->format)
-	{
-	case AV_PIX_FMT_BGRA:
-	{
-		//check & copy to output
-		if (w == clone_frame->width &&
-			h == clone_frame->height &&
-			lineSize == clone_frame->linesize[0] &&
-			GetArgbBufferSize(w, h) == sizeInByte)
-		{
-			memcpy(buffer, clone_frame->data[0], lineSize);
-			result = true;
-			break;
-		}
-	}
-	default:
-	{
-		result = SwsScale(clone_frame, buffer, sizeInByte, w, h, lineSize, AV_PIX_FMT_BGRA);// -> bitmap c# Format32bppArgb
-	}
-	}
-	av_frame_unref(clone_frame);
-	av_frame_free(&clone_frame);
-	return result;
-}
-
-bool Video::SwsScale(const AVFrame* frame, BYTE* buffer, const int sizeInByte, int w, int h, int lineSize, AVPixelFormat target/* = AV_PIX_FMT_BGRA*/) {
-	if (w <= 0 || w % 2 != 0) {
-		return false;
-	}
-	if (h <= 0 || h % 2 != 0) {
-		return false;
-	}
-	if (GetArgbBufferSize(w, h) != sizeInByte)
-		return false;
-
-	int linesizes[4]{ 0 };
-	BYTE* const arr[1]{
-		buffer
-	};
-	int err = av_image_fill_linesizes(linesizes, target, w);
-	if (err < 0)
-		return false;
-	if (linesizes[0] != lineSize)
-		return false;
-
-	SwsContext* sws = sws_getContext(frame->width, frame->height, (AVPixelFormat)frame->format,
-		w, h, target,
-		SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
-	if (sws == nullptr)
-		return false;
-
-	if (err >= 0) err = sws_scale(sws, frame->data, frame->linesize, 0, frame->height, arr, linesizes);
-	sws_freeContext(sws);
-	return err >= 0;
+	return result >= 0;
 }

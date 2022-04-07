@@ -10,11 +10,15 @@
 #endif
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
-typedef class Scrcpy;
-typedef struct ScrcpyNativeConfig;
 
 #ifdef TQKLIBRARYSCRCPYNATIVE_EXPORTS
+typedef class Scrcpy;
+typedef class ScrcpyWorking;
+typedef struct ScrcpyNativeConfig;
+
 typedef class SocketWrapper;
+typedef class ProcessWrapper;
+
 typedef class Control;
 typedef class Video;
 typedef class ParsePacket;
@@ -28,6 +32,9 @@ typedef class NV12ToRgbShader;
 #include <stdlib.h>
 #include <d3d11.h>
 #include "libav.h"
+#include "ws2tcpip.h"
+#pragma comment(lib,"ws2_32.lib")
+
 enum Orientations : int
 {
 	Auto = -1,
@@ -45,13 +52,13 @@ struct ScrcpyNativeConfig {
 	bool IsControl;
 };
 
-#include "ProcessWrapper.h"
-#include "SocketWrapper.h"
-#include "Utils.h"
-
-#include "Video.h"
-#include "Control.h"
-#include "Scrcpy.h"
+//#include "ProcessWrapper.h"
+//#include "SocketWrapper.h"
+//#include "Utils.h"
+//#include "ScrcpyWorking.h"
+//#include "Video.h"
+//#include "Control.h"
+//#include "Scrcpy.h"
 #endif //TQKLIBRARYSCRCPYNATIVE_EXPORTS
 
 #include "Exports.h"

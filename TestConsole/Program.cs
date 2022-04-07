@@ -6,13 +6,17 @@ string deviceId = "a29bc285";
 
 
 int i = 0;
+ScrcpyConfig config = new ScrcpyConfig()
+{
+    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+};
 while (true)
 {
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Start");
     using (Scrcpy scrcpy = new Scrcpy(deviceId))
     {
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connect");
-        scrcpy.Connect();
+        scrcpy.Connect(config);
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
         await Task.Delay(3000);
 

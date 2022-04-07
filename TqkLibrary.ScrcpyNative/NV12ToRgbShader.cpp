@@ -63,6 +63,8 @@ bool NV12ToRgbShader::Init() {
 
 	if (!InitShader())
 		return false;
+	
+	return true;
 }
 
 bool NV12ToRgbShader::InitShader() {

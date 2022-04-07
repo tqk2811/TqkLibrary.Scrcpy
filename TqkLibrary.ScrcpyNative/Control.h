@@ -8,7 +8,7 @@ public:
 	~Control();
 	void Start();
 	void Stop();
-	
+
 	bool ControlCommand(const BYTE* command, const int sizeInByte);
 private:
 	SocketWrapper* _sockControl{ nullptr };

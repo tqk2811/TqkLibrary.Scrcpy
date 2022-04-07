@@ -38,9 +38,5 @@ namespace TqkLibrary.Scrcpy
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool ScrcpyGetScreenShot(IntPtr intPtr, IntPtr buffer, int sizeInByte, int w, int h, int lineSize);
-
-
-        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int ScrcpyGetScreenBufferSize(IntPtr intPtr);
     }
 }
