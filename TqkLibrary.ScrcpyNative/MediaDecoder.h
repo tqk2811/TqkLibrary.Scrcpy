@@ -11,6 +11,7 @@ public:
 	bool Decode(const AVPacket* packet,AVFrame** received);
 private:
 	AVFrame* _decoding_frame = nullptr;
+	AVFrame* _transfer_frame = nullptr;
 	AVCodecContext* _codec_ctx = nullptr;
 	const AVCodec* _codec = nullptr;
 	AVHWDeviceType _hwType;

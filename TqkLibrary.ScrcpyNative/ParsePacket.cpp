@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "libav.h"
 #include "ParsePacket.h"
+#include "Utils.h"
 
 ParsePacket::ParsePacket(const AVCodec* codec_decoder) {
 	this->_codec_decoder = codec_decoder;
@@ -20,13 +21,13 @@ bool ParsePacket::Init() {
 	if (this->_codec_ctx == nullptr)
 		return false;
 
-	
+
 	this->_parser = av_parser_init(this->_codec_decoder->id);
 	if (this->_parser == nullptr)
 		return false;
 	this->_parser->flags |= PARSER_FLAG_COMPLETE_FRAMES;
 
-	
+
 	this->_pending = av_packet_alloc();
 	if (this->_pending == nullptr)
 		return false;
@@ -46,7 +47,7 @@ bool ParsePacket::ParserPushPacket(AVPacket* packet) {
 
 			//increase size pending packet for copy at start pointer + pending->size
 			//pending: [------------|       add size packet->size     ]
-			assert(av_grow_packet(_pending, packet->size) == 0);
+			assert(avcheck(av_grow_packet(_pending, packet->size)));
 
 			//pending: [------------|    packet->data copy to here    ]
 			memcpy(_pending->data + offset, packet->data, packet->size);
@@ -54,7 +55,7 @@ bool ParsePacket::ParserPushPacket(AVPacket* packet) {
 		else//is_config
 		{
 			//just ref
-			assert(av_packet_ref(_pending, packet) == 0);
+			assert(avcheck(av_packet_ref(_pending, packet)));
 			has_pending = true;
 		}
 

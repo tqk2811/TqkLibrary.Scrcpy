@@ -102,10 +102,10 @@ void Video::threadStart() {
 			return;
 
 		AVPacket packet;
-		int err = av_new_packet(&packet, len);
-		if (err < 0)
+		if (!avcheck(av_new_packet(&packet, len))) {
 			return;
-
+		}
+		
 		if (this->_videoSock->ReadAll(packet.data, len) != len)
 		{
 			av_packet_unref(&packet);

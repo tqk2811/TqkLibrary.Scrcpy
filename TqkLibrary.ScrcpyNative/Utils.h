@@ -17,7 +17,11 @@ static inline bool avcheck(int err) {
 	if (err < 0) {
 		char buffer[1024];
 		av_strerror(err, buffer, 1024);
-		::MessageBoxA(NULL, (LPCSTR)buffer, (LPCSTR)"Libav", MB_OK);
+		printf("avcheck: %d %s", err, buffer);
+#if _DEBUG
+		//::MessageBoxA(NULL, (LPCSTR)buffer, (LPCSTR)"Libav", MB_OK);
+#endif
+
 		return false;
 	}
 	return true;

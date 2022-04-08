@@ -75,6 +75,7 @@ bool Scrcpy::GetScreenShot(BYTE* buffer, const int sizeInByte, int w, int h, int
 	if (result) {
 		FrameConventer convert;
 		result = convert.Convert(&frame, buffer, sizeInByte, w, h, lineSize);
+		av_frame_unref(&frame);
 	}
 	return result;
 }
