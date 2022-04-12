@@ -15,6 +15,6 @@ private:
 	AVCodecContext* _codec_ctx = nullptr;
 	const AVCodec* _codec = nullptr;
 	AVHWDeviceType _hwType;
-	
+	NV12ToRgbShader* _d3d11_shader = nullptr;
 };
 #endif // !MediaDecoder_H

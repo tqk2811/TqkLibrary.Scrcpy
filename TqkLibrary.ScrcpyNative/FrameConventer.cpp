@@ -3,7 +3,7 @@
 #include "Utils.h"
 
 FrameConventer::FrameConventer() {
-
+	
 }
 FrameConventer::~FrameConventer() {
 
@@ -16,41 +16,7 @@ bool FrameConventer::Convert(AVFrame* frame, BYTE* buff, const int sizeInByte, i
 		return false;
 	}
 	int err = 0;
-
-
-	//if (frame->hw_frames_ctx != nullptr) {
-	//	//transfer from gpu to cpu
-	//	AVHWFramesContext* hw_frames_ctx = (AVHWFramesContext*)frame->hw_frames_ctx->data;
-	//	AVHWDeviceContext* hw_device_ctx = hw_frames_ctx->device_ctx;
-	//	switch (hw_device_ctx->type)
-	//	{
-	//		//gpu hw
-
-	//	case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
-	//	{
-	//		//NV12ToRgbShader shader(hw_device_ctx);
-	//	}
-	//	case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA:
-	//	case AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2:
-	//	{
-	//		AVFrame transfer_frame{ 0 };
-	//		if (!avcheck(av_hwframe_transfer_data(&transfer_frame, frame, 0))) {
-	//			return false;
-	//		}
-	//		av_frame_unref(frame);
-	//		av_frame_move_ref(frame, &transfer_frame);
-	//		break;
-	//	}
-
-	//	//cpu hw
-	//	case AVHWDeviceType::AV_HWDEVICE_TYPE_NONE:
-	//	case AVHWDeviceType::AV_HWDEVICE_TYPE_QSV:
-	//	default:
-	//		break;
-	//	}
-	//}
-
-
+	
 	switch (frame->format)
 	{
 	case AV_PIX_FMT_BGRA:
@@ -73,6 +39,11 @@ bool FrameConventer::Convert(AVFrame* frame, BYTE* buff, const int sizeInByte, i
 		if (!avcheck(av_image_fill_linesizes(linesizes, AV_PIX_FMT_BGRA, w))) {
 			return false;
 		}
+		
+		if (IsCudaSupport) {
+			
+		}
+
 
 		SwsContext* sws = sws_getContext(
 			frame->width, frame->height, (AVPixelFormat)frame->format,

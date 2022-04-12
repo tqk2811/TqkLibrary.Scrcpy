@@ -8,8 +8,6 @@ public:
 	bool Convert(AVFrame* frame, BYTE* buff, const int sizeInByte, int w, int h, int lineSize);
 
 private:
-
-
 };
 
 #endif // !FrameConventer_H

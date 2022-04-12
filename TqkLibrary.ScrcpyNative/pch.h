@@ -51,7 +51,7 @@ struct ScrcpyNativeConfig {
 	bool ForceAdbForward;
 	bool IsControl;
 };
-
+extern bool IsCudaSupport;
 //#include "ProcessWrapper.h"
 //#include "SocketWrapper.h"
 //#include "Utils.h"

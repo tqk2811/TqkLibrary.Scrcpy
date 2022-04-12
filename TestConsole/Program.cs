@@ -19,6 +19,8 @@ while (true)
         scrcpy.Connect(config);
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
         await Task.Delay(3000);
+        
+        while (true) await Task.Delay(3000);
 
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShot");
         using Bitmap bitmap = scrcpy.GetScreenShot();

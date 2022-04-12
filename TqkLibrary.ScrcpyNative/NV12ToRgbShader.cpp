@@ -91,16 +91,18 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 	if (this->_avhw_deviceCtx == nullptr) return false;
 
 	//For hwaccel-format frames, this should be a reference to the AVHWFramesContext describing the frame.
-	AVHWFramesContext* frameCtx = (AVHWFramesContext*)source->hw_frames_ctx->data;
-	if (frameCtx->device_ctx != _avhw_deviceCtx) return false;
-
+	AVHWFramesContext* hw_frames_ctx = (AVHWFramesContext*)source->hw_frames_ctx->data;
+	AVHWDeviceContext* hw_device_ctx = hw_frames_ctx->device_ctx;
+	if (hw_device_ctx != _avhw_deviceCtx) 
+		return false;
+	
 	//process frame
 	//This struct is allocated as AVHWFramesContext.hwctx
-	AVD3D11VAFramesContext* d3dFrameCtx = (AVD3D11VAFramesContext*)frameCtx->hwctx;
+	AVD3D11VAFramesContext* d3d11_frame_ctx = (AVD3D11VAFramesContext*)hw_frames_ctx->hwctx;
 
-	ID3D11Texture2D* texture = d3dFrameCtx->texture;
+	ID3D11Texture2D* d3d11_texture_2d = d3d11_frame_ctx->texture;
 	D3D11_TEXTURE2D_DESC textureDesc{ 0 };
-	texture->GetDesc(&textureDesc);
+	d3d11_texture_2d->GetDesc(&textureDesc);
 	HRESULT hr = 0;
 
 	/*D3D11_MAPPED_SUBRESOURCE ms{ 0 };
@@ -115,30 +117,30 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 	if (FAILED(hr)) return false;*/
 
 	// DXGI_FORMAT_R8G8_UNORM for NV12 chrominance channel
-	D3D11_SHADER_RESOURCE_VIEW_DESC chrominance_desc = CD3D11_SHADER_RESOURCE_VIEW_DESC(texture, D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8_UNORM);
+	D3D11_SHADER_RESOURCE_VIEW_DESC chrominance_desc = CD3D11_SHADER_RESOURCE_VIEW_DESC(d3d11_texture_2d, D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8_UNORM);
 	ID3D11ShaderResourceView* m_chrominance_shader_resource_view{ nullptr };
-	hr = _d3d11_device->CreateShaderResourceView(texture, &chrominance_desc, &m_chrominance_shader_resource_view);
+	hr = _d3d11_device->CreateShaderResourceView(d3d11_texture_2d, &chrominance_desc, &m_chrominance_shader_resource_view);
 	if (FAILED(hr)) return false;
 
 	//_d3d11_deviceCtx->PSSetShaderResources(0, 1, &m_luminance_shader_resource_view);
 	_d3d11_deviceCtx->PSSetShaderResources(1, 1, &m_chrominance_shader_resource_view);
 
 	IDXGIResource* dxgi_resource{ nullptr };
-	hr = texture->QueryInterface(__uuidof(IDXGIResource), (void**)&dxgi_resource);
+	hr = d3d11_texture_2d->QueryInterface(__uuidof(IDXGIResource), (void**)&dxgi_resource);
 	if (FAILED(hr)) return false;
 
 	HANDLE shared_handle{ nullptr };
 	hr = dxgi_resource->GetSharedHandle(&shared_handle);
 	if (FAILED(hr)) return false;
 
-	hr = _d3d11_device->OpenSharedResource(shared_handle, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&texture));
+	hr = _d3d11_device->OpenSharedResource(shared_handle, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&d3d11_texture_2d));
 	if (FAILED(hr)) return false;
 
 	AVFrame* temp_received = av_frame_alloc();
 
 	ID3D11Texture2D* new_texture = (ID3D11Texture2D*)*temp_received->data[0];
 	const int texture_index = temp_received->data[1][0];
-	_d3d11_deviceCtx->CopySubresourceRegion(texture, 0, 0, 0, 0, new_texture, texture_index, nullptr);
+	_d3d11_deviceCtx->CopySubresourceRegion(d3d11_texture_2d, 0, 0, 0, 0, new_texture, texture_index, nullptr);
 
 	return true;
 }

@@ -47,5 +47,13 @@ static inline int GetArgbBufferSize(const int width, const int height) {
 	return av_image_get_buffer_size(AVPixelFormat::AV_PIX_FMT_ARGB, width, height, 1);
 }
 
+static inline bool IsHwSupport(AVHWDeviceType hwType) {
+	AVHWDeviceType find = AVHWDeviceType::AV_HWDEVICE_TYPE_NONE;
+	while (true) {
+		find = av_hwdevice_iterate_types(find);
+		if (find == AV_HWDEVICE_TYPE_NONE) return false;
+		if (find == hwType) return true;
+	}
+}
 
 #endif // !Utils_H

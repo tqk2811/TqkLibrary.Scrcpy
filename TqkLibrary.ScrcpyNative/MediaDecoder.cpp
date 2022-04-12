@@ -10,6 +10,8 @@ MediaDecoder::MediaDecoder(const AVCodec* codec, AVHWDeviceType type) {
 }
 
 MediaDecoder::~MediaDecoder() {
+	if (this->_d3d11_shader != NULL)
+		delete this->_d3d11_shader;
 	avcodec_close(_codec_ctx);
 	avcodec_free_context(&_codec_ctx);
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
@@ -44,6 +46,19 @@ bool MediaDecoder::Init() {
 			nullptr,
 			0)))
 			return false;
+
+		switch (this->_hwType)
+		{
+		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
+		{
+			AVHWDeviceContext* hw_device_ctx = (AVHWDeviceContext*)this->_codec_ctx->hw_device_ctx->data;
+			this->_d3d11_shader = new NV12ToRgbShader(hw_device_ctx);
+			if (this->_d3d11_shader == nullptr)
+				return false;
+		}
+		default:
+			break;
+		}
 	}
 	return true;
 }
@@ -58,10 +73,12 @@ bool MediaDecoder::Decode(const AVPacket* packet, AVFrame** frame) {
 	switch (this->_hwType)
 	{
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
+	{
+		return this->_d3d11_shader->Convert(_decoding_frame, frame);
+	}
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA:
 	case AVHWDeviceType::AV_HWDEVICE_TYPE_DXVA2:
 	{
-		//_transfer_frame->format = AVPixelFormat::AV_PIX_FMT_BGRA;
 		if (!avcheck(av_hwframe_transfer_data(_transfer_frame, _decoding_frame, 0)))
 			return false;
 
