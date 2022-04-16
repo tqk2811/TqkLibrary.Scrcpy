@@ -14,17 +14,14 @@ private:
 	ID3D11DeviceContext* _d3d11_deviceCtx{ NULL };
 	ID3D11Device* _d3d11_device{ NULL };
 	ID3D11SamplerState* _d3d11_samplerState{ NULL };
-
 	//shader
 	ID3D11PixelShader* _d3d11_pixelShader{ NULL };
 	ID3D11InputLayout* _d3d11_inputLayout{ NULL };
 	ID3D11VertexShader* _d3d11_vertexShader{ NULL };
-	bool InitShader();
 
 
 
 	//SharedSurf
-
 	ID3D11Texture2D* _texture_nv12{ nullptr };
 	ID3D11ShaderResourceView* _luminanceView{ nullptr };
 	ID3D11ShaderResourceView* _chrominanceView{ nullptr };

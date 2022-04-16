@@ -13,8 +13,8 @@ using namespace DirectX;
 #define NUMVERTICES 6
 typedef struct _VERTEX
 {
-	XMFLOAT3 Pos;
-	XMFLOAT2 TexCoord;
+	DirectX::XMFLOAT3 Pos;
+	DirectX::XMFLOAT2 TexCoord;
 } VERTEX;
 
 // Vertices for drawing whole texture
@@ -42,6 +42,9 @@ NV12ToRgbShader::~NV12ToRgbShader() {
 
 	if (this->_d3d11_inputLayout != nullptr)
 		this->_d3d11_inputLayout->Release();
+
+	if (this->_d3d11_samplerState != nullptr)
+		this->_d3d11_samplerState->Release();
 
 	if (this->_d3d11_device != nullptr)
 		this->_d3d11_device->Release();
@@ -94,28 +97,34 @@ bool NV12ToRgbShader::Init() {
 	if (FAILED(hr))
 		return false;
 
-	if (!InitShader())
-		return false;
-
-	return true;
-}
-
-bool NV12ToRgbShader::InitShader() {
-	if (this->_d3d11_device == nullptr)
-		return false;
-	HRESULT hr = 0;
-
 	//VertexShader
 	UINT Size = ARRAYSIZE(g_VS);
 	hr = this->_d3d11_device->CreateVertexShader(g_VS, Size, nullptr, &this->_d3d11_vertexShader);
 	if (FAILED(hr))
 		return false;
 
-	constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> Layout =
+	/*constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> Layout =
 	{ {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	} };
+	} };*/
+	std::array<D3D11_INPUT_ELEMENT_DESC, 2> Layout;
+	Layout[0].SemanticName = "POSITION";
+	Layout[0].SemanticIndex = 0;
+	Layout[0].Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	Layout[0].InputSlot = 0;
+	Layout[0].AlignedByteOffset = 0;
+	Layout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	Layout[0].InstanceDataStepRate = 0;	
+	
+	Layout[1].SemanticName = "TEXCOORD";
+	Layout[1].SemanticIndex = 0;
+	Layout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	Layout[1].InputSlot = 0;
+	Layout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	Layout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	Layout[1].InstanceDataStepRate = 0;
+	
 	hr = this->_d3d11_device->CreateInputLayout(Layout.data(), Layout.size(), g_VS, Size, &this->_d3d11_inputLayout);
 	if (FAILED(hr))
 		return false;
@@ -130,6 +139,8 @@ bool NV12ToRgbShader::InitShader() {
 
 	return true;
 }
+
+
 
 bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	//
@@ -160,7 +171,7 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	texDesc_rgba.Height = height;
 	texDesc_rgba.ArraySize = 1;
 	texDesc_rgba.MipLevels = 1;
-	texDesc_rgba.BindFlags = D3D11_BIND_RENDER_TARGET;
+	texDesc_rgba.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	texDesc_rgba.Usage = D3D11_USAGE_DEFAULT;
 	texDesc_rgba.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	texDesc_rgba.SampleDesc.Count = 1;
@@ -254,18 +265,20 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 		this->_texture_nv12, 0, 0, 0, 0,
 		texture.Get(), texture_index, nullptr
 	);
+	this->_d3d11_deviceCtx->CopyResource(this->_texture_nv12, texture.Get());
+
 
 	//https://microsoft.github.io/DirectX-Specs/d3d/archive/D3D11_3_FunctionalSpec.htm
 
-	
+
 	// Rendering NV12 requires two resource views, which represent the luminance and chrominance channels of the YUV formatted texture.	
 	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
 		this->_luminanceView,
 		this->_chrominanceView
 	};
 	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
-	FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-	//this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
+	FLOAT blendFactor[4] = { 0.f, 1.f, 0.f, 0.f };
+	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
 	this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView, blendFactor);
 	this->_d3d11_deviceCtx->OMSetRenderTargets(1, &this->_renderTargetView, nullptr);
 	this->_d3d11_deviceCtx->VSSetShader(this->_d3d11_vertexShader, nullptr, 0);
@@ -284,20 +297,20 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame** received) {
 	InitData.pSysMem = Vertices;
 
 	ComPtr<ID3D11Buffer> VertexBuffer = nullptr;
-	hr = this->_d3d11_device->CreateBuffer(&BufferDesc, &InitData, &VertexBuffer);
+	hr = this->_d3d11_device->CreateBuffer(&BufferDesc, &InitData, VertexBuffer.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	UINT Stride = sizeof(VERTEX);
 	UINT Offset = 0;
-	_d3d11_deviceCtx->IASetVertexBuffers(0, 1, &VertexBuffer, &Stride, &Offset);
+	_d3d11_deviceCtx->IASetVertexBuffers(0, 1, VertexBuffer.GetAddressOf(), &Stride, &Offset);
 
 
 	// Draw quad.
 	//this->_d3d11_deviceCtx->IASetInputLayout(nullptr);
 
 	_d3d11_deviceCtx->Draw(NUMVERTICES, 0);
-	
+
 	//get draw result
 	//make new texture allow cpu access
 	ComPtr<ID3D11Texture2D> pInTexture2D = NULL;
