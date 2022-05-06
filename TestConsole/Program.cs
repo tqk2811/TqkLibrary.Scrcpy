@@ -20,7 +20,7 @@ int i = 0;
 ScrcpyConfig config = new ScrcpyConfig()
 {
     HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    MaxFps = 12
+    //MaxFps = 12
 };
 while (true)
 {
@@ -32,7 +32,7 @@ while (true)
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
         await Task.Delay(3000);
 
-        //while (true) await Task.Delay(3000);
+        while (true) await Task.Delay(3000);
 
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShot");
         while (true)

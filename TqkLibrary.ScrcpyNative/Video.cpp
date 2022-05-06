@@ -105,7 +105,7 @@ void Video::threadStart() {
 		if (!avcheck(av_new_packet(&packet, len))) {
 			return;
 		}
-		
+
 		if (this->_videoSock->ReadAll(packet.data, len) != len)
 		{
 			av_packet_unref(&packet);
@@ -119,9 +119,16 @@ void Video::threadStart() {
 
 		if (this->_parsePacket->ParserPushPacket(&packet))
 		{
+#if _DEBUG
+			auto start = std::chrono::high_resolution_clock::now();
+#endif
 			AVFrame* frame = av_frame_alloc();
 			if (this->_h264_mediaDecoder->Decode(&packet, frame)) {
-
+#if _DEBUG
+				auto stop = std::chrono::high_resolution_clock::now();
+				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+				printf(std::string("Decode time:").append(std::to_string(duration.count())).append("\r\n").c_str());				
+#endif
 				//lock ref to frame
 				_mtx.lock();
 				av_frame_unref(this->_tempFrame);

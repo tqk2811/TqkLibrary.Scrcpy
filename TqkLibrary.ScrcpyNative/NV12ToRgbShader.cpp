@@ -30,34 +30,13 @@ NV12ToRgbShader::NV12ToRgbShader() {
 
 NV12ToRgbShader::~NV12ToRgbShader() {
 	this->ReleaseSharedSurf();
-	if (this->_d3d11_pixelShader != nullptr) {
-		this->_d3d11_pixelShader->Release();
-		this->_d3d11_pixelShader = nullptr;
-	}
-	if (this->_d3d11_vertexShader != nullptr) {
-		this->_d3d11_vertexShader->Release();
-		this->_d3d11_vertexShader = nullptr;
-	}
-	if (this->_d3d11_inputLayout != nullptr) {
-		this->_d3d11_inputLayout->Release();
-		this->_d3d11_inputLayout = nullptr;
-	}
-	if (this->_d3d11_samplerState != nullptr) {
-		this->_d3d11_samplerState->Release();
-		this->_d3d11_samplerState = nullptr;
-	}
-	if (this->_d3d11_vertexBuffer != nullptr) {
-		this->_d3d11_vertexBuffer->Release();
-		this->_d3d11_vertexBuffer = nullptr;
-	}
-	if (this->_d3d11_device != nullptr) {
-		this->_d3d11_device->Release();
-		this->_d3d11_device = nullptr;
-	}
-	if (this->_d3d11_deviceCtx != nullptr) {
-		this->_d3d11_deviceCtx->Release();
-		this->_d3d11_deviceCtx = nullptr;
-	}
+	_d3d11_vertexBuffer.Reset();
+	_d3d11_pixelShader.Reset();
+	_d3d11_inputLayout.Reset();
+	_d3d11_vertexShader.Reset();
+	_d3d11_samplerState.Reset();
+	_d3d11_device.Reset();
+	_d3d11_deviceCtx.Reset();
 }
 
 bool NV12ToRgbShader::Init() {
@@ -89,7 +68,7 @@ bool NV12ToRgbShader::Init() {
 	for (UINT DriverTypeIndex = 0; DriverTypeIndex < NumDriverTypes; ++DriverTypeIndex)
 	{
 		hr = D3D11CreateDevice(nullptr, DriverTypes[DriverTypeIndex], nullptr, creationFlags, FeatureLevels, NumFeatureLevels,
-			D3D11_SDK_VERSION, &this->_d3d11_device, &FeatureLevel, &this->_d3d11_deviceCtx);
+			D3D11_SDK_VERSION, this->_d3d11_device.GetAddressOf(), &FeatureLevel, this->_d3d11_deviceCtx.GetAddressOf());
 		if (SUCCEEDED(hr))
 		{
 			// Device creation succeeded, no need to loop anymore
@@ -99,35 +78,35 @@ bool NV12ToRgbShader::Init() {
 	if (FAILED(hr))
 		return false;
 
+	//SamplerState
 	D3D11_SAMPLER_DESC desc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
-	hr = this->_d3d11_device->CreateSamplerState(&desc, &this->_d3d11_samplerState);
+	hr = this->_d3d11_device->CreateSamplerState(&desc, this->_d3d11_samplerState.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	//VertexShader
 	UINT Size = ARRAYSIZE(g_VS);
-	hr = this->_d3d11_device->CreateVertexShader(g_VS, Size, nullptr, &this->_d3d11_vertexShader);
+	hr = this->_d3d11_device->CreateVertexShader(g_VS, Size, nullptr, this->_d3d11_vertexShader.GetAddressOf());
 	if (FAILED(hr))
 		return false;
-
 	constexpr std::array<D3D11_INPUT_ELEMENT_DESC, 2> Layout =
 	{ {
 		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	} };
 
-	hr = this->_d3d11_device->CreateInputLayout(Layout.data(), Layout.size(), g_VS, Size, &this->_d3d11_inputLayout);
+	hr = this->_d3d11_device->CreateInputLayout(Layout.data(), Layout.size(), g_VS, Size, this->_d3d11_inputLayout.GetAddressOf());
 	if (FAILED(hr))
 		return false;
-	this->_d3d11_deviceCtx->IASetInputLayout(this->_d3d11_inputLayout);
 
 
 	//PixelShader
 	Size = ARRAYSIZE(g_PS);
-	hr = this->_d3d11_device->CreatePixelShader(g_PS, Size, nullptr, &this->_d3d11_pixelShader);
+	hr = this->_d3d11_device->CreatePixelShader(g_PS, Size, nullptr, this->_d3d11_pixelShader.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
+	//VertexBuffer
 	D3D11_BUFFER_DESC BufferDesc;
 	RtlZeroMemory(&BufferDesc, sizeof(BufferDesc));
 	BufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -137,12 +116,50 @@ bool NV12ToRgbShader::Init() {
 	D3D11_SUBRESOURCE_DATA InitData;
 	RtlZeroMemory(&InitData, sizeof(InitData));
 	InitData.pSysMem = Vertices;
-	hr = this->_d3d11_device->CreateBuffer(&BufferDesc, &InitData, &this->_d3d11_vertexBuffer);
+	hr = this->_d3d11_device->CreateBuffer(&BufferDesc, &InitData, this->_d3d11_vertexBuffer.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	return true;
 }
+
+
+void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
+	//init set
+	this->_d3d11_deviceCtx->IASetInputLayout(this->_d3d11_inputLayout.Get());
+	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
+	//this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView.Get(), blendFactor);
+	this->_d3d11_deviceCtx->VSSetShader(this->_d3d11_vertexShader.Get(), nullptr, 0);
+	this->_d3d11_deviceCtx->PSSetShader(this->_d3d11_pixelShader.Get(), nullptr, 0);
+	this->_d3d11_deviceCtx->PSSetSamplers(0, 1, this->_d3d11_samplerState.GetAddressOf());
+	this->_d3d11_deviceCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	UINT Stride = sizeof(VERTEX);
+	UINT Offset = 0;
+	this->_d3d11_deviceCtx->IASetVertexBuffers(0, 1, this->_d3d11_vertexBuffer.GetAddressOf(), &Stride, &Offset);
+	
+
+	//SharedSurf	
+	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
+		this->_luminanceView.Get(),
+		this->_chrominanceView.Get()
+	};
+	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
+	this->_d3d11_deviceCtx->OMSetRenderTargets(1, this->_renderTargetView.GetAddressOf(), nullptr);
+	
+	D3D11_VIEWPORT VP;
+	VP.Width = static_cast<FLOAT>(width);
+	VP.Height = static_cast<FLOAT>(height);
+	VP.MinDepth = 0.0f;
+	VP.MaxDepth = 1.0f;
+	VP.TopLeftX = 0;
+	VP.TopLeftY = 0;
+	this->_d3d11_deviceCtx->RSSetViewports(1, &VP);
+
+	this->_width = width;
+	this->_height = height;
+}
+
+
 
 
 
@@ -163,21 +180,21 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	texDesc_nv12.SampleDesc.Count = 1;
 	texDesc_nv12.SampleDesc.Quality = 0;
 	texDesc_nv12.MiscFlags = 0;
-	hr = this->_d3d11_device->CreateTexture2D(&texDesc_nv12, nullptr, &this->_texture_nv12);
+	hr = this->_d3d11_device->CreateTexture2D(&texDesc_nv12, nullptr, this->_texture_nv12.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	//
 	D3D11_SHADER_RESOURCE_VIEW_DESC const luminancePlaneDesc
-		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->_texture_nv12, D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
-	hr = this->_d3d11_device->CreateShaderResourceView(this->_texture_nv12, &luminancePlaneDesc, &this->_luminanceView);
+		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->_texture_nv12.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
+	hr = this->_d3d11_device->CreateShaderResourceView(this->_texture_nv12.Get(), &luminancePlaneDesc, this->_luminanceView.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	//
 	D3D11_SHADER_RESOURCE_VIEW_DESC const chrominancePlaneDesc
-		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->_texture_nv12, D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8_UNORM);
-	hr = this->_d3d11_device->CreateShaderResourceView(this->_texture_nv12, &chrominancePlaneDesc, &this->_chrominanceView);
+		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->_texture_nv12.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8_UNORM);
+	hr = this->_d3d11_device->CreateShaderResourceView(this->_texture_nv12.Get(), &chrominancePlaneDesc, this->_chrominanceView.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
@@ -195,7 +212,7 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	texDesc_rgba.SampleDesc.Count = 1;
 	texDesc_rgba.SampleDesc.Quality = 0;
 	texDesc_rgba.MiscFlags = 0;
-	hr = this->_d3d11_device->CreateTexture2D(&texDesc_rgba, nullptr, &this->_texture_rgba_target);
+	hr = this->_d3d11_device->CreateTexture2D(&texDesc_rgba, nullptr, this->_texture_rgba_target.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
@@ -203,7 +220,7 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	texDesc_rgba.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	texDesc_rgba.Usage = D3D11_USAGE_STAGING;//cpu read
 	texDesc_rgba.MiscFlags = 0;
-	hr = this->_d3d11_device->CreateTexture2D(&texDesc_rgba, nullptr, &this->_texture_rgba_copy);
+	hr = this->_d3d11_device->CreateTexture2D(&texDesc_rgba, nullptr, this->_texture_rgba_copy.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
@@ -212,67 +229,21 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 	rtvDesc.Texture2D.MipSlice = 0;
-	hr = this->_d3d11_device->CreateRenderTargetView(this->_texture_rgba_target, &rtvDesc, &this->_renderTargetView);
+	hr = this->_d3d11_device->CreateRenderTargetView(this->_texture_rgba_target.Get(), &rtvDesc, this->_renderTargetView.GetAddressOf());
 	if (FAILED(hr))
 		return false;
-	this->_d3d11_deviceCtx->OMSetRenderTargets(1, &this->_renderTargetView, nullptr);
 
-
-	D3D11_VIEWPORT VP;
-	VP.Width = static_cast<FLOAT>(width);
-	VP.Height = static_cast<FLOAT>(height);
-	VP.MinDepth = 0.0f;
-	VP.MaxDepth = 1.0f;
-	VP.TopLeftX = 0;
-	VP.TopLeftY = 0;
-	this->_d3d11_deviceCtx->RSSetViewports(1, &VP);
-
-	this->_width = width;
-	this->_height = height;
-
-	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
-		this->_luminanceView,
-		this->_chrominanceView
-	};
-	UINT Stride = sizeof(VERTEX);
-	UINT Offset = 0;
-	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
-	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
-	//this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView.Get(), blendFactor);
-	this->_d3d11_deviceCtx->OMSetRenderTargets(1, &this->_renderTargetView, nullptr);
-	this->_d3d11_deviceCtx->VSSetShader(this->_d3d11_vertexShader, nullptr, 0);
-	this->_d3d11_deviceCtx->PSSetShader(this->_d3d11_pixelShader, nullptr, 0);
-	this->_d3d11_deviceCtx->PSSetSamplers(0, 1, &this->_d3d11_samplerState);
-	this->_d3d11_deviceCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	this->_d3d11_deviceCtx->IASetVertexBuffers(0, 1, &this->_d3d11_vertexBuffer, &Stride, &Offset);
 	return true;
 }
-void NV12ToRgbShader::ReleaseSharedSurf() {
-	if (this->_luminanceView != nullptr) {
-		this->_luminanceView->Release();
-		this->_luminanceView = nullptr;
-	}
-	if (this->_chrominanceView != nullptr) {
-		this->_chrominanceView->Release();
-		this->_chrominanceView = nullptr;
-	}
-	if (this->_renderTargetView != nullptr) {
-		this->_renderTargetView->Release();
-		this->_renderTargetView = nullptr;
-	}
-	if (this->_texture_nv12 != nullptr) {
-		this->_texture_nv12->Release();
-		this->_texture_nv12 = nullptr;
-	}
-	if (this->_texture_rgba_target != nullptr) {
-		this->_texture_rgba_target->Release();
-		this->_texture_rgba_target = nullptr;
-	}
-	if (this->_texture_rgba_copy != nullptr) {
-		this->_texture_rgba_copy->Release();
-		this->_texture_rgba_copy = nullptr;
-	}
+
+void NV12ToRgbShader::ReleaseSharedSurf() {	
 	this->_d3d11_deviceCtx->ClearState();
+	this->_texture_nv12.Reset();
+	this->_luminanceView.Reset();
+	this->_chrominanceView.Reset();
+	this->_texture_rgba_target.Reset();
+	this->_texture_rgba_copy.Reset();
+	this->_renderTargetView.Reset();
 	this->_width = 0;
 	this->_height = 0;
 }
@@ -300,39 +271,39 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 		this->ReleaseSharedSurf();
 		if (!this->CreateSharedSurf(source->width, source->height))
 			return false;
+		else 
+			this->DeviceCtxSet(source->width, source->height);
 	}
 
 	ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)source->data[0];
 	const int texture_index = (int)source->data[1];
 	//bind/copy ffmpeg hw texture -> local d3d11 texture
 	this->_d3d11_deviceCtx->CopySubresourceRegion(
-		this->_texture_nv12, 0, 0, 0, 0,
+		this->_texture_nv12.Get(), 0, 0, 0, 0,
 		texture.Get(), texture_index, nullptr
 	);
 
-
-	this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView, blendFactor);
 	this->_d3d11_deviceCtx->Draw(NUMVERTICES, 0);
-	//this->_d3d11_deviceCtx->Flush();
 
+	
 #define ViewSubResource 0//intel onboard
 //#define ViewSubResource 10//nvidia
 
 #define TargetSubResource 0
 	this->_d3d11_deviceCtx->CopySubresourceRegion(
-		this->_texture_rgba_copy, TargetSubResource, 0, 0, 0,
-		this->_texture_rgba_target, ViewSubResource, nullptr
+		this->_texture_rgba_copy.Get(), TargetSubResource, 0, 0, 0,
+		this->_texture_rgba_target.Get(), ViewSubResource, nullptr
 	);
 
 	//get texture output
 	D3D11_MAPPED_SUBRESOURCE ms;
-	hr = this->_d3d11_deviceCtx->Map(this->_texture_rgba_copy, TargetSubResource, D3D11_MAP_READ, 0, &ms);
+	hr = this->_d3d11_deviceCtx->Map(this->_texture_rgba_copy.Get(), TargetSubResource, D3D11_MAP_READ, 0, &ms);
 	if (FAILED(hr))
 		return false;
 
 	bool result = this->CopyMapResource(ms, source, received);
 
-	this->_d3d11_deviceCtx->Unmap(this->_texture_rgba_copy, 0);
+	this->_d3d11_deviceCtx->Unmap(this->_texture_rgba_copy.Get(), 0);
 
 	return result;
 }
