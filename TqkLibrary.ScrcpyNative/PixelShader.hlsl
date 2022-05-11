@@ -41,6 +41,7 @@ float3 ConvertYUVtoRGB(float3 yuv)
 	return float3(yuv.z, yuv.y, yuv.x);
 }
 
+[numthreads (8,8,1)]
 min16float4 PS(PixelShaderInput input) : SV_TARGET
 {
 	float y = luminanceChannel.Sample(defaultSampler, input.texCoord);

@@ -67,7 +67,7 @@ bool MediaDecoder::Init() {
 }
 
 bool MediaDecoder::Decode(const AVPacket* packet, AVFrame* frame) {
-	if(packet == nullptr || frame == nullptr)
+	if (packet == nullptr || frame == nullptr)
 		return false;
 	if (!avcheck(avcodec_send_packet(_codec_ctx, packet)))
 		return false;
@@ -75,7 +75,6 @@ bool MediaDecoder::Decode(const AVPacket* packet, AVFrame* frame) {
 	av_frame_unref(_transfer_frame);
 	if (!avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame)))
 		return false;
-
 	if (_decoding_frame->hw_frames_ctx == nullptr)
 	{
 		av_frame_move_ref(frame, _decoding_frame);
@@ -96,7 +95,7 @@ bool MediaDecoder::Decode(const AVPacket* packet, AVFrame* frame) {
 		{
 			bool result = avcheck(av_hwframe_transfer_data(_transfer_frame, _decoding_frame, 0));
 			av_frame_unref(_decoding_frame);
-			if(result)
+			if (result)
 				av_frame_move_ref(frame, _transfer_frame);
 			return result;
 		}

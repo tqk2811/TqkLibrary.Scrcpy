@@ -19,7 +19,8 @@ private:
 	MediaDecoder* _h264_mediaDecoder{ nullptr };
 	SocketWrapper* _videoSock{ nullptr };
 	BYTE* _videoBuffer{ nullptr };
-	AVFrame* _tempFrame{ nullptr };
+	AVFrame* _frame{ nullptr };
+	AVFrame* _temp_frame{ nullptr };
 	std::mutex _mtx;
 	void threadStart();
 

@@ -3,6 +3,7 @@
 #include "VertexShader.h"
 #include "Utils.h"
 #include "NV12ToRgbShader.h"
+#include <math.h>
 
 #define NUMVERTICES 6
 
@@ -54,16 +55,16 @@ bool NV12ToRgbShader::Init() {
 	// Feature levels supported
 	D3D_FEATURE_LEVEL FeatureLevels[] =
 	{
+		D3D_FEATURE_LEVEL_11_1,
 		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_9_1
 	};
 	UINT NumFeatureLevels = ARRAYSIZE(FeatureLevels);
 	D3D_FEATURE_LEVEL FeatureLevel;
 	// This flag adds support for surfaces with a different color channel ordering
 	// than the default. It is required for compatibility with Direct2D.
-	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+	UINT creationFlags = 
+		D3D11_CREATE_DEVICE_SINGLETHREADED | 
+		D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
 	for (UINT DriverTypeIndex = 0; DriverTypeIndex < NumDriverTypes; ++DriverTypeIndex)
 	{
@@ -136,7 +137,7 @@ void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
 	UINT Stride = sizeof(VERTEX);
 	UINT Offset = 0;
 	this->_d3d11_deviceCtx->IASetVertexBuffers(0, 1, this->_d3d11_vertexBuffer.GetAddressOf(), &Stride, &Offset);
-	
+
 
 	//SharedSurf	
 	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
@@ -145,7 +146,7 @@ void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
 	};
 	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
 	this->_d3d11_deviceCtx->OMSetRenderTargets(1, this->_renderTargetView.GetAddressOf(), nullptr);
-	
+
 	D3D11_VIEWPORT VP;
 	VP.Width = static_cast<FLOAT>(width);
 	VP.Height = static_cast<FLOAT>(height);
@@ -154,14 +155,14 @@ void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
 	VP.TopLeftX = 0;
 	VP.TopLeftY = 0;
 	this->_d3d11_deviceCtx->RSSetViewports(1, &VP);
-
+	//this->_d3d11_deviceCtx->Dispatch(8, 8, 1);
+	this->_d3d11_deviceCtx->Dispatch(
+		(UINT)ceil(width * 1.0 / 8),
+		(UINT)ceil(height * 1.0 / 8),
+		1);
 	this->_width = width;
 	this->_height = height;
 }
-
-
-
-
 
 bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	//
@@ -236,7 +237,7 @@ bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
 	return true;
 }
 
-void NV12ToRgbShader::ReleaseSharedSurf() {	
+void NV12ToRgbShader::ReleaseSharedSurf() {
 	this->_d3d11_deviceCtx->ClearState();
 	this->_texture_nv12.Reset();
 	this->_luminanceView.Reset();
@@ -248,9 +249,6 @@ void NV12ToRgbShader::ReleaseSharedSurf() {
 	this->_height = 0;
 }
 
-
-
-
 //https://medium.com/swlh/streaming-video-with-ffmpeg-and-directx-11-7395fcb372c4
 bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 	HRESULT hr{ 0 };
@@ -261,17 +259,12 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 	if (!source->hw_frames_ctx)
 		return false;
 
-	if (this->_d3d11_device == nullptr) {
-		if (!Init())
-			return false;
-	}
-
 	//init/reinit shader surface
 	if (this->_width != source->width || this->_height != source->height) {
 		this->ReleaseSharedSurf();
 		if (!this->CreateSharedSurf(source->width, source->height))
 			return false;
-		else 
+		else
 			this->DeviceCtxSet(source->width, source->height);
 	}
 
@@ -285,19 +278,14 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 
 	this->_d3d11_deviceCtx->Draw(NUMVERTICES, 0);
 
-	
-#define ViewSubResource 0//intel onboard
-//#define ViewSubResource 10//nvidia
 
-#define TargetSubResource 0
-	this->_d3d11_deviceCtx->CopySubresourceRegion(
-		this->_texture_rgba_copy.Get(), TargetSubResource, 0, 0, 0,
-		this->_texture_rgba_target.Get(), ViewSubResource, nullptr
-	);
+	//render target view only 1 sub resource https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-subresources
+	#define CopySubResource 0
+	this->_d3d11_deviceCtx->CopyResource(this->_texture_rgba_copy.Get(), this->_texture_rgba_target.Get());	
 
 	//get texture output
 	D3D11_MAPPED_SUBRESOURCE ms;
-	hr = this->_d3d11_deviceCtx->Map(this->_texture_rgba_copy.Get(), TargetSubResource, D3D11_MAP_READ, 0, &ms);
+	hr = this->_d3d11_deviceCtx->Map(this->_texture_rgba_copy.Get(), CopySubResource, D3D11_MAP_READ, 0, &ms);
 	if (FAILED(hr))
 		return false;
 

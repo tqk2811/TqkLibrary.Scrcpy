@@ -22,8 +22,8 @@ Video::~Video() {
 	delete this->_h264_mediaDecoder;
 	delete this->_videoSock;
 	delete this->_videoBuffer;
-	av_frame_unref(this->_tempFrame);
-	av_frame_free(&this->_tempFrame);
+	av_frame_free(&this->_frame);
+	av_frame_free(&this->_temp_frame);
 	CloseHandle(this->_threadHandle);
 }
 
@@ -53,7 +53,10 @@ bool Video::Init() {
 	if (!this->_h264_mediaDecoder->Init())
 		return false;
 
-	return true;
+	this->_frame = av_frame_alloc();
+	this->_temp_frame = av_frame_alloc();
+
+	return this->_frame != nullptr && this->_temp_frame != nullptr;
 }
 
 DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
@@ -119,21 +122,13 @@ void Video::threadStart() {
 
 		if (this->_parsePacket->ParserPushPacket(&packet))
 		{
-#if _DEBUG
-			auto start = std::chrono::high_resolution_clock::now();
-#endif
-			AVFrame* frame = av_frame_alloc();
-			if (this->_h264_mediaDecoder->Decode(&packet, frame)) {
-#if _DEBUG
-				auto stop = std::chrono::high_resolution_clock::now();
-				auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-				printf(std::string("Decode time:").append(std::to_string(duration.count())).append("\r\n").c_str());				
-#endif
+			av_frame_unref(this->_temp_frame);
+			if (this->_h264_mediaDecoder->Decode(&packet, this->_temp_frame)) 
+			{
 				//lock ref to frame
 				_mtx.lock();
-				av_frame_unref(this->_tempFrame);
-				av_frame_free(&this->_tempFrame);
-				this->_tempFrame = frame;
+				av_frame_unref(this->_frame);
+				av_frame_move_ref(this->_frame, this->_temp_frame);
 				_mtx.unlock();
 				this->_ishaveFrame = true;
 			}
@@ -147,8 +142,8 @@ bool Video::GetScreenSize(int& w, int& h) {
 		return false;
 
 	_mtx.lock();
-	w = this->_tempFrame->width;
-	h = this->_tempFrame->height;
+	w = this->_frame->width;
+	h = this->_frame->height;
 	_mtx.unlock();
 
 	return true;
@@ -159,7 +154,7 @@ bool Video::RefCurrentFrame(AVFrame* frame) {
 		return false;
 
 	_mtx.lock();
-	int result = av_frame_ref(frame, this->_tempFrame);
+	int result = av_frame_ref(frame, this->_frame);
 	_mtx.unlock();
 
 	return result >= 0;
