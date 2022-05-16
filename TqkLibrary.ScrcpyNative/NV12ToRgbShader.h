@@ -3,7 +3,7 @@
 class NV12ToRgbShader
 {
 public:
-	NV12ToRgbShader();
+	NV12ToRgbShader(const AVD3D11VADeviceContext* d3d11va_device_ctx);
 	~NV12ToRgbShader();
 
 	bool Init();

@@ -26,7 +26,9 @@ VERTEX Vertices[NUMVERTICES] =
 
 FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 
-NV12ToRgbShader::NV12ToRgbShader() {
+NV12ToRgbShader::NV12ToRgbShader(const AVD3D11VADeviceContext* d3d11va_device_ctx) {	
+	this->_d3d11_device = d3d11va_device_ctx->device;
+	this->_d3d11_deviceCtx = d3d11va_device_ctx->device_context;
 }
 
 NV12ToRgbShader::~NV12ToRgbShader() {
@@ -36,49 +38,11 @@ NV12ToRgbShader::~NV12ToRgbShader() {
 	_d3d11_inputLayout.Reset();
 	_d3d11_vertexShader.Reset();
 	_d3d11_samplerState.Reset();
-	_d3d11_device.Reset();
-	_d3d11_deviceCtx.Reset();
 }
 
 bool NV12ToRgbShader::Init() {
 	HRESULT hr;
-
-	// Driver types supported
-	D3D_DRIVER_TYPE DriverTypes[] =
-	{
-		D3D_DRIVER_TYPE_HARDWARE,
-		D3D_DRIVER_TYPE_WARP,
-		D3D_DRIVER_TYPE_REFERENCE,
-	};
-	UINT NumDriverTypes = ARRAYSIZE(DriverTypes);
-
-	// Feature levels supported
-	D3D_FEATURE_LEVEL FeatureLevels[] =
-	{
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0,
-	};
-	UINT NumFeatureLevels = ARRAYSIZE(FeatureLevels);
-	D3D_FEATURE_LEVEL FeatureLevel;
-	// This flag adds support for surfaces with a different color channel ordering
-	// than the default. It is required for compatibility with Direct2D.
-	UINT creationFlags = 
-		D3D11_CREATE_DEVICE_SINGLETHREADED | 
-		D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-	for (UINT DriverTypeIndex = 0; DriverTypeIndex < NumDriverTypes; ++DriverTypeIndex)
-	{
-		hr = D3D11CreateDevice(nullptr, DriverTypes[DriverTypeIndex], nullptr, creationFlags, FeatureLevels, NumFeatureLevels,
-			D3D11_SDK_VERSION, this->_d3d11_device.GetAddressOf(), &FeatureLevel, this->_d3d11_deviceCtx.GetAddressOf());
-		if (SUCCEEDED(hr))
-		{
-			// Device creation succeeded, no need to loop anymore
-			break;
-		}
-	}
-	if (FAILED(hr))
-		return false;
-
+	
 	//SamplerState
 	D3D11_SAMPLER_DESC desc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
 	hr = this->_d3d11_device->CreateSamplerState(&desc, this->_d3d11_samplerState.GetAddressOf());
@@ -122,46 +86,6 @@ bool NV12ToRgbShader::Init() {
 		return false;
 
 	return true;
-}
-
-
-void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
-	//init set
-	this->_d3d11_deviceCtx->IASetInputLayout(this->_d3d11_inputLayout.Get());
-	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
-	//this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView.Get(), blendFactor);
-	this->_d3d11_deviceCtx->VSSetShader(this->_d3d11_vertexShader.Get(), nullptr, 0);
-	this->_d3d11_deviceCtx->PSSetShader(this->_d3d11_pixelShader.Get(), nullptr, 0);
-	this->_d3d11_deviceCtx->PSSetSamplers(0, 1, this->_d3d11_samplerState.GetAddressOf());
-	this->_d3d11_deviceCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	UINT Stride = sizeof(VERTEX);
-	UINT Offset = 0;
-	this->_d3d11_deviceCtx->IASetVertexBuffers(0, 1, this->_d3d11_vertexBuffer.GetAddressOf(), &Stride, &Offset);
-
-
-	//SharedSurf	
-	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
-		this->_luminanceView.Get(),
-		this->_chrominanceView.Get()
-	};
-	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
-	this->_d3d11_deviceCtx->OMSetRenderTargets(1, this->_renderTargetView.GetAddressOf(), nullptr);
-
-	D3D11_VIEWPORT VP;
-	VP.Width = static_cast<FLOAT>(width);
-	VP.Height = static_cast<FLOAT>(height);
-	VP.MinDepth = 0.0f;
-	VP.MaxDepth = 1.0f;
-	VP.TopLeftX = 0;
-	VP.TopLeftY = 0;
-	this->_d3d11_deviceCtx->RSSetViewports(1, &VP);
-	//this->_d3d11_deviceCtx->Dispatch(8, 8, 1);
-	this->_d3d11_deviceCtx->Dispatch(
-		(UINT)ceil(width * 1.0 / 8),
-		(UINT)ceil(height * 1.0 / 8),
-		1);
-	this->_width = width;
-	this->_height = height;
 }
 
 bool NV12ToRgbShader::CreateSharedSurf(int width, int height) {
@@ -249,6 +173,44 @@ void NV12ToRgbShader::ReleaseSharedSurf() {
 	this->_height = 0;
 }
 
+void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
+	//init set
+	this->_d3d11_deviceCtx->IASetInputLayout(this->_d3d11_inputLayout.Get());
+	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
+	//this->_d3d11_deviceCtx->ClearRenderTargetView(this->_renderTargetView.Get(), blendFactor);
+	this->_d3d11_deviceCtx->VSSetShader(this->_d3d11_vertexShader.Get(), nullptr, 0);
+	this->_d3d11_deviceCtx->PSSetShader(this->_d3d11_pixelShader.Get(), nullptr, 0);
+	this->_d3d11_deviceCtx->PSSetSamplers(0, 1, this->_d3d11_samplerState.GetAddressOf());
+	UINT Stride = sizeof(VERTEX);
+	UINT Offset = 0;
+	this->_d3d11_deviceCtx->IASetVertexBuffers(0, 1, this->_d3d11_vertexBuffer.GetAddressOf(), &Stride, &Offset);
+	this->_d3d11_deviceCtx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	//SharedSurf	
+	std::array<ID3D11ShaderResourceView*, 2> const textureViews = {
+		this->_luminanceView.Get(),
+		this->_chrominanceView.Get()
+	};
+	this->_d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
+	this->_d3d11_deviceCtx->OMSetRenderTargets(1, this->_renderTargetView.GetAddressOf(), nullptr);
+
+	D3D11_VIEWPORT VP;
+	VP.Width = static_cast<FLOAT>(width);
+	VP.Height = static_cast<FLOAT>(height);
+	VP.MinDepth = 0.0f;
+	VP.MaxDepth = 1.0f;
+	VP.TopLeftX = 0;
+	VP.TopLeftY = 0;
+	this->_d3d11_deviceCtx->RSSetViewports(1, &VP);
+
+	UINT x = (UINT)ceil(width * 1.0 / 8);
+	UINT y = (UINT)ceil(height * 1.0 / 8);
+	UINT z = 1;
+	this->_d3d11_deviceCtx->Dispatch(x, y, z);
+	this->_width = width;
+	this->_height = height;
+}
+
 //https://medium.com/swlh/streaming-video-with-ffmpeg-and-directx-11-7395fcb372c4
 bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 	HRESULT hr{ 0 };
@@ -258,18 +220,24 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 		return false;
 	if (!source->hw_frames_ctx)
 		return false;
-
+	
 	//init/reinit shader surface
 	if (this->_width != source->width || this->_height != source->height) {
 		this->ReleaseSharedSurf();
-		if (!this->CreateSharedSurf(source->width, source->height))
-			return false;
+		if (this->CreateSharedSurf(source->width, source->height))
+		{
+			//this->DeviceCtxSet(source->width, source->height);
+		}
 		else
-			this->DeviceCtxSet(source->width, source->height);
-	}
-
+		{
+			return false;
+		}
+	}	
+	this->DeviceCtxSet(source->width, source->height);
+	
 	ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)source->data[0];
 	const int texture_index = (int)source->data[1];
+
 	//bind/copy ffmpeg hw texture -> local d3d11 texture
 	this->_d3d11_deviceCtx->CopySubresourceRegion(
 		this->_texture_nv12.Get(), 0, 0, 0, 0,
@@ -278,10 +246,9 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 
 	this->_d3d11_deviceCtx->Draw(NUMVERTICES, 0);
 
-
 	//render target view only 1 sub resource https://docs.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-resources-subresources
-	#define CopySubResource 0
-	this->_d3d11_deviceCtx->CopyResource(this->_texture_rgba_copy.Get(), this->_texture_rgba_target.Get());	
+#define CopySubResource 0
+	this->_d3d11_deviceCtx->CopyResource(this->_texture_rgba_copy.Get(), this->_texture_rgba_target.Get());
 
 	//get texture output
 	D3D11_MAPPED_SUBRESOURCE ms;
