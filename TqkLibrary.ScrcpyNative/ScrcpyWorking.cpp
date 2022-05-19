@@ -4,6 +4,7 @@
 #include "Control.h"
 #include "ProcessWrapper.h"
 #include "Scrcpy.h"
+#include <chrono>
 
 #define IPV4_LOCALHOST 0x7F000001
 const wchar_t* adbPath = L"adb.exe";
@@ -23,24 +24,22 @@ SOCKET CreateListenSock(int port, int backlog, const timeval timeout) {
 		return INVALID_SOCKET;
 	}
 
+	u_long iMode = 1;
+	if (ioctlsocket(sock, FIONBIO, &iMode) == SOCKET_ERROR) {
+		closesocket(sock);
+		return INVALID_SOCKET;
+	}
+
 	sockaddr_in addr;
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = htonl(IPV4_LOCALHOST);
-	//InetPton(AF_INET, L"127.0.0.1", &addr.sin_addr);
 	if (bind(sock, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
 
 	if (listen(sock, backlog) == SOCKET_ERROR) {
-		closesocket(sock);
-		return INVALID_SOCKET;
-	}
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	FD_SET(sock, &rfds);
-	if (select(sock, &rfds, NULL, NULL, &timeout) == SOCKET_ERROR) {
 		closesocket(sock);
 		return INVALID_SOCKET;
 	}
@@ -60,18 +59,32 @@ SOCKET FindPort(int& port, int backlog, const timeval timeout, int maxTry = 100)
 	return sock;
 }
 
-SOCKET AcceptConnection(SOCKET sock)
+SOCKET AcceptConnection(SOCKET sock, int timeout = 2000)
 {
 	sockaddr_in addr;
 	int addrLen = sizeof(addr);
-	SOCKET client = accept(sock, (sockaddr*)&addr, &addrLen);
-	if (client == INVALID_SOCKET) {
-		return INVALID_SOCKET;
+	auto start = std::chrono::high_resolution_clock::now();
+	while (true)
+	{
+		SOCKET client = accept(sock, (sockaddr*)&addr, &addrLen);
+		if (client != INVALID_SOCKET) {
+			u_long iMode = 0;
+			if (ioctlsocket(client, FIONBIO, &iMode) == SOCKET_ERROR) {
+				closesocket(client);
+				return INVALID_SOCKET;
+			}
+			return client;
+		}
+		else
+		{
+			auto end = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+			if (duration > timeout) {
+				return INVALID_SOCKET;
+			}
+		}
 	}
-	return client;
 }
-
-
 
 ScrcpyWorking::ScrcpyWorking(const Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	this->_scrcpy = scrcpy;
@@ -95,8 +108,9 @@ ScrcpyWorking::~ScrcpyWorking() {
 		this->_video->Stop();
 		delete this->_video;
 	}
-}
 
+	if (this->_wsa_isStartUp) WSACleanup();
+}
 
 DWORD ScrcpyWorking::RunAdbProcess(LPCWSTR argument)
 {
@@ -117,15 +131,13 @@ DWORD ScrcpyWorking::RunAdbProcess(LPCWSTR argument)
 }
 
 
-
-
 bool ScrcpyWorking::Start() {
-
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (res != 0) {
 		return false;
 	}
+	this->_wsa_isStartUp = true;
 
 	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
 	exitCode = RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
@@ -135,7 +147,7 @@ bool ScrcpyWorking::Start() {
 
 	int backlog = 1;
 	if (this->_nativeConfig.IsControl) backlog = 2;
-	const timeval timeout{ 1 , 0 };
+	const timeval timeout{ 2 , 0 };
 
 	int port = -1;
 	this->_listenSock = FindPort(port, backlog, timeout);
@@ -143,6 +155,7 @@ bool ScrcpyWorking::Start() {
 		return false;
 	}
 
+	//port += 5;//test on failed connect
 	std::wstring arg(L"reverse localabstract:scrcpy tcp:");
 	arg.append(std::to_wstring(port));
 	exitCode = RunAdbProcess(arg.c_str());
@@ -151,7 +164,7 @@ bool ScrcpyWorking::Start() {
 	}
 
 	//run main process
-	LPCWSTR cmds[]
+	LPCWSTR cmds[5]
 	{
 		L"-s",
 		this->_scrcpy->_deviceId.c_str(),
@@ -168,29 +181,28 @@ bool ScrcpyWorking::Start() {
 	this->_process = new ProcessWrapper((LPWSTR)args.c_str());
 
 
-	SOCKET video = AcceptConnection(this->_listenSock);
+	SOCKET video = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
 	if (video == INVALID_SOCKET) {
 		return false;
 	}
-	this->_video = new Video(video, this->_nativeConfig.HwType);
+	this->_video = new Video(video, (AVHWDeviceType)this->_nativeConfig.HwType);
 	if (!this->_video->Init()) {
 		return false;
 	}
 
 	SOCKET control = INVALID_SOCKET;
 	if (this->_nativeConfig.IsControl) {
-		control = AcceptConnection(this->_listenSock);
+		control = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
 		if (control == INVALID_SOCKET) {
 			return false;
 		}
 		this->_control = new Control(control);
 	}
 
-	this->_video->Start();
-	if (this->_nativeConfig.IsControl) this->_control->Start();
+	this->_video->Start();//start video thread
+	if (this->_nativeConfig.IsControl) this->_control->Start();//start control thread
 
-	closesocket(this->_listenSock);
-	this->_listenSock = INVALID_SOCKET;
-	
+	/*closesocket(this->_listenSock);
+	this->_listenSock = INVALID_SOCKET;*/
 	return true;
 }

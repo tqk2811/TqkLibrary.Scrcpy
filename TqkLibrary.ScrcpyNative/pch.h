@@ -42,21 +42,22 @@ typedef class NV12ToRgbShader;
 #pragma comment(lib,"ws2_32.lib")
 using namespace Microsoft::WRL;
 using namespace DirectX;
-enum Orientations : int
-{
-	Auto = -1,
-	Natural = 0,
-	Counterclockwise90 = 1,
-	/// <summary>
-	/// 180°
-	/// </summary>
-	Flip = 2,
-	Clockwise90 = 3
-};
+//enum Orientations : int
+//{
+//	Auto = -1,
+//	Natural = 0,
+//	Counterclockwise90 = 1,
+//	/// <summary>
+//	/// 180°
+//	/// </summary>
+//	Flip = 2,
+//	Clockwise90 = 3
+//};
 struct ScrcpyNativeConfig {
-	AVHWDeviceType HwType;//int
+	BYTE HwType;//AVHWDeviceType
 	bool ForceAdbForward;
 	bool IsControl;
+	INT32 ConnectionTimeout;
 };
 extern bool IsCudaSupport;
 //#include "ProcessWrapper.h"

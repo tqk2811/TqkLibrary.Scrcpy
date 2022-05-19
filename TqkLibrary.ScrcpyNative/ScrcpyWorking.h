@@ -8,6 +8,7 @@ public:
 	~ScrcpyWorking();
 	bool Start();
 private:
+	bool _wsa_isStartUp = false;
 	//function	
 	DWORD RunAdbProcess(LPCWSTR argument);
 

@@ -97,6 +97,11 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
+        /// Default: 3000
+        /// </summary>
+        public int ConnectionTimeout { get; set; } = 3000;
+        
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
@@ -111,7 +116,8 @@ namespace TqkLibrary.Scrcpy
             {
                 HwType = this.HwType,
                 ForceAdbForward = this.ForceAdbForward,
-                IsControl = this.IsControl
+                IsControl = this.IsControl,
+                ConnectionTimeout = ConnectionTimeout,
             };
         }
     }

@@ -5,8 +5,15 @@ namespace TqkLibrary.Scrcpy
     [StructLayout(LayoutKind.Sequential)]
     internal struct ScrcpyNativeConfig
     {
-        public FFmpegAVHWDeviceType HwType;//int
+        [MarshalAs(UnmanagedType.U1)]
+        public FFmpegAVHWDeviceType HwType;//uint8
+
+        [MarshalAs(UnmanagedType.U1)]
         public bool ForceAdbForward;
+
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsControl;
+
+        public int ConnectionTimeout;
     }
 }

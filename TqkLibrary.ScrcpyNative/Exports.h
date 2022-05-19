@@ -1,7 +1,7 @@
 #ifndef ScrcpyNativeExports_H
 #define ScrcpyNativeExports_H
 
-ScrcpyNativeExport bool LoadKey(BYTE* key,const int sizeInByte);
+ScrcpyNativeExport bool LoadKey(BYTE* key, const int sizeInByte);
 ScrcpyNativeExport Scrcpy* ScrcpyAlloc(LPCWSTR deviceId);
 ScrcpyNativeExport void ScrcpyFree(Scrcpy* scrcpy);
 ScrcpyNativeExport bool ScrcpyConnect(Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig);
