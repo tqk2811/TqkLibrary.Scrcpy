@@ -202,7 +202,9 @@ bool ScrcpyWorking::Start() {
 	this->_video->Start();//start video thread
 	if (this->_nativeConfig.IsControl) this->_control->Start();//start control thread
 
-	/*closesocket(this->_listenSock);
-	this->_listenSock = INVALID_SOCKET;*/
+	//close listen sock
+	closesocket(this->_listenSock);
+	this->_listenSock = INVALID_SOCKET;
+
 	return true;
 }
