@@ -2,6 +2,25 @@
 using TqkLibrary.Scrcpy;
 using TqkLibrary.AdbDotNet;
 
+var env = System.Environment.GetEnvironmentVariables();
+
+
+int first_row = 1783;
+Dictionary<char, Point> keyMaps = new Dictionary<char, Point>()
+{
+    { 'q', new Point(51,first_row) },
+    { 'w', new Point(160,first_row)},
+    { 'e', new Point(263,first_row)},
+    { 'r', new Point(381,first_row)},
+    { 't', new Point(485,first_row)},
+    { 'y', new Point(592,first_row)},
+    { 'u', new Point(700,first_row)},
+    { 'i', new Point(800,first_row)},
+    { 'o', new Point(920,first_row)},
+    { 'p', new Point(1026,first_row)},
+};
+
+
 var imgs = Path.Combine(Directory.GetCurrentDirectory(), "Imgs");
 Directory.CreateDirectory(imgs);
 
@@ -19,10 +38,10 @@ string deviceId = devices.First();
 int i = 0;
 ScrcpyConfig config = new ScrcpyConfig()
 {
-    //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    IsUseD3D11Shader = true,
+    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+    IsUseD3D11Shader = false,
     IsControl = true,
-    MaxFps = 12
+    MaxFps = 6
 };
 while (true)
 {
@@ -30,38 +49,59 @@ while (true)
     using (Scrcpy scrcpy = new Scrcpy(deviceId))
     {
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connect");
-        scrcpy.Connect(config);
-        Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
-        await Task.Delay(3000);
-
-        //while (true) await Task.Delay(3000);
-        scrcpy.Control.SetClipboard("test clipboard", true);
-        await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
-        scrcpy.Control.SetClipboard("test clipboard2", true);
-        string text = await scrcpy.Control.GetClipboardAsync();
-
-        while (true) await Task.Delay(3000);
-
-        Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShot");
-        while (true)
+        if(scrcpy.Connect(config))
         {
-            using Bitmap bitmap = scrcpy.GetScreenShot();
-            Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShoted");
-            bitmap.Save($"{imgs}\\{i++:00000}.png");
-            await Task.Delay(1000);
-            //break;
+            Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
+            //await Task.Delay(3000);
+
+            //scrcpy.Control.SetClipboard("Phạm Đức Long Click mất cũng chừng đó thôi =))", true);
+            //await TapKeyboard(scrcpy, "qwertyuiop");
+            //await Task.Delay(500);
+            //await scrcpy.Control.KeyAsync(AndroidKeyCode.KEYCODE_ENTER);
+            //await Task.Delay(3000);
+            ////scrcpy.Control.SetClipboard("test clipboard", true);
+            //await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
+            //string text = await scrcpy.Control.GetClipboardAsync();
+            //Console.WriteLine($"GetClipboardAsync: {text}");
+
+            while (true)
+                await Task.Delay(3000);
+            //Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShot");
+
+            while (true)
+            {
+                using Bitmap bitmap = scrcpy.GetScreenShot();
+                Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShoted");
+                //bitmap.Save($"{imgs}\\{i++:00000}.png");
+                await Task.Delay(90);
+                //break;
+            }
+            //await Task.Delay(3000);
+
+            //while (true) await Task.Delay(3000);
+
+            //Console.WriteLine($"{DateTime.Now:mm:ss.fff} Stop");
+            //scrcpy.Stop();
+            //Console.WriteLine($"{DateTime.Now:mm:ss.fff} Stopped");
         }
-        await Task.Delay(3000);
-
-        while (true) await Task.Delay(3000);
-
-        Console.WriteLine($"{DateTime.Now:mm:ss.fff} Stop");
-        scrcpy.Stop();
-        Console.WriteLine($"{DateTime.Now:mm:ss.fff} Stopped");
+        else
+        {
+            
+        }
     }
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Disposesed");
     GC.Collect();
     GC.WaitForPendingFinalizers();
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} GC cleared");
     //await Task.Delay(5000);
+}
+
+
+async Task TapKeyboard(Scrcpy scrcpy, string text)
+{
+    foreach (var c in text)
+    {
+        await scrcpy.Control.TapAsync(keyMaps[c], 100);
+        await Task.Delay(50);
+    }
 }
