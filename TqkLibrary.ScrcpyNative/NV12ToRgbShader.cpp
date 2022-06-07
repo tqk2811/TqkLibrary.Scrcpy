@@ -26,7 +26,7 @@ VERTEX Vertices[NUMVERTICES] =
 
 FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 
-NV12ToRgbShader::NV12ToRgbShader(const AVD3D11VADeviceContext* d3d11va_device_ctx) {	
+NV12ToRgbShader::NV12ToRgbShader(const AVD3D11VADeviceContext* d3d11va_device_ctx) {
 	this->_d3d11_device = d3d11va_device_ctx->device;
 	this->_d3d11_deviceCtx = d3d11va_device_ctx->device_context;
 }
@@ -42,7 +42,7 @@ NV12ToRgbShader::~NV12ToRgbShader() {
 
 bool NV12ToRgbShader::Init() {
 	HRESULT hr;
-	
+
 	//SamplerState
 	D3D11_SAMPLER_DESC desc = CD3D11_SAMPLER_DESC(CD3D11_DEFAULT());
 	hr = this->_d3d11_device->CreateSamplerState(&desc, this->_d3d11_samplerState.GetAddressOf());
@@ -174,7 +174,7 @@ void NV12ToRgbShader::ReleaseSharedSurf() {
 }
 
 void NV12ToRgbShader::DeviceCtxSet(int width, int height) {
-		
+
 	//init set
 	this->_d3d11_deviceCtx->IASetInputLayout(this->_d3d11_inputLayout.Get());
 	this->_d3d11_deviceCtx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);
@@ -221,7 +221,7 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 		return false;
 	if (!source->hw_frames_ctx)
 		return false;
-	
+
 	//init/reinit shader surface
 	if (this->_width != source->width || this->_height != source->height) {
 		this->ReleaseSharedSurf();
@@ -236,20 +236,20 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 	}
 	//this->_d3d11_deviceCtx->ClearState();
 	//this->DeviceCtxSet(source->width, source->height);
-	
+
 	ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)source->data[0];
 	const int texture_index = (int)source->data[1];
 
 	//bind/copy ffmpeg hw texture -> local d3d11 texture
 
-	D3D11_BOX box{0};
+	D3D11_BOX box{ 0 };
 	box.left = 0;
 	box.right = source->width;
 	box.top = 0;
 	box.bottom = source->height;
 	box.front = 0;
 	box.back = 1;//https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copysubresourceregion
-	
+
 	this->_d3d11_deviceCtx->CopySubresourceRegion(
 		this->_texture_nv12.Get(), 0, 0, 0, 0,
 		texture.Get(), texture_index, &box
@@ -277,7 +277,7 @@ bool NV12ToRgbShader::Convert(const AVFrame* source, AVFrame* received) {
 bool NV12ToRgbShader::CopyMapResource(const D3D11_MAPPED_SUBRESOURCE& ms, const AVFrame* source, AVFrame* received) {
 	bool result = false;
 	int size = av_image_get_buffer_size(AVPixelFormat::AV_PIX_FMT_BGRA, source->width, source->height, 1);
-	if (size <= ms.DepthPitch)
+	if ((size <= ms.DepthPitch) && (ms.RowPitch * source->height == ms.DepthPitch))
 	{
 		av_frame_unref(received);
 		AVBufferRef* dataref = av_buffer_alloc(size);
@@ -300,8 +300,9 @@ bool NV12ToRgbShader::CopyMapResource(const D3D11_MAPPED_SUBRESOURCE& ms, const 
 			if (received->linesize[0] == ms.RowPitch)
 			{
 				memcpy(dataref->data, ms.pData, ms.DepthPitch);
+				result = true;
 			}
-			else
+			else if (received->linesize[0] < ms.RowPitch)
 			{
 				for (UINT64 i = 0; i < source->height; i++)
 				{
@@ -309,8 +310,8 @@ bool NV12ToRgbShader::CopyMapResource(const D3D11_MAPPED_SUBRESOURCE& ms, const 
 					uint8_t* src = (uint8_t*)ms.pData + i * ms.RowPitch;
 					memcpy(dst, src, received->linesize[0]);
 				}
+				result = true;
 			}
-			result = true;
 		}
 		else
 		{

@@ -24,7 +24,6 @@ Video::~Video() {
 	delete this->_videoBuffer;
 	av_frame_free(&this->_frame);
 	av_frame_free(&this->_temp_frame);
-	ReleaseMutex(this->_mtx_waitFirstFrame);
 	CloseHandle(this->_threadHandle);
 	CloseHandle(this->_mtx_waitFirstFrame);
 }
@@ -54,17 +53,19 @@ bool Video::Init() {
 
 	if (!this->_h264_mediaDecoder->Init())
 		return false;
-
-	this->_mtx_waitFirstFrame = CreateMutex(NULL, FALSE, NULL);
+	
+	//first bool is true for manual reset else auto reset, second bool is initially signaled
+	this->_mtx_waitFirstFrame = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (this->_mtx_waitFirstFrame == INVALID_HANDLE_VALUE)
 		return false;
-
-	this->_videoSock->ChangeBlockMode(true);
 
 	this->_frame = av_frame_alloc();
 	this->_temp_frame = av_frame_alloc();
 
-	return this->_frame != nullptr && this->_temp_frame != nullptr;
+	return
+		this->_frame != nullptr &&
+		this->_temp_frame != nullptr &&
+		this->_videoSock->ChangeBlockMode(true);
 }
 
 DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
@@ -73,7 +74,8 @@ DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
 }
 
 bool Video::WaitForFirstFrame(DWORD timeout) {
-	return WaitForSingleObject(this->_mtx_waitFirstFrame, timeout) == WAIT_OBJECT_0;
+	auto ret = WaitForSingleObject(this->_mtx_waitFirstFrame, timeout);
+	return ret == WAIT_OBJECT_0;
 }
 
 void Video::threadStart() {
@@ -130,7 +132,7 @@ void Video::threadStart() {
 		}
 
 #if _DEBUG
-		printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
+		//printf(std::string("pts:").append(std::to_string(pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
 #endif
 		packet.pts = pts != NO_PTS ? (INT64)pts : AV_NOPTS_VALUE;
 
@@ -141,11 +143,18 @@ void Video::threadStart() {
 			{
 				//lock ref to frame
 				_mtx_frame.lock();
+
 				av_frame_unref(this->_frame);
 				av_frame_move_ref(this->_frame, this->_temp_frame);
+
 				_mtx_frame.unlock();
-				ReleaseMutex(this->_mtx_waitFirstFrame);
-				this->_ishaveFrame = true;
+				
+
+				if (!this->_ishaveFrame)
+				{
+					SetEvent(this->_mtx_waitFirstFrame);
+					this->_ishaveFrame = true;
+				}
 			}
 		}
 		av_packet_unref(&packet);

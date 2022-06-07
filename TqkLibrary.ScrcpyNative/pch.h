@@ -35,10 +35,6 @@ typedef class NV12ToRgbShader;
 #include "libav.h"
 #include <ws2tcpip.h>
 
-#include <d3d11.h>
-#include <directxmath.h>
-#include <wrl/client.h>
-#include <dxgi.h>
 #include "ScrcpyNativeConfig.h"
 #pragma comment(lib,"ws2_32.lib")
 using namespace Microsoft::WRL;
