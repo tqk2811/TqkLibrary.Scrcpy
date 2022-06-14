@@ -4,11 +4,28 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
+using System.IO;
 
 namespace TqkLibrary.Scrcpy
 {
     internal static class NativeWrapper
     {
+        static NativeWrapper()
+        {
+            string path = Path.Combine(
+                Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), 
+                Environment.Is64BitProcess ? "x64" : throw new NotSupportedException("Not support x86"));
+            
+            bool r = SetDllDirectory(path);
+            if (!r)
+                throw new InvalidOperationException("Can't set Kernel32.SetDllDirectory");
+        }
+
+        [DllImport("Kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool SetDllDirectory(string PathName);
+
+
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern byte FFmpegHWSupport(byte bHWSupport);
 
