@@ -36,9 +36,6 @@
 		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swscale-6.dll" Link="x64\swscale-6.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Include="..\..\..\..\..\..\lib\Scrcpy\scrcpy-win64-v1.19\scrcpy-server" Link="scrcpy-server">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
 
 	</ItemGroup>
 	
@@ -65,5 +62,11 @@
 
 	<ItemGroup>
 	  <Folder Include="x64\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="scrcpy-server1.19.jar">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 </Project>

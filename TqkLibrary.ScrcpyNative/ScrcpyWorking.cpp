@@ -140,7 +140,11 @@ bool ScrcpyWorking::Start() {
 	this->_wsa_isStartUp = true;
 
 	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
-	exitCode = RunAdbProcess(L"push scrcpy-server /sdcard/scrcpy-server-tqk.jar");
+	std::wstring push(L"push ");
+	push.append(this->_nativeConfig.ScrcpyServerPath);
+	push.append(L" /sdcard/scrcpy-server-tqk.jar");
+	
+	exitCode = RunAdbProcess(push.c_str());
 	if (exitCode != 0) {
 		return false;
 	}
@@ -200,7 +204,7 @@ bool ScrcpyWorking::Start() {
 	}
 
 	this->_video->Start();//start video thread
-	if (this->_nativeConfig.IsControl) 
+	if (this->_nativeConfig.IsControl)
 		this->_control->Start();//start control thread
 
 	//close listen sock

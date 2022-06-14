@@ -26,7 +26,7 @@ namespace TqkLibrary.Scrcpy
 
             } while (type != FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
         }
-        
+
         /// <summary>
         /// Default: false
         /// </summary>
@@ -104,9 +104,10 @@ namespace TqkLibrary.Scrcpy
         /// </summary>
         public int ConnectionTimeout { get; set; } = 3000;
 
-
-
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ScrcpyServerPath { get; set; } = "scrcpy-server1.19.jar";
 
 
         /// <summary>
@@ -149,6 +150,7 @@ namespace TqkLibrary.Scrcpy
                 ForceAdbForward = this.ForceAdbForward,
                 IsControl = this.IsControl,
                 IsUseD3D11Shader = this.IsUseD3D11Shader,
+                ScrcpyServerPath = this.ScrcpyServerPath,
                 ConnectionTimeout = ConnectionTimeout,
             };
         }

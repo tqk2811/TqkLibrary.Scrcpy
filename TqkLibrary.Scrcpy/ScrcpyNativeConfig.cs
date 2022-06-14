@@ -17,6 +17,9 @@ namespace TqkLibrary.Scrcpy
         [MarshalAs(UnmanagedType.U1)]
         public bool IsUseD3D11Shader;
 
+        [MarshalAs(UnmanagedType.LPWStr)]
+        public string ScrcpyServerPath;
+
         public int ConnectionTimeout;
     }
 }

@@ -13,7 +13,8 @@
 			<dependency id="System.Drawing.Common" version="6.0.0" />
 		</dependencies>
 		<contentFiles>
-			<files include="**/*.dll" copyToOutput="true" buildAction="None" flatten="true"/>
+			<files include="x64/*.dll" copyToOutput="true" buildAction="None" flatten="true"/>
+			<files include="scrcpy-server1.19.jar" copyToOutput="true" buildAction="None" flatten="true"/>
 		</contentFiles>
 	</metadata>
 
@@ -22,6 +23,6 @@
 		<file src="bin\Release\**\$id$.pdb" target="lib\" />
 		<file src="bin\Release\**\$id$.xml" target="lib\" />
 		<file src="bin\Release\net462\x64\*.dll" target="contentFiles\any\any\x64\" />
-		<file src="bin\Release\net462\scrcpy-server" target="contentFiles\any\any\" />
+		<file src="bin\Release\net462\scrcpy-server1.19.jar" target="contentFiles\any\any\" />
 	</files>
 </package>

@@ -5,6 +5,7 @@ struct ScrcpyNativeConfig {
 	bool ForceAdbForward;
 	bool IsControl;
 	bool IsUseD3D11Shader;
+	LPCWSTR ScrcpyServerPath;
 	INT32 ConnectionTimeout;
 };
 #endif // !ScrcpyNativeConfig_H
