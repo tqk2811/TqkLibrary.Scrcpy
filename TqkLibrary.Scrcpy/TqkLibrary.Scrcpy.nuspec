@@ -10,7 +10,15 @@
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
 		<license type="expression">MIT</license>
 		<dependencies>
-			<dependency id="System.Drawing.Common" version="6.0.0" />
+			<group targetFramework="net462">
+				<dependency id="System.Drawing.Common" version="6.0.0" />
+			</group>
+			<group targetFramework="net5.0-windows7.0">
+				<dependency id="System.Drawing.Common" version="6.0.0" />
+			</group>
+			<group targetFramework="net6.0-windows7.0">
+				<dependency id="System.Drawing.Common" version="6.0.0" />
+			</group>
 		</dependencies>
 		<contentFiles>
 			<files include="x64/*.dll" copyToOutput="true" buildAction="None" flatten="true"/>
