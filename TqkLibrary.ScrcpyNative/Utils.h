@@ -43,8 +43,8 @@ static inline uint64_t sc_read64be(const uint8_t* buf) {
 	return ((uint64_t)msb << 32) | lsb;
 }
 
-static inline int GetArgbBufferSize(const int width, const int height) {
-	return av_image_get_buffer_size(AVPixelFormat::AV_PIX_FMT_ARGB, width, height, 1);
+static inline int GetArgbBufferSize(const int width, const int height, const int align) {
+	return av_image_get_buffer_size(AVPixelFormat::AV_PIX_FMT_BGRA, width, height, align);
 }
 
 static inline bool IsHwSupport(AVHWDeviceType hwType) {

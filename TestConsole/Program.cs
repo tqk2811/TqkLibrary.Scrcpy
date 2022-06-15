@@ -3,7 +3,7 @@ using TqkLibrary.Scrcpy;
 using TqkLibrary.AdbDotNet;
 
 var env = System.Environment.GetEnvironmentVariables();
-
+var h = 1080 % 16;
 
 int first_row = 1783;
 Dictionary<char, Point> keyMaps = new Dictionary<char, Point>()
@@ -64,15 +64,15 @@ while (true)
             //string text = await scrcpy.Control.GetClipboardAsync();
             //Console.WriteLine($"GetClipboardAsync: {text}");
 
-            while (true)
-                await Task.Delay(3000);
+            //while (true)
+            //    await Task.Delay(3000);
             //Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShot");
-
+            await Task.Delay(1000);
             while (true)
             {
                 using Bitmap bitmap = scrcpy.GetScreenShot();
                 Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShoted");
-                //bitmap.Save($"{imgs}\\{i++:00000}.png");
+                bitmap.Save($"{imgs}\\{i++:00000}.png");
                 await Task.Delay(90);
                 //break;
             }

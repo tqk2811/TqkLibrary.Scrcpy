@@ -143,19 +143,32 @@ namespace TqkLibrary.Scrcpy
             {
                 CheckDispose();
                 Size size = GetScreenSize();
-                Bitmap bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppArgb);
-                BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, size.Width, size.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
+                Size fix_size = new Size(size.Width + size.Width % 16, size.Height);
 
+                Bitmap bitmap = new Bitmap(fix_size.Width, fix_size.Height, PixelFormat.Format32bppArgb);
+                BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, fix_size.Width, fix_size.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+                //ARGB only
                 NativeWrapper.ScrcpyGetScreenShot(
                     _handle,
                     bitmapData.Scan0,
-                    size.Width * size.Height * 4,
+                    fix_size.Width * fix_size.Height * 4,
                     size.Width,
                     size.Height,
-                    bitmapData.Stride);//ARGB only
+                    fix_size.Width * 4);
 
                 bitmap.UnlockBits(bitmapData);
-                return bitmap;//blank
+
+                if (size.Width != fix_size.Width)
+                {
+                    Bitmap original_bitmap = bitmap.Clone(new Rectangle(0, 0, size.Width, size.Height), PixelFormat.Format32bppArgb);
+                    bitmap.Dispose();
+                    return original_bitmap;
+                }
+                else
+                {
+                    return bitmap;//blank
+                }
             }
         }
 

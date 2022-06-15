@@ -21,8 +21,7 @@
 			</group>
 		</dependencies>
 		<contentFiles>
-			<files include="x64/*.dll" copyToOutput="true" buildAction="None" flatten="true"/>
-			<files include="scrcpy-server1.19.jar" copyToOutput="true" buildAction="None" flatten="true"/>
+			<files include="**/*.*" copyToOutput="true" buildAction="None"/>
 		</contentFiles>
 	</metadata>
 

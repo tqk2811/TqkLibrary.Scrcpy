@@ -11,6 +11,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TqkLibrary.ScrcpyNative", "TqkLibrary.ScrcpyNative\TqkLibrary.ScrcpyNative.vcxproj", "{3D31EA18-664A-4F98-8A70-1CBF2247D5DA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsole", "TestConsole\TestConsole.csproj", "{64C66D02-73F0-4BA9-BDD8-1AAA6E016F64}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D31EA18-664A-4F98-8A70-1CBF2247D5DA} = {3D31EA18-664A-4F98-8A70-1CBF2247D5DA}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{632A7333-C10B-43E1-85BE-32B6348C6FF5}"
 	ProjectSection(SolutionItems) = preProject
