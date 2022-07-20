@@ -32,13 +32,14 @@ typedef class NV12ToRgbShader;
 #include <array>
 #include <assert.h>
 #include <stdlib.h>
+
 #include "libav.h"
+#include "D3D11Header.h"
+
 #include <ws2tcpip.h>
 
 #include "ScrcpyNativeConfig.h"
 #pragma comment(lib,"ws2_32.lib")
-using namespace Microsoft::WRL;
-using namespace DirectX;
 
 #endif //TQKLIBRARYSCRCPYNATIVE_EXPORTS
 

@@ -13,6 +13,7 @@ public:
 
 	bool GetScreenSize(int& w, int& h);
 	bool RefCurrentFrame(AVFrame* frame);
+	bool DoRender(IUnknown* surface, bool isNewSurface);
 private:
 	std::string _deviceName{};
 	bool _ishaveFrame{ false };

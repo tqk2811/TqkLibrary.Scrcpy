@@ -197,3 +197,8 @@ bool Video::RefCurrentFrame(AVFrame* frame) {
 
 	return result >= 0;
 }
+
+bool Video::DoRender(IUnknown* surface, bool isNewSurface) {
+
+	return this->_h264_mediaDecoder->DoRender(surface, isNewSurface);
+}

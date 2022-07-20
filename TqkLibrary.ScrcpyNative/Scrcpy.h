@@ -15,6 +15,7 @@ public:
 	bool GetScreenSize(int& w, int& h);
 	bool RegisterClipboardEvent(ClipboardReceivedDelegate callback);
 	bool RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate);
+	bool DoRender(IUnknown* surface, bool isNewSurface);
 private:
 	//const
 	std::wstring _deviceId;

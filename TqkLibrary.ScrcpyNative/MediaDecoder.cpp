@@ -1,8 +1,12 @@
 #include "pch.h"
-#include "libav.h"
-#include "MediaDecoder.h"
-#include "NV12ToRgbShader.h"
+//#include "libav.h"
+//#include "D3D11Header.h"
+//
+//#include "NV12ToRgbShader.h"
 #include "Utils.h"
+
+#include "MediaDecoder.h"
+
 
 MediaDecoder::MediaDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativeConfig) {
 	this->_codec = codec;
@@ -55,12 +59,21 @@ bool MediaDecoder::Init() {
 			if (this->_nativeConfig.IsUseD3D11Shader) {
 				AVHWDeviceContext* hw_device_ctx = reinterpret_cast<AVHWDeviceContext*>(this->_codec_ctx->hw_device_ctx->data);
 				AVD3D11VADeviceContext* d3d11va_device_ctx = reinterpret_cast<AVD3D11VADeviceContext*>(hw_device_ctx->hwctx);
-				this->_d3d11_shader = new NV12ToRgbShader(d3d11va_device_ctx);
+
+				this->m_d3d11_convert = new D3DImageConvert();
+				if (this->m_d3d11_convert == nullptr)
+					return false;
+
+				if (!this->m_d3d11_convert->Initialize(d3d11va_device_ctx))
+					return false;
+
+
+				/*this->_d3d11_shader = new NV12ToRgbShader(d3d11va_device_ctx);
 				if (this->_d3d11_shader == nullptr)
 					return false;
 
 				if (!this->_d3d11_shader->Init())
-					return false;
+					return false;*/
 			}
 			break;
 		}
@@ -90,11 +103,17 @@ bool MediaDecoder::Decode(const AVPacket* packet, AVFrame* frame) {
 		{
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
 		{
-			if (this->_d3d11_shader != nullptr) {
-				bool result = this->_d3d11_shader->Convert(_decoding_frame, frame);
+			if (this->m_d3d11_convert != nullptr) {
+				bool result = this->m_d3d11_convert->Convert(_decoding_frame) && this->m_d3d11_convert->GetImage(_decoding_frame, frame);
 				av_frame_unref(_decoding_frame);
 				return result;
 			}
+
+			/*if (this->_d3d11_shader != nullptr) {
+				bool result = this->_d3d11_shader->Convert(_decoding_frame, frame);
+				av_frame_unref(_decoding_frame);
+				return result;
+			}*/
 			return this->FFmpegTransfer(frame);
 		}
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA://nvidia 
@@ -130,4 +149,12 @@ bool MediaDecoder::FFmpegTransfer(AVFrame* frame) {
 	if (result)
 		av_frame_move_ref(frame, _transfer_frame);
 	return result;
+}
+
+bool MediaDecoder::DoRender(IUnknown* surface, bool isNewSurface) {
+	if (this->_nativeConfig.IsUseD3D11Shader)
+	{
+		//return this->_d3d11_shader->DoRender(surface, isNewSurface);
+	}
+	return false;
 }

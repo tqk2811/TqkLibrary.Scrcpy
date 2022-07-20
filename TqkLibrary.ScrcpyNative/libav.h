@@ -1,9 +1,10 @@
 #ifndef libav_H
 #define libav_H
+
+#ifndef __d3d11_h__
 #include <d3d11.h>
-#include <directxmath.h>
-#include <wrl/client.h>
-#include <dxgi.h>
+#endif
+
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavdevice/avdevice.h>

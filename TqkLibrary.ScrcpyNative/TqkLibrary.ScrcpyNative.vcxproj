@@ -93,38 +93,49 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Control.h" />
+    <ClInclude Include="D3D11Header.h" />
+    <ClInclude Include="D3DClass.h" />
+    <ClInclude Include="D3DImageConvert.h" />
     <ClInclude Include="Exports.h" />
     <ClInclude Include="FrameConventer.h" />
+    <ClInclude Include="InputTextureClass.h" />
     <ClInclude Include="libav.h" />
     <ClInclude Include="MediaDecoder.h" />
-    <ClInclude Include="NV12ToRgbShader.h" />
     <ClInclude Include="opengl.h" />
     <ClInclude Include="ParsePacket.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PixelShaderClass.h" />
     <ClInclude Include="ProcessWrapper.h" />
+    <ClInclude Include="RenderTextureClass.h" />
     <ClInclude Include="Scrcpy.h" />
     <ClInclude Include="ScrcpyNativeConfig.h" />
     <ClInclude Include="ScrcpyWorking.h" />
     <ClInclude Include="SocketWrapper.h" />
     <ClInclude Include="Utils.h" />
+    <ClInclude Include="VertexShaderClass.h" />
     <ClInclude Include="Video.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
+    <ClCompile Include="D3DClass.cpp" />
+    <ClCompile Include="D3DImageConvert.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Exports.cpp" />
     <ClCompile Include="FrameConventer.cpp" />
+    <ClCompile Include="InputTextureClass.cpp" />
     <ClCompile Include="MediaDecoder.cpp" />
-    <ClCompile Include="NV12ToRgbShader.cpp" />
     <ClCompile Include="ParsePacket.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PixelShaderClass.cpp" />
     <ClCompile Include="ProcessWrapper.cpp" />
+    <ClCompile Include="RenderTextureClass.cpp" />
     <ClCompile Include="Scrcpy.cpp" />
     <ClCompile Include="ScrcpyWorking.cpp" />
     <ClCompile Include="SocketWrapper.cpp" />
+    <ClCompile Include="VertexShaderClass.cpp" />
     <ClCompile Include="Video.cpp" />
   </ItemGroup>
   <ItemGroup>

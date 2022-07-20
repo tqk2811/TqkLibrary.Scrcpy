@@ -13,30 +13,36 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="D3D11">
+      <UniqueIdentifier>{a000a0e3-9f7f-4d95-b17c-b9c598163b7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3D11\Header Files">
+      <UniqueIdentifier>{a5a4ceef-67ba-487a-b2d9-02d44afe446c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="D3D11\Source Files">
+      <UniqueIdentifier>{3a1786d8-b68b-4a54-9fc9-48fa075e9114}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scrcpy">
+      <UniqueIdentifier>{68c40e44-3be9-472b-92e7-3b15cb90e21f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scrcpy\Header Files">
+      <UniqueIdentifier>{eb9743ee-040d-4e3a-9fad-f3ebcde9c0f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scrcpy\Source Files">
+      <UniqueIdentifier>{baa9bbd6-d670-4f3c-940f-c43d61bc3156}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParsePacket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MediaDecoder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="libav.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NV12ToRgbShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="opengl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scrcpy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Exports.h">
@@ -48,20 +54,50 @@
     <ClInclude Include="SocketWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Video.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Control.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScrcpyWorking.h">
-      <Filter>Header Files</Filter>
+      <Filter>Scrcpy\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FrameConventer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MediaDecoder.h">
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParsePacket.h">
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScrcpyWorking.h">
+      <Filter>Scrcpy\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScrcpyNativeConfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Video.h">
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scrcpy.h">
+      <Filter>Scrcpy\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTextureClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexShaderClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelShaderClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTextureClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DImageConvert.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3D11Header.h">
+      <Filter>D3D11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -69,18 +105,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ParsePacket.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MediaDecoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NV12ToRgbShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scrcpy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Exports.cpp">
@@ -92,17 +116,44 @@
     <ClCompile Include="SocketWrapper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Video.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Scrcpy.cpp">
+      <Filter>Scrcpy\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Control.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Video.cpp">
+      <Filter>Scrcpy\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParsePacket.cpp">
+      <Filter>Scrcpy\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ScrcpyWorking.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Scrcpy\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MediaDecoder.cpp">
+      <Filter>Scrcpy\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="FrameConventer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Scrcpy\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Control.cpp">
+      <Filter>Scrcpy\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTextureClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexShaderClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PixelShaderClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTextureClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DImageConvert.cpp">
+      <Filter>D3D11\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

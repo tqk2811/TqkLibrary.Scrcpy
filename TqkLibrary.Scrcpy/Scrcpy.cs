@@ -193,5 +193,19 @@ namespace TqkLibrary.Scrcpy
             NativeWrapper.ScrcpyGetScreenSize(_handle, ref w, ref h);
             return new Size(w, h);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="surface"></param>
+        /// <param name="isNewSurface">If we've gotten a new Surface, need to initialize the renderTarget.<br></br>One of the times that this happens is on a resize.</param>
+        public bool DoRender(IntPtr surface, bool isNewSurface)
+        {
+            lock (_lock)
+            {
+                CheckDispose();
+                return NativeWrapper.DoRender(this._handle, surface, isNewSurface);
+            }
+        }
     }
 }

@@ -23,6 +23,16 @@ namespace TestRenderWpf
         public MainWindow()
         {
             InitializeComponent();
+            InteropImage.WindowOwner = (new System.Windows.Interop.WindowInteropHelper(this)).Handle;
+            InteropImage.OnRender = this.DoRender;
+        }
+
+
+        public void Test() => InteropImage.RequestRender();
+
+        private void DoRender(IntPtr surface, bool isNewSurface)
+        {
+
         }
     }
 }

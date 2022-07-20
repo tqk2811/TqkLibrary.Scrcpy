@@ -91,12 +91,20 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	_mutex.unlock();
 	return result;
 }
-
+bool Scrcpy::DoRender(IUnknown* surface, bool isNewSurface) {
+	_mutex.lock();
+	bool result = false;
+	if (this->_scrcpyWorking != nullptr && this->_scrcpyWorking->_video != nullptr) {
+		result = this->_scrcpyWorking->_video->DoRender(surface, isNewSurface);
+	}
+	_mutex.unlock();
+	return result;
+}
 bool Scrcpy::RegisterClipboardEvent(const ClipboardReceivedDelegate callback) {
 	this->clipboardCallback = callback;
 	return true;
 }
-bool Scrcpy::RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate callback){
+bool Scrcpy::RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate callback) {
 	this->clipboardAcknowledgementCallback = callback;
 	return true;
 }
