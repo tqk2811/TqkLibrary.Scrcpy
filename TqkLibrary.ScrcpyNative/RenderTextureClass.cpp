@@ -15,7 +15,7 @@ bool RenderTextureClass::Initialize(ID3D11Device* device, int textureWidth, int 
 
 	if (this->m_textureWidth == textureWidth && this->m_textureHeight == textureHeight)
 		return true;
-	
+
 	this->Shutdown();
 
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -77,7 +77,7 @@ void RenderTextureClass::Shutdown()
 void RenderTextureClass::SetRenderTarget(ID3D11DeviceContext* deviceContext, ID3D11DepthStencilView* depthStencilView)
 {
 	// Bind the render target view and depth stencil buffer to the output render pipeline.
-	deviceContext->OMSetRenderTargets(1, &m_renderTargetView, depthStencilView);
+	deviceContext->OMSetRenderTargets(1, this->m_renderTargetView.GetAddressOf(), depthStencilView);
 	return;
 }
 void RenderTextureClass::SetViewPort(ID3D11DeviceContext* device_ctx, int width, int height) {
@@ -103,10 +103,10 @@ void RenderTextureClass::ClearRenderTarget(
 	color[3] = alpha;
 
 	// Clear the back buffer.
-	deviceContext->ClearRenderTargetView(m_renderTargetView.Get(), color);
+	deviceContext->ClearRenderTargetView(this->m_renderTargetView.Get(), color);
 
 	// Clear the depth buffer.
-	deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	//deviceContext->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 bool RenderTextureClass::GetImage(ID3D11DeviceContext* deviceContext, const AVFrame* source, AVFrame* received) {

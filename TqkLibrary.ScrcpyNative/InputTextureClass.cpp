@@ -11,9 +11,6 @@ InputTextureClass::~InputTextureClass() {
 
 bool InputTextureClass::Initialize(ID3D11Device* device, int width, int height) {
 	assert(device != nullptr);
-	assert(m_texture_nv12.Get() == nullptr);
-	assert(m_luminanceView.Get() == nullptr);
-	assert(m_chrominanceView.Get() == nullptr);
 
 	if (width != this->m_width || height != this->m_height) {
 		this->Shutdown();
