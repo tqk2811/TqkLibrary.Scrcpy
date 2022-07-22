@@ -38,7 +38,7 @@ float3 ConvertYUVtoRGB(float3 yuv)
 	yuv -= float3(0.062745f, 0.501960f, 0.501960f);
 	yuv = mul(yuv, YUVtoRGBCoeffMatrix);
 	yuv = saturate(yuv);//BGR
-	return float3(yuv.z, yuv.y, yuv.x);//GRB
+	return yuv;
 }
 
 [numthreads (8,8,1)]

@@ -13,8 +13,7 @@ public:
 	bool WaitForFirstFrame(DWORD timeout);
 
 	bool GetScreenSize(int& w, int& h);
-	bool RefCurrentFrame(AVFrame* frame);
-	bool DoRender(IUnknown* surface, bool isNewSurface);
+	bool GetCurrentRgbaFrame(AVFrame* frame);
 private:
 	std::string _deviceName{};
 	bool _ishaveFrame{ false };
@@ -22,9 +21,7 @@ private:
 	MediaDecoder* _h264_mediaDecoder{ nullptr };
 	SocketWrapper* _videoSock{ nullptr };
 	BYTE* _videoBuffer{ nullptr };
-	AVFrame* _frame{ nullptr };
-	AVFrame* _temp_frame{ nullptr };
-	std::mutex _mtx_frame;
+
 	HANDLE _mtx_waitFirstFrame{ INVALID_HANDLE_VALUE };
 
 	void threadStart();

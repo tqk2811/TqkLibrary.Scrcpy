@@ -102,7 +102,7 @@
     <ClInclude Include="D3DImageView.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PixelShaderCopyClass.h">
+    <ClInclude Include="PixelShaderNv12ToBgraClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderTextureSurfaceClass.h">
@@ -167,7 +167,7 @@
     <ClCompile Include="D3DImageView.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PixelShaderCopyClass.cpp">
+    <ClCompile Include="PixelShaderNv12ToBgraClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderTextureSurfaceClass.cpp">
@@ -182,6 +182,9 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="PixelShadeRgbaCopy.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

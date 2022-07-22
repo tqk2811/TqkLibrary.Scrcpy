@@ -105,7 +105,7 @@
     <ClInclude Include="opengl.h" />
     <ClInclude Include="ParsePacket.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="PixelShaderCopyClass.h" />
+    <ClInclude Include="PixelShaderNv12ToBgraClass.h" />
     <ClInclude Include="PixelShaderNv12ToRgbaClass.h" />
     <ClInclude Include="ProcessWrapper.h" />
     <ClInclude Include="RenderTextureClass.h" />
@@ -133,7 +133,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="PixelShaderCopyClass.cpp" />
+    <ClCompile Include="PixelShaderNv12ToBgraClass.cpp" />
     <ClCompile Include="PixelShaderNv12ToRgbaClass.cpp" />
     <ClCompile Include="ProcessWrapper.cpp" />
     <ClCompile Include="RenderTextureClass.cpp" />
@@ -146,6 +146,16 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShadeRgbaCopy.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS</EntryPointName>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).h</HeaderFileOutput>
+      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).h</HeaderFileOutput>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>

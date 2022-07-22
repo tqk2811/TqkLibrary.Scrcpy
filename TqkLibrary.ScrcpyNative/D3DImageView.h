@@ -8,12 +8,12 @@ public:
 
 	void Shutdown();
 
-	bool Draw(D3DImageConvert* imgConvert, IUnknown* surface, bool isNewSurface);
+	bool Draw(D3DClass* d3d, InputTextureClass* input, const AVFrame* source, IUnknown* surface, bool isNewSurface);
 
 private:
-	UINT64 m_currentPts;
+	UINT64 m_currentPts{ 0 };
 	VertexShaderClass m_vertex;
-	PixelShaderCopyClass m_pixel;
+	PixelShaderNv12ToBgraClass m_pixel;
 	RenderTextureSurfaceClass m_renderTextureSurface;
 };
 #endif

@@ -68,24 +68,65 @@ ID3D11ShaderResourceView* InputTextureClass::GetChrominanceView() {
 	return this->m_chrominanceView.Get();
 }
 bool InputTextureClass::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame) {
-	if (sourceFrame->format != AV_PIX_FMT_D3D11)
-		return false;
-	if (!sourceFrame->hw_frames_ctx)
-		return false;
+	if (sourceFrame->format == AV_PIX_FMT_D3D11 && sourceFrame->hw_frames_ctx != nullptr)
+	{
+		ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)sourceFrame->data[0];
+		const int texture_index = (int)sourceFrame->data[1];
 
-	ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)sourceFrame->data[0];
+		D3D11_TEXTURE2D_DESC desc{ 0 };
+		texture->GetDesc(&desc);
 
-	const int texture_index = (int)sourceFrame->data[1];
-	D3D11_BOX box{ 0 };
-	box.left = 0;
-	box.right = sourceFrame->width;
-	box.top = 0;
-	box.bottom = sourceFrame->height;
-	box.front = 0;
-	box.back = 1;//https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copysubresourceregion
+		D3D11_BOX box{ 0 };
+		box.left = 0;
+		box.right = sourceFrame->width;
+		box.top = 0;
+		box.bottom = sourceFrame->height;
+		box.front = 0;
+		box.back = 1;//https://docs.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copysubresourceregion
 
-	device_ctx->CopySubresourceRegion(
-		this->m_texture_nv12.Get(), 0, 0, 0, 0,
-		texture.Get(), texture_index, &box
-	);
+		device_ctx->CopySubresourceRegion(
+			this->m_texture_nv12.Get(), 0, 0, 0, 0,
+			texture.Get(), texture_index, &box
+		);
+		return true;
+	}
+	else if (sourceFrame->format == AV_PIX_FMT_YUV420P)
+	{
+		D3D11_MAPPED_SUBRESOURCE ms;
+		HRESULT hr = device_ctx->Map(this->m_texture_nv12.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &ms);
+		if (FAILED(hr))
+			return false;
+
+		int ySize = sourceFrame->linesize[0] * sourceFrame->height;
+		int uvSize = sourceFrame->linesize[1] * sourceFrame->height;
+
+		UINT64 totalSize = ySize + uvSize;
+		assert(ms.DepthPitch == totalSize || ms.DepthPitch == 0);
+		assert(sourceFrame->linesize[1] == sourceFrame->linesize[2]);
+		assert(ms.RowPitch == sourceFrame->linesize[0]);
+		// YYYYYYYY...... UVUV....
+		//
+		//Y
+		memcpy(ms.pData, sourceFrame->data[0], ySize);
+		//UV
+
+		BYTE* buffUV = new BYTE[uvSize];
+		for (UINT64 i = 0; i < uvSize; i++)
+		{
+			if (i % 2 == 0)
+			{
+				memcpy((void*)((UINT64)buffUV + i), sourceFrame->data[1] + i / 2, 1);
+			}
+			else
+			{
+				memcpy((void*)((UINT64)buffUV + i), sourceFrame->data[2] + i / 2, 1);
+			}
+		}
+		memcpy((void*)((UINT64)ms.pData + ySize), buffUV, uvSize);
+		delete[]buffUV;
+
+		device_ctx->Unmap(this->m_texture_nv12.Get(), 0);
+		return true;
+	}
+	return false;
 }

@@ -8,9 +8,6 @@ RenderTextureClass::RenderTextureClass() {
 RenderTextureClass::~RenderTextureClass() {
 	this->Shutdown();
 }
-ID3D11ShaderResourceView* RenderTextureClass::GetRgbaResourceView() {
-	return m_rgbaRenderTargetTextureResourceView.Get();
-}
 bool RenderTextureClass::Initialize(ID3D11Device* device, int textureWidth, int textureHeight)
 {
 	HRESULT hr;
@@ -40,14 +37,6 @@ bool RenderTextureClass::Initialize(ID3D11Device* device, int textureWidth, int 
 	hr = device->CreateTexture2D(&textureDesc, NULL, m_renderTargetTexture.GetAddressOf());
 	if (FAILED(hr))
 		return false;
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC const rgbaPlaneDesc
-		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_renderTargetTexture.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8B8A8_UNORM);
-	hr = device->CreateShaderResourceView(this->m_renderTargetTexture.Get(), &rgbaPlaneDesc, this->m_rgbaRenderTargetTextureResourceView.GetAddressOf());
-	if (FAILED(hr))
-		return false;
-
-
 
 	textureDesc.BindFlags = 0;
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
@@ -79,7 +68,6 @@ void RenderTextureClass::Shutdown()
 {
 	m_renderTargetView.Reset();
 	m_renderTargetTexture.Reset();
-	m_rgbaRenderTargetTextureResourceView.Reset();
 	m_renderTargetTexture_copy.Reset();
 	return;
 }

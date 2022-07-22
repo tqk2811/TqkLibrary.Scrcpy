@@ -56,7 +56,7 @@ namespace TestRenderWpf
                 HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
                 IsUseD3D11Shader = true,
                 IsControl = true,
-                MaxFps = 0,
+                MaxFps = 24,
                 ConnectionTimeout = 99999999
             });
             host_SizeChanged(null, null);

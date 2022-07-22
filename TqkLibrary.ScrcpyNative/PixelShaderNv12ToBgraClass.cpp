@@ -1,15 +1,15 @@
 #include "pch.h"
-#include "PixelShadeRgbaCopy.h"
-#include "PixelShaderCopyClass.h"
+#include "PixelShaderNv12ToBgra.h"
+#include "PixelShaderNv12ToBgraClass.h"
 
-PixelShaderCopyClass::PixelShaderCopyClass() {
+PixelShaderNv12ToBgraClass::PixelShaderNv12ToBgraClass() {
 
 }
 
-PixelShaderCopyClass::~PixelShaderCopyClass() {
+PixelShaderNv12ToBgraClass::~PixelShaderNv12ToBgraClass() {
 	this->Shutdown();
 }
-bool PixelShaderCopyClass::Initialize(ID3D11Device* d3d11_device) {
+bool PixelShaderNv12ToBgraClass::Initialize(ID3D11Device* d3d11_device) {
 	if (this->m_d3d11_pixelShader != nullptr) return true;
 
 	UINT Size = ARRAYSIZE(g_PS);
@@ -25,17 +25,17 @@ bool PixelShaderCopyClass::Initialize(ID3D11Device* d3d11_device) {
 
 	return true;
 }
-void PixelShaderCopyClass::Set(ID3D11DeviceContext* d3d11_deviceCtx, ID3D11ShaderResourceView* rgba) {
+void PixelShaderNv12ToBgraClass::Set(ID3D11DeviceContext* d3d11_deviceCtx, ID3D11ShaderResourceView* luminance, ID3D11ShaderResourceView* chrominance) {
 
 	d3d11_deviceCtx->PSSetShader(this->m_d3d11_pixelShader.Get(), nullptr, 0);
 
 	d3d11_deviceCtx->PSSetSamplers(0, 1, this->m_d3d11_samplerState.GetAddressOf());
 
-	std::array<ID3D11ShaderResourceView*, 1> const textureViews = { rgba };
+	std::array<ID3D11ShaderResourceView*, 2> const textureViews = { luminance,chrominance };
 	d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
 
 }
-void PixelShaderCopyClass::Shutdown() {
+void PixelShaderNv12ToBgraClass::Shutdown() {
 	this->m_d3d11_pixelShader.Reset();
 	this->m_d3d11_samplerState.Reset();
 }

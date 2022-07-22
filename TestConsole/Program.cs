@@ -42,7 +42,8 @@ ScrcpyConfig config = new ScrcpyConfig()
     IsUseD3D11Shader = true,
     IsControl = true,
     MaxFps = 24,
-    ConnectionTimeout = 99999999
+    ConnectionTimeout = 99999999,
+    ClipboardAutosync = false,
 };
 while (true)
 {
@@ -73,17 +74,17 @@ while (true)
             await Task.Delay(1000);
             while (true)
             {
-                scrcpy.Control.SetClipboard("Phạm Đức Long Click mất cũng chừng đó thôi =))", true, 222233);
+                //scrcpy.Control.SetClipboard("Phạm Đức Long Click mất cũng chừng đó thôi =))", true, 222233);
 
-                using Bitmap bitmap = scrcpy.GetScreenShot();
-                Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShoted");
-                bitmap.Save($"{imgs}\\{i++:00000}.png");
+                //using Bitmap bitmap = scrcpy.GetScreenShot();
+                //Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetScreenShoted");
+                //bitmap.Save($"{imgs}\\{i++:00000}.png");
                 await Task.Delay(500);
 
                 //scrcpy.Control.GetClipboard();
-                Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetClipboardAsync");
-                string abc = await scrcpy.Control.GetClipboardAsync().ConfigureAwait(false);
-                Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetClipboardAsync: {abc}");
+                //Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetClipboardAsync");
+                //string abc = await scrcpy.Control.GetClipboardAsync().ConfigureAwait(false);
+                //Console.WriteLine($"{DateTime.Now:mm:ss.fff} GetClipboardAsync: {abc}");
                 //break;
             }
             //await Task.Delay(3000);

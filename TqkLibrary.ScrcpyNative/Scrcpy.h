@@ -22,7 +22,7 @@ private:
 	std::wstring _deviceId;
 	std::mutex _mutex;
 
-
+	AVFrame cache;
 	//need release
 	ScrcpyInstance* _scrcpyInstance{ nullptr };
 	ClipboardReceivedDelegate clipboardCallback{ nullptr };

@@ -2,8 +2,6 @@
 #include "D3DImageView.h"
 
 
-
-
 D3DImageView::D3DImageView() {
 }
 
@@ -17,40 +15,44 @@ void D3DImageView::Shutdown() {
 	this->m_renderTextureSurface.Shutdown();
 }
 
-bool D3DImageView::Draw(D3DImageConvert* imgConvert, IUnknown* surface, bool isNewSurface) {
-	assert(imgConvert != nullptr);
-
-	if (surface == NULL)
+bool D3DImageView::Draw(D3DClass* d3d, InputTextureClass* input, const AVFrame* source, IUnknown* surface, bool isNewSurface) {
+	if (source == nullptr || surface == NULL || input == nullptr)
 		return false;
 
-	ComPtr<ID3D11DeviceContext> device_ctx = imgConvert->m_d3d.GetDeviceContext();
-	ComPtr<ID3D11Device> device = imgConvert->m_d3d.GetDevice();
+	if ((source->format == AV_PIX_FMT_D3D11 && source->hw_frames_ctx != nullptr) || source->format == AV_PIX_FMT_YUV420P)
+	{
+		ComPtr<ID3D11DeviceContext> device_ctx = d3d->GetDeviceContext();
+		ComPtr<ID3D11Device> device = d3d->GetDevice();
 
-	if (this->m_vertex.Initialize(device.Get()) &&
-		this->m_pixel.Initialize(device.Get()) &&
-		this->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface)) {
+		if (this->m_vertex.Initialize(device.Get()) &&
+			this->m_pixel.Initialize(device.Get()) &&
+			this->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface)) {
 
-		if (imgConvert->IsNewFrame(&this->m_currentPts) || isNewSurface)
-		{
-			device_ctx->ClearState();
+			bool isNewFrame = this->m_currentPts < source->pts;
 
-			device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			if ((isNewFrame || isNewSurface))
+			{
+				device_ctx->ClearState();
 
-			m_vertex.Set(device_ctx.Get());
-			m_pixel.Set(device_ctx.Get(), imgConvert->m_renderTexture.GetRgbaResourceView());
+				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-			m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
-			m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
-			m_renderTextureSurface.SetViewPort(device_ctx.Get(), m_renderTextureSurface.Width(), m_renderTextureSurface.Height());
+				m_vertex.Set(device_ctx.Get());
+				m_pixel.Set(device_ctx.Get(), input->GetLuminanceView(), input->GetChrominanceView());
 
-			UINT x = (UINT)ceil(static_cast<FLOAT>(m_renderTextureSurface.Width()) / 8);
-			UINT y = (UINT)ceil(static_cast<FLOAT>(m_renderTextureSurface.Height()) / 8);
-			UINT z = 1;
-			device_ctx->Dispatch(x, y, z);
+				//m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
+				m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
+				m_renderTextureSurface.SetViewPort(device_ctx.Get(), m_renderTextureSurface.Width(), m_renderTextureSurface.Height());
 
-			device_ctx->Draw(this->m_vertex.GetVertexCount(), 0);
+				UINT x = (UINT)ceil(static_cast<FLOAT>(m_renderTextureSurface.Width()) / 8);
+				UINT y = (UINT)ceil(static_cast<FLOAT>(m_renderTextureSurface.Height()) / 8);
+				UINT z = 1;
+				device_ctx->Dispatch(x, y, z);
+				this->m_currentPts = source->pts;
+
+				device_ctx->Draw(this->m_vertex.GetVertexCount(), 0);
+			}
+			return true;
 		}
-		return true;
 	}
 	return false;
 }

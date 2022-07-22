@@ -41,6 +41,8 @@ void Scrcpy::Stop() {
 		this->_scrcpyInstance = nullptr;
 	}
 
+	av_frame_unref(&this->cache);
+
 	_mutex.unlock();
 }
 
@@ -62,22 +64,30 @@ bool Scrcpy::GetScreenShot(BYTE* buffer, const int sizeInByte, const int w, cons
 	//copy lock and ref frame then unlock (for mini time lock)
 	//convert frame
 
-	AVFrame frame{ 0 };
+	AVFrame temp{ 0 };
 
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_video != nullptr) {
-		result = this->_scrcpyInstance->_video->RefCurrentFrame(&frame);
+	if (this->_scrcpyInstance != nullptr &&
+		this->_scrcpyInstance->_video != nullptr) {
+		if (this->_scrcpyInstance->_video->_h264_mediaDecoder->IsNewFrame(this->cache.pts))
+		{
+			av_frame_unref(&this->cache);
+			result = this->_scrcpyInstance->_video->GetCurrentRgbaFrame(&this->cache);
+		}
+		else
+			result = true;
 	}
+	if (result) av_frame_ref(&temp, &this->cache);
 
 	_mutex.unlock();
 
 	if (result) {
 		FrameConventer convert;
-		result = convert.Convert(&frame, buffer, sizeInByte, w, h, lineSize);
-		av_frame_unref(&frame);
+		result = convert.Convert(&temp, buffer, sizeInByte, w, h, lineSize);
 	}
+	av_frame_unref(&temp);
 	return result;
 }
 
@@ -92,6 +102,7 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	_mutex.unlock();
 	return result;
 }
+
 bool Scrcpy::Draw(D3DImageView* d3d_imgView, IUnknown* surface, bool isNewSurface) {
 	assert(d3d_imgView != nullptr);
 
@@ -100,21 +111,21 @@ bool Scrcpy::Draw(D3DImageView* d3d_imgView, IUnknown* surface, bool isNewSurfac
 	bool result = false;
 	if (this->_scrcpyInstance != nullptr &&
 		this->_scrcpyInstance->_video != nullptr &&
-		this->_scrcpyInstance->_video->_h264_mediaDecoder != nullptr &&
-		this->_scrcpyInstance->_video->_h264_mediaDecoder->m_d3d11_convert != nullptr) {
-
-		result = d3d_imgView->Draw(
-			this->_scrcpyInstance->_video->_h264_mediaDecoder->m_d3d11_convert,
+		this->_scrcpyInstance->_video->_h264_mediaDecoder != nullptr) {
+		result = this->_scrcpyInstance->_video->_h264_mediaDecoder->Draw(
+			d3d_imgView,
 			surface,
 			isNewSurface);
 	}
 	_mutex.unlock();
 	return result;
 }
+
 bool Scrcpy::RegisterClipboardEvent(const ClipboardReceivedDelegate callback) {
 	this->clipboardCallback = callback;
 	return true;
 }
+
 bool Scrcpy::RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate callback) {
 	this->clipboardAcknowledgementCallback = callback;
 	return true;

@@ -23,7 +23,7 @@ typedef class VertexShaderClass;
 #include "D3DClass.h"
 #include "InputTextureClass.h"
 #include "PixelShaderNv12ToRgbaClass.h"
-#include "PixelShaderCopyClass.h"
+#include "PixelShaderNv12ToBgraClass.h"
 #include "RenderTextureClass.h"
 #include "RenderTextureSurfaceClass.h"
 #include "VertexShaderClass.h"
