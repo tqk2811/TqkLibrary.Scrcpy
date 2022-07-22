@@ -37,13 +37,15 @@ bool D3DImageConvert::Convert(const AVFrame* source) {
 	{
 		device_ctx->ClearState();
 
-		m_pixel.Set(device_ctx.Get(), m_input.GetLuminanceView(), m_input.GetChrominanceView());
+		device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
 		m_vertex.Set(device_ctx.Get());
+
+		m_pixel.Set(device_ctx.Get(), m_input.GetLuminanceView(), m_input.GetChrominanceView());
+
 		m_renderTexture.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 		m_renderTexture.SetRenderTarget(device_ctx.Get(), nullptr);
 		m_renderTexture.SetViewPort(device_ctx.Get(), source->width, source->height);
-
-		device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 		device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
@@ -53,7 +55,8 @@ bool D3DImageConvert::Convert(const AVFrame* source) {
 		UINT z = 1;
 		device_ctx->Dispatch(x, y, z);
 
-		device_ctx->Draw(NUMVERTICES, 0);
+		device_ctx->Draw(this->m_vertex.GetVertexCount(), 0);
+		this->m_currentPts = source->pts;
 		return true;
 	}
 	return false;
@@ -62,4 +65,10 @@ bool D3DImageConvert::Convert(const AVFrame* source) {
 bool D3DImageConvert::GetImage(const AVFrame* source, AVFrame* received) {
 
 	return m_renderTexture.GetImage(this->m_d3d.GetDeviceContext(), source, received);
+}
+
+bool D3DImageConvert::IsNewFrame(UINT64* pts) {
+	bool result = *pts < m_currentPts;
+	if (result) *pts = m_currentPts;
+	return result;
 }

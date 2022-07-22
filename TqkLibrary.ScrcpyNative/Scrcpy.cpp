@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "Scrcpy.h"
+#include "MediaDecoder.h"
 #include "ProcessWrapper.h"
 #include "FrameConventer.h"
-#include "ScrcpyWorking.h"
+#include "ScrcpyInstance.h"
 #include "Video.h"
 #include "Control.h"
 
@@ -16,14 +17,14 @@ Scrcpy::~Scrcpy() {
 
 bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	_mutex.lock();
-	if (this->_scrcpyWorking != nullptr) {
+	if (this->_scrcpyInstance != nullptr) {
 		_mutex.unlock();
 		return false;
 	}
-	this->_scrcpyWorking = new ScrcpyWorking(this, config, nativeConfig);
-	if (!this->_scrcpyWorking->Start()) {
-		delete this->_scrcpyWorking;
-		this->_scrcpyWorking = nullptr;
+	this->_scrcpyInstance = new ScrcpyInstance(this, config, nativeConfig);
+	if (!this->_scrcpyInstance->Start()) {
+		delete this->_scrcpyInstance;
+		this->_scrcpyInstance = nullptr;
 		_mutex.unlock();
 		return false;
 	}
@@ -35,9 +36,9 @@ bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 void Scrcpy::Stop() {
 	_mutex.lock();
 
-	if (this->_scrcpyWorking != nullptr) {
-		delete this->_scrcpyWorking;
-		this->_scrcpyWorking = nullptr;
+	if (this->_scrcpyInstance != nullptr) {
+		delete this->_scrcpyInstance;
+		this->_scrcpyInstance = nullptr;
 	}
 
 	_mutex.unlock();
@@ -47,8 +48,8 @@ bool Scrcpy::ControlCommand(const BYTE* command, const int sizeInByte) {
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyWorking != nullptr && this->_scrcpyWorking->_control != nullptr) {
-		result = this->_scrcpyWorking->_control->ControlCommand(command, sizeInByte);
+	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_control != nullptr) {
+		result = this->_scrcpyInstance->_control->ControlCommand(command, sizeInByte);
 	}
 
 	_mutex.unlock();
@@ -66,8 +67,8 @@ bool Scrcpy::GetScreenShot(BYTE* buffer, const int sizeInByte, const int w, cons
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyWorking != nullptr && this->_scrcpyWorking->_video != nullptr) {
-		result = this->_scrcpyWorking->_video->RefCurrentFrame(&frame);
+	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_video != nullptr) {
+		result = this->_scrcpyInstance->_video->RefCurrentFrame(&frame);
 	}
 
 	_mutex.unlock();
@@ -84,18 +85,28 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyWorking != nullptr && this->_scrcpyWorking->_video != nullptr) {
-		result = this->_scrcpyWorking->_video->GetScreenSize(w, h);
+	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_video != nullptr) {
+		result = this->_scrcpyInstance->_video->GetScreenSize(w, h);
 	}
 
 	_mutex.unlock();
 	return result;
 }
-bool Scrcpy::DoRender(IUnknown* surface, bool isNewSurface) {
+bool Scrcpy::Draw(D3DImageView* d3d_imgView, IUnknown* surface, bool isNewSurface) {
+	assert(d3d_imgView != nullptr);
+
 	_mutex.lock();
+
 	bool result = false;
-	if (this->_scrcpyWorking != nullptr && this->_scrcpyWorking->_video != nullptr) {
-		result = this->_scrcpyWorking->_video->DoRender(surface, isNewSurface);
+	if (this->_scrcpyInstance != nullptr &&
+		this->_scrcpyInstance->_video != nullptr &&
+		this->_scrcpyInstance->_video->_h264_mediaDecoder != nullptr &&
+		this->_scrcpyInstance->_video->_h264_mediaDecoder->m_d3d11_convert != nullptr) {
+
+		result = d3d_imgView->Draw(
+			this->_scrcpyInstance->_video->_h264_mediaDecoder->m_d3d11_convert,
+			surface,
+			isNewSurface);
 	}
 	_mutex.unlock();
 	return result;

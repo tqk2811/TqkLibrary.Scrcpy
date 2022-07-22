@@ -14,7 +14,7 @@
 typedef struct ScrcpyNativeConfig;
 #ifdef TQKLIBRARYSCRCPYNATIVE_EXPORTS
 typedef class Scrcpy;
-typedef class ScrcpyWorking;
+typedef class ScrcpyInstance;
 typedef struct ScrcpyNativeConfig;
 
 typedef class SocketWrapper;

@@ -2,6 +2,7 @@
 #define MediaDecoder_H
 class MediaDecoder
 {
+	friend Scrcpy;
 public:
 	MediaDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativeConfig);
 	~MediaDecoder();

@@ -3,6 +3,7 @@
 
 class Video
 {
+	friend Scrcpy;
 public:
 	Video(SOCKET sock, const ScrcpyNativeConfig& nativeConfig);
 	~Video();

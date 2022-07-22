@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ScrcpyWorking.h"
+#include "ScrcpyInstance.h"
 #include "Video.h"
 #include "Control.h"
 #include "ProcessWrapper.h"
@@ -87,13 +87,13 @@ SOCKET AcceptConnection(SOCKET sock, int timeout = 2000)
 	}
 }
 
-ScrcpyWorking::ScrcpyWorking(const Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
+ScrcpyInstance::ScrcpyInstance(const Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	this->_scrcpy = scrcpy;
 	this->_config = config;
 	this->_nativeConfig = nativeConfig;
 }
 
-ScrcpyWorking::~ScrcpyWorking() {
+ScrcpyInstance::~ScrcpyInstance() {
 	if (this->_listenSock != INVALID_SOCKET)
 		closesocket(this->_listenSock);
 
@@ -113,7 +113,7 @@ ScrcpyWorking::~ScrcpyWorking() {
 	if (this->_wsa_isStartUp) WSACleanup();
 }
 
-DWORD ScrcpyWorking::RunAdbProcess(LPCWSTR argument)
+DWORD ScrcpyInstance::RunAdbProcess(LPCWSTR argument)
 {
 	LPCWSTR cmds[]
 	{
@@ -132,7 +132,7 @@ DWORD ScrcpyWorking::RunAdbProcess(LPCWSTR argument)
 }
 
 
-bool ScrcpyWorking::Start() {
+bool ScrcpyInstance::Start() {
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (res != 0) {

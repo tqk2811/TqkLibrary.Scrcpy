@@ -62,7 +62,18 @@ namespace TqkLibrary.Scrcpy
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool RegisterClipboardAcknowledgementEvent(IntPtr scrcpy, IntPtr delegateHandle);
 
+
+
+
+
+
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool DoRender(IntPtr scrcpy, IntPtr surface, bool isNewSurface);
+        internal static extern IntPtr D3DImageViewAlloc();
+
+        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void D3DImageViewFree(IntPtr d3dView);
+
+        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool D3DImageViewRender(IntPtr d3dView, IntPtr scrcpy, IntPtr surface, bool isNewSurface);
     }
 }

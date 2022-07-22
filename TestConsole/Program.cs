@@ -28,9 +28,9 @@ Directory.GetFiles(imgs, "*.png")
     .ToList()
     .ForEach(File.Delete);
 
-var devices = Adb.Devices(DeviceState.Device).ToList();
+var devices = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).ToList();
 
-string deviceId = devices.First();
+string deviceId = devices.First().DeviceId;
 //string deviceId = "a29bc285";
 //string deviceId = "5793d2f39905";
 
@@ -38,10 +38,10 @@ string deviceId = devices.First();
 int i = 0;
 ScrcpyConfig config = new ScrcpyConfig()
 {
-    //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    //IsUseD3D11Shader = false,
+    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+    IsUseD3D11Shader = true,
     IsControl = true,
-    MaxFps = 6,
+    MaxFps = 24,
     ConnectionTimeout = 99999999
 };
 while (true)

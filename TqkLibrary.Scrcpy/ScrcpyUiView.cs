@@ -11,12 +11,17 @@ namespace TqkLibrary.Scrcpy
     /// </summary>
     public class ScrcpyUiView : IDisposable
     {
+        readonly IntPtr d3dView;
+        readonly Scrcpy scrcpy;
+
+        bool isDisposed = false;
         /// <summary>
         /// 
         /// </summary>
-        internal ScrcpyUiView(Scrcpy scrcpy, IntPtr viewHandle)
+        internal ScrcpyUiView(Scrcpy scrcpy)
         {
-
+            this.scrcpy = scrcpy ?? throw new ArgumentNullException(nameof(scrcpy));
+            d3dView = NativeWrapper.D3DImageViewAlloc();
         }
         /// <summary>
         /// 
@@ -31,17 +36,25 @@ namespace TqkLibrary.Scrcpy
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         void Dispose(bool disposing)
         {
-
+            if (isDisposed) return;
+            NativeWrapper.D3DImageViewFree(d3dView);
+            isDisposed = true;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="surface"></param>
+        /// <param name="isNewSurface"></param>
+        /// <returns></returns>
         public bool DoRender(IntPtr surface, bool isNewSurface)
         {
-            return false;
+            return scrcpy.D3DImageViewRender(d3dView, surface, isNewSurface);
         }
     }
 }

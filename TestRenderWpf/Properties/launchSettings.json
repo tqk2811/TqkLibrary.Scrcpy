@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestRenderWpf": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

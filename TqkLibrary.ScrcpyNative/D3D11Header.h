@@ -10,16 +10,24 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 
 typedef class D3DImageConvert;
+typedef class D3DImageView;
+
 typedef class D3DClass;
 typedef class InputTextureClass;
-typedef class PixelShaderClass;
+typedef class PixelShaderCopyClass;
+typedef class PixelShaderNv12ToRgbaClass;
 typedef class RenderTextureClass;
+typedef class RenderTextureSurfaceClass;
 typedef class VertexShaderClass;
 
 #include "D3DClass.h"
 #include "InputTextureClass.h"
-#include "PixelShaderClass.h"
+#include "PixelShaderNv12ToRgbaClass.h"
+#include "PixelShaderCopyClass.h"
 #include "RenderTextureClass.h"
+#include "RenderTextureSurfaceClass.h"
 #include "VertexShaderClass.h"
+
 #include "D3DImageConvert.h"
+#include "D3DImageView.h"
 #endif

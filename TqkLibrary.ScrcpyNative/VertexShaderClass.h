@@ -1,7 +1,6 @@
 #ifndef VertexShaderClass_H
 #define VertexShaderClass_H
 
-#define NUMVERTICES 6
 class VertexShaderClass
 {
 public:
@@ -10,6 +9,7 @@ public:
 
 	bool Initialize(ID3D11Device* d3d11_device);
 	void Set(ID3D11DeviceContext* d3d11_deviceCtx);
+	UINT GetVertexCount();
 	void Shutdown();
 
 private:

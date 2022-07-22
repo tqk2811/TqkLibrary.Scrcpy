@@ -38,10 +38,24 @@ bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, con
 	if (scrcpy == nullptr || buffer == nullptr) return false;
 	return scrcpy->GetScreenShot(buffer, sizeInByte, w, h, lineSize);
 }
-bool DoRender(Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface) {
-	if (scrcpy == nullptr || surface == nullptr) return false;
-	return scrcpy->DoRender(surface, isNewSurface);
+
+
+
+
+D3DImageView* D3DImageViewAlloc() {
+	return new D3DImageView();
 }
+void D3DImageViewFree(D3DImageView* d3dView) {
+	delete d3dView;
+}
+bool D3DImageViewRender(D3DImageView* d3dView, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface) {
+	if (d3dView == nullptr || scrcpy == nullptr || surface == nullptr)
+		return false;
+	return scrcpy->Draw(d3dView, surface, isNewSurface);
+}
+
+
+
 
 bool RegisterClipboardEvent(Scrcpy* scrcpy, ClipboardReceivedDelegate clipboardDelegate) {
 	if (scrcpy == nullptr || clipboardDelegate == nullptr) return false;

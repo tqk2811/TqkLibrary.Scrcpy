@@ -1,12 +1,13 @@
 #ifndef ScrcpyWorking_H
 #define ScrcpyWorking_H
-class ScrcpyWorking
+class ScrcpyInstance
 {
 	friend Scrcpy;
 public:
-	ScrcpyWorking(const Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig);
-	~ScrcpyWorking();
+	ScrcpyInstance(const Scrcpy* scrcpy, LPCWSTR config, const ScrcpyNativeConfig& nativeConfig);
+	~ScrcpyInstance();
 	bool Start();
+
 private:
 	bool _wsa_isStartUp = false;
 	//function	

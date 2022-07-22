@@ -66,7 +66,7 @@
     <ClInclude Include="ParsePacket.h">
       <Filter>Scrcpy\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScrcpyWorking.h">
+    <ClInclude Include="ScrcpyInstance.h">
       <Filter>Scrcpy\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScrcpyNativeConfig.h">
@@ -87,7 +87,7 @@
     <ClInclude Include="VertexShaderClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PixelShaderClass.h">
+    <ClInclude Include="PixelShaderNv12ToRgbaClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputTextureClass.h">
@@ -97,7 +97,16 @@
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D11Header.h">
-      <Filter>D3D11</Filter>
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DImageView.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelShaderCopyClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTextureSurfaceClass.h">
+      <Filter>D3D11\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -125,7 +134,7 @@
     <ClCompile Include="ParsePacket.cpp">
       <Filter>Scrcpy\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ScrcpyWorking.cpp">
+    <ClCompile Include="ScrcpyInstance.cpp">
       <Filter>Scrcpy\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MediaDecoder.cpp">
@@ -146,7 +155,7 @@
     <ClCompile Include="VertexShaderClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PixelShaderClass.cpp">
+    <ClCompile Include="PixelShaderNv12ToRgbaClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputTextureClass.cpp">
@@ -155,12 +164,24 @@
     <ClCompile Include="D3DImageConvert.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="D3DImageView.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PixelShaderCopyClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderTextureSurfaceClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShader.hlsl">
+    <FxCompile Include="PixelShaderNv12ToRgba.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShadeRgbaCopy.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

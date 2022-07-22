@@ -13,10 +13,13 @@ public:
 	void ClearRenderTarget(ID3D11DeviceContext*, ID3D11DepthStencilView*, float, float, float, float);
 	void SetViewPort(ID3D11DeviceContext* device_ctx, int width, int height);
 	bool GetImage(ID3D11DeviceContext* deviceContext, const AVFrame* source, AVFrame* received);
+
+	ID3D11ShaderResourceView* GetRgbaResourceView();
 private:
 	int m_textureWidth{ 0 };
 	int m_textureHeight{ 0 };
 	ComPtr<ID3D11Texture2D> m_renderTargetTexture = nullptr;
+	ComPtr<ID3D11ShaderResourceView> m_rgbaRenderTargetTextureResourceView = nullptr;
 	ComPtr<ID3D11Texture2D> m_renderTargetTexture_copy = nullptr;
 	ComPtr<ID3D11RenderTargetView> m_renderTargetView = nullptr;
 };

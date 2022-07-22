@@ -2,7 +2,7 @@
 #include "VertexShaderClass.h"
 #include "VertexShader.h"
 
-
+#define NUMVERTICES 6
 typedef struct _VERTEX
 {
 	DirectX::XMFLOAT3 Pos;
@@ -19,7 +19,7 @@ VertexShaderClass::~VertexShaderClass() {
 }
 
 bool VertexShaderClass::Initialize(ID3D11Device* d3d11_device) {
-	if (this->m_d3d11_vertexShader != nullptr) return false;
+	if (this->m_d3d11_vertexShader != nullptr) return true;
 
 	UINT Size = ARRAYSIZE(g_VS);
 	HRESULT hr = d3d11_device->CreateVertexShader(g_VS, Size, nullptr, this->m_d3d11_vertexShader.GetAddressOf());
@@ -73,7 +73,9 @@ void VertexShaderClass::Set(ID3D11DeviceContext* d3d11_deviceCtx) {
 	UINT Offset = 0;
 	d3d11_deviceCtx->IASetVertexBuffers(0, 1, this->m_d3d11_vertexBuffer.GetAddressOf(), &Stride, &Offset);
 }
-
+UINT VertexShaderClass::GetVertexCount() {
+	return NUMVERTICES;
+}
 void VertexShaderClass::Shutdown() {
 	this->m_d3d11_vertexShader.Reset();
 	this->m_d3d11_inputLayout.Reset();

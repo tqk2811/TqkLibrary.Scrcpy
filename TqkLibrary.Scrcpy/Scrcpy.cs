@@ -186,6 +186,24 @@ namespace TqkLibrary.Scrcpy
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ScrcpyUiView InitScrcpyUiView()
+        {
+            return new ScrcpyUiView(this);
+        }
+
+        internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface)
+        {
+            lock (_lock)
+            {
+                CheckDispose();
+                return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface);
+            }
+        }
+
         Size GetScreenSize()
         {
             int w = 0;
@@ -194,18 +212,5 @@ namespace TqkLibrary.Scrcpy
             return new Size(w, h);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="surface"></param>
-        /// <param name="isNewSurface">If we've gotten a new Surface, need to initialize the renderTarget.<br></br>One of the times that this happens is on a resize.</param>
-        public bool DoRender(IntPtr surface, bool isNewSurface)
-        {
-            lock (_lock)
-            {
-                CheckDispose();
-                return NativeWrapper.DoRender(this._handle, surface, isNewSurface);
-            }
-        }
     }
 }
