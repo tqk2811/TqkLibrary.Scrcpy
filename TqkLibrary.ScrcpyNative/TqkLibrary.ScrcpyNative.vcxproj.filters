@@ -90,22 +90,25 @@
     <ClInclude Include="PixelShaderNv12ToRgbaClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InputTextureClass.h">
-      <Filter>D3D11\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="D3DImageConvert.h">
+    <ClInclude Include="InputTextureNv12Class.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="D3D11Header.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D3DImageView.h">
-      <Filter>D3D11\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PixelShaderNv12ToBgraClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderTextureSurfaceClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PixelShaderYuv420ToBgraClass.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTextureYv12Class.h">
+      <Filter>D3D11\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DImageView.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -158,19 +161,22 @@
     <ClCompile Include="PixelShaderNv12ToRgbaClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="InputTextureClass.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DImageConvert.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DImageView.cpp">
+    <ClCompile Include="InputTextureNv12Class.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PixelShaderNv12ToBgraClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderTextureSurfaceClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PixelShaderYuv420ToBgraClass.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTextureYv12Class.cpp">
+      <Filter>D3D11\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DImageView.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -181,10 +187,10 @@
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShadeRgbaCopy.hlsl">
+    <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
+    <FxCompile Include="PixelShaderYuv420ToBgra.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

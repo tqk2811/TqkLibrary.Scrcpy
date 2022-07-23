@@ -93,6 +93,16 @@ void RenderTextureSurfaceClass::ClearRenderTarget(
 	// Clear the back buffer.
 	deviceContext->ClearRenderTargetView(this->m_pRenderTargetView.Get(), color);
 }
+void RenderTextureSurfaceClass::SetViewPort(ID3D11DeviceContext* device_ctx) {
+	D3D11_VIEWPORT VP;
+	VP.Width = static_cast<FLOAT>(this->m_Width);
+	VP.Height = static_cast<FLOAT>(this->m_Height);
+	VP.MinDepth = 0.0f;
+	VP.MaxDepth = 1.0f;
+	VP.TopLeftX = 0;
+	VP.TopLeftY = 0;
+	device_ctx->RSSetViewports(1, &VP);
+}
 void RenderTextureSurfaceClass::SetViewPort(ID3D11DeviceContext* device_ctx, int width, int height) {
 	D3D11_VIEWPORT VP;
 	VP.Width = static_cast<FLOAT>(width);

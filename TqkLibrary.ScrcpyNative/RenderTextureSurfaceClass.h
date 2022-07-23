@@ -13,6 +13,7 @@ public:
 
 	void SetRenderTarget(ID3D11DeviceContext*, ID3D11DepthStencilView*);
 	void ClearRenderTarget(ID3D11DeviceContext*, ID3D11DepthStencilView*, float, float, float, float);
+	void SetViewPort(ID3D11DeviceContext* device_ctx);
 	void SetViewPort(ID3D11DeviceContext* device_ctx, int width, int height);
 
 	int Width() { return m_Width; }

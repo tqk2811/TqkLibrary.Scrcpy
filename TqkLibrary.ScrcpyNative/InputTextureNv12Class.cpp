@@ -1,15 +1,15 @@
 #include "pch.h"
-#include "InputTextureClass.h"
+#include "InputTextureNv12Class.h"
 
-InputTextureClass::InputTextureClass() {
+InputTextureNv12Class::InputTextureNv12Class() {
 
 }
 
-InputTextureClass::~InputTextureClass() {
+InputTextureNv12Class::~InputTextureNv12Class() {
 	this->Shutdown();
 }
 
-bool InputTextureClass::Initialize(ID3D11Device* device, int width, int height) {
+bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int height) {
 	assert(device != nullptr);
 
 	if (width != this->m_width || height != this->m_height) {
@@ -56,18 +56,27 @@ bool InputTextureClass::Initialize(ID3D11Device* device, int width, int height) 
 	return true;
 }
 
-void InputTextureClass::Shutdown() {
+void InputTextureNv12Class::Shutdown() {
 	m_texture_nv12.Reset();
 	m_luminanceView.Reset();
 	m_chrominanceView.Reset();
 }
-ID3D11ShaderResourceView* InputTextureClass::GetLuminanceView() {
+ID3D11ShaderResourceView* InputTextureNv12Class::GetLuminanceView() {
 	return this->m_luminanceView.Get();
 }
-ID3D11ShaderResourceView* InputTextureClass::GetChrominanceView() {
+ID3D11ShaderResourceView* InputTextureNv12Class::GetChrominanceView() {
 	return this->m_chrominanceView.Get();
 }
-bool InputTextureClass::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame) {
+
+int InputTextureNv12Class::Width() {
+	return this->m_width;
+}
+
+int InputTextureNv12Class::Height() {
+	return this->m_height;
+}
+
+bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame) {
 	if (sourceFrame->format == AV_PIX_FMT_D3D11 && sourceFrame->hw_frames_ctx != nullptr)
 	{
 		ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)sourceFrame->data[0];
@@ -88,44 +97,6 @@ bool InputTextureClass::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sou
 			this->m_texture_nv12.Get(), 0, 0, 0, 0,
 			texture.Get(), texture_index, &box
 		);
-		return true;
-	}
-	else if (sourceFrame->format == AV_PIX_FMT_YUV420P)
-	{
-		D3D11_MAPPED_SUBRESOURCE ms;
-		HRESULT hr = device_ctx->Map(this->m_texture_nv12.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &ms);
-		if (FAILED(hr))
-			return false;
-
-		int ySize = sourceFrame->linesize[0] * sourceFrame->height;
-		int uvSize = sourceFrame->linesize[1] * sourceFrame->height;
-
-		UINT64 totalSize = ySize + uvSize;
-		assert(ms.DepthPitch == totalSize || ms.DepthPitch == 0);
-		assert(sourceFrame->linesize[1] == sourceFrame->linesize[2]);
-		assert(ms.RowPitch == sourceFrame->linesize[0]);
-		// YYYYYYYY...... UVUV....
-		//
-		//Y
-		memcpy(ms.pData, sourceFrame->data[0], ySize);
-		//UV
-
-		BYTE* buffUV = new BYTE[uvSize];
-		for (UINT64 i = 0; i < uvSize; i++)
-		{
-			if (i % 2 == 0)
-			{
-				memcpy((void*)((UINT64)buffUV + i), sourceFrame->data[1] + i / 2, 1);
-			}
-			else
-			{
-				memcpy((void*)((UINT64)buffUV + i), sourceFrame->data[2] + i / 2, 1);
-			}
-		}
-		memcpy((void*)((UINT64)ms.pData + ySize), buffUV, uvSize);
-		delete[]buffUV;
-
-		device_ctx->Unmap(this->m_texture_nv12.Get(), 0);
 		return true;
 	}
 	return false;

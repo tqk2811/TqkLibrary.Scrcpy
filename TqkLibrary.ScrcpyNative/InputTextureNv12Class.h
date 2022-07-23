@@ -1,10 +1,10 @@
-#ifndef _InputTextureClass_H_
-#define _InputTextureClass_H_
-class InputTextureClass
+#ifndef _InputTextureNv12Class_H_
+#define _InputTextureNv12Class_H_
+class InputTextureNv12Class
 {
 public:
-	InputTextureClass();
-	~InputTextureClass();
+	InputTextureNv12Class();
+	~InputTextureNv12Class();
 
 
 	bool Initialize(ID3D11Device* device, int width, int height);
@@ -14,6 +14,9 @@ public:
 
 	ID3D11ShaderResourceView* GetLuminanceView();
 	ID3D11ShaderResourceView* GetChrominanceView();
+
+	int Width();
+	int Height();
 
 private:
 	int m_width{ 0 };

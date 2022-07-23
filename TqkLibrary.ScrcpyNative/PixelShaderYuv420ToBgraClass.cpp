@@ -1,15 +1,15 @@
 #include "pch.h"
-#include "PixelShaderNv12ToBgra.h"
-#include "PixelShaderNv12ToBgraClass.h"
+#include "PixelShaderYuv420ToBgraClass.h"
+#include "PixelShaderYuv420ToBgra.h"
 
-PixelShaderNv12ToBgraClass::PixelShaderNv12ToBgraClass() {
+PixelShaderYuv420ToBgraClass::PixelShaderYuv420ToBgraClass() {
 
 }
-
-PixelShaderNv12ToBgraClass::~PixelShaderNv12ToBgraClass() {
+PixelShaderYuv420ToBgraClass::~PixelShaderYuv420ToBgraClass() {
 	this->Shutdown();
 }
-bool PixelShaderNv12ToBgraClass::Initialize(ID3D11Device* d3d11_device) {
+
+bool PixelShaderYuv420ToBgraClass::Initialize(ID3D11Device* d3d11_device) {
 	if (this->m_d3d11_pixelShader != nullptr) return true;
 
 	UINT Size = ARRAYSIZE(g_PS);
@@ -25,17 +25,21 @@ bool PixelShaderNv12ToBgraClass::Initialize(ID3D11Device* d3d11_device) {
 
 	return true;
 }
-void PixelShaderNv12ToBgraClass::Set(ID3D11DeviceContext* d3d11_deviceCtx, ID3D11ShaderResourceView* luminance, ID3D11ShaderResourceView* chrominance) {
+void PixelShaderYuv420ToBgraClass::Set(
+	ID3D11DeviceContext* d3d11_deviceCtx,
+	ID3D11ShaderResourceView* y,
+	ID3D11ShaderResourceView* u,
+	ID3D11ShaderResourceView* v) {
 
 	d3d11_deviceCtx->PSSetShader(this->m_d3d11_pixelShader.Get(), nullptr, 0);
 
 	d3d11_deviceCtx->PSSetSamplers(0, 1, this->m_d3d11_samplerState.GetAddressOf());
 
-	std::array<ID3D11ShaderResourceView*, 2> const textureViews = { luminance, chrominance };
+	std::array<ID3D11ShaderResourceView*, 3> const textureViews = { y, u, v };
 	d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
-
 }
-void PixelShaderNv12ToBgraClass::Shutdown() {
+
+void PixelShaderYuv420ToBgraClass::Shutdown() {
 	this->m_d3d11_pixelShader.Reset();
 	this->m_d3d11_samplerState.Reset();
 }

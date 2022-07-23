@@ -28,12 +28,21 @@ private:
 
 
 
-	D3DClass* m_d3d11{ nullptr };
-	InputTextureClass* m_d3d11_input{ nullptr };
 
-	D3DImageConvert* m_d3d11_convert = nullptr;
+
+	D3DClass* m_d3d11;
+	VertexShaderClass* m_vertex;
+
+	InputTextureNv12Class* m_d3d11_inputNv12;
+	InputTextureYv12Class* m_d3d11_inputYv12;
+
+	PixelShaderNv12ToRgbaClass* m_d3d11_pixel_Nv12ToRgba;//get screen shot
+
+	PixelShaderNv12ToBgraClass* m_d3d11_pixel_Nv12ToBgra;//video render
+	PixelShaderYuv420ToBgraClass* m_d3d11_pixel_Yuv420ToBgra;//video render
+
+	RenderTextureClass* m_d3d11_renderTexture;
 
 	std::mutex _mtx_frame;
-	std::mutex _mtx_texture;
 };
 #endif // !MediaDecoder_H

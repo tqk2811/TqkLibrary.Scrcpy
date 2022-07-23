@@ -7,13 +7,10 @@ public:
 	~D3DImageView();
 
 	void Shutdown();
+	bool IsNewFrame(INT64 pts);
 
-	bool Draw(D3DClass* d3d, InputTextureClass* input, const AVFrame* source, IUnknown* surface, bool isNewSurface);
-
-private:
-	UINT64 m_currentPts{ 0 };
-	VertexShaderClass m_vertex;
-	PixelShaderNv12ToBgraClass m_pixel;
 	RenderTextureSurfaceClass m_renderTextureSurface;
+private:
+	INT64 m_currentPts{ 0 };
 };
 #endif
