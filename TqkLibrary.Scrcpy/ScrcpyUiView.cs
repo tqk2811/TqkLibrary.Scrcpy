@@ -12,7 +12,12 @@ namespace TqkLibrary.Scrcpy
     public class ScrcpyUiView : IDisposable
     {
         readonly IntPtr d3dView;
-        readonly Scrcpy scrcpy;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Scrcpy Scrcpy { get; }
+
 
         bool isDisposed = false;
         /// <summary>
@@ -20,7 +25,7 @@ namespace TqkLibrary.Scrcpy
         /// </summary>
         internal ScrcpyUiView(Scrcpy scrcpy)
         {
-            this.scrcpy = scrcpy ?? throw new ArgumentNullException(nameof(scrcpy));
+            this.Scrcpy = scrcpy ?? throw new ArgumentNullException(nameof(scrcpy));
             d3dView = NativeWrapper.D3DImageViewAlloc();
         }
         /// <summary>
@@ -54,7 +59,7 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public bool DoRender(IntPtr surface, bool isNewSurface)
         {
-            return scrcpy.D3DImageViewRender(d3dView, surface, isNewSurface);
+            return Scrcpy.D3DImageViewRender(d3dView, surface, isNewSurface);
         }
     }
 }

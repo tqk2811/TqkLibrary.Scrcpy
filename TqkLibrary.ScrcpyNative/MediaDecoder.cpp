@@ -22,10 +22,8 @@ MediaDecoder::~MediaDecoder() {
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
 	DeleteHeap(this->m_vertex);
 	DeleteHeap(this->m_d3d11_inputNv12);
-	DeleteHeap(this->m_d3d11_inputYv12);
 	DeleteHeap(this->m_d3d11_pixel_Nv12ToRgba);
 	DeleteHeap(this->m_d3d11_pixel_Nv12ToBgra);
-	DeleteHeap(this->m_d3d11_pixel_Yuv420ToBgra);
 	DeleteHeap(this->m_d3d11_renderTexture);
 	DeleteHeap(this->m_d3d11);
 }
@@ -72,10 +70,8 @@ bool MediaDecoder::Init() {
 					return false;
 
 				m_d3d11_inputNv12 = new InputTextureNv12Class();
-				m_d3d11_inputYv12 = new InputTextureYv12Class();
 				m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
 				m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
-				m_d3d11_pixel_Yuv420ToBgra = new PixelShaderYuv420ToBgraClass();
 				m_d3d11_renderTexture = new RenderTextureClass();
 
 			}
@@ -105,28 +101,21 @@ bool MediaDecoder::Decode(const AVPacket* packet) {
 #if _DEBUG
 			auto start(std::chrono::high_resolution_clock::now());
 #endif
-			if (_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr)
+			if ((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
+				_decoding_frame->format == AV_PIX_FMT_YUV420P)
 			{
 				if (this->m_d3d11_inputNv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
 				{
 					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
 				}
 			}
-			else if (_decoding_frame->format == AV_PIX_FMT_YUV420P)
-			{
-				if (this->m_d3d11_inputYv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
-				{
-					result = this->m_d3d11_inputYv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
-				}
-			}
-
 #if _DEBUG
 			auto finish(std::chrono::high_resolution_clock::now());
 			auto r = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start);
 			std::wstring text(L"Copy to Texture: ");
 			text.append(std::to_wstring(r.count()));
 			text.append(L"\r");
-			wprintf(text.c_str());
+			OutputDebugString(text.c_str());
 #endif
 		}
 		_mtx_frame.unlock();
@@ -144,48 +133,11 @@ bool MediaDecoder::Convert(AVFrame* frame) {
 	{
 		if (_decoding_frame->format == AVPixelFormat::AV_PIX_FMT_YUV420P)// -> m_d3d11_inputYv12
 		{
-			ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
-			ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
-
-			if (this->m_d3d11_renderTexture->Initialize(device.Get(), this->m_d3d11_inputYv12->Width(), this->m_d3d11_inputYv12->Height()) &&
-				this->m_d3d11_pixel_Yuv420ToBgra->Initialize(device.Get()))
-			{
-				device_ctx->ClearState();
-
-				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-				this->m_vertex->Set(device_ctx.Get());
-
-				this->m_d3d11_pixel_Yuv420ToBgra->Set(
-					device_ctx.Get(),
-					this->m_d3d11_inputYv12->GetYView(),
-					this->m_d3d11_inputYv12->GetUView(),
-					this->m_d3d11_inputYv12->GetVView());
-
-				this->m_d3d11_renderTexture->SetRenderTarget(device_ctx.Get(), nullptr);
-				this->m_d3d11_renderTexture->SetViewPort(device_ctx.Get(), this->m_d3d11_inputYv12->Width(), this->m_d3d11_inputYv12->Height());
-
-				/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-				device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
-
-				UINT x = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputYv12->Width()) / 8);
-				UINT y = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputYv12->Height()) / 8);
-				UINT z = 1;
-				device_ctx->Dispatch(x, y, z);
-
-
-				this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
-				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
-
-				_mtx_frame.lock();
-				result = this->m_d3d11_renderTexture->GetImage(device_ctx.Get(), _decoding_frame, frame);
-				_mtx_frame.unlock();
-			}
+			result = Nv12Convert(frame);
 		}
 		else//other hw
 		{
 			result = this->TransferNoHw(frame);
-			_mtx_frame.unlock();
 		}
 	}
 	else//HW success
@@ -194,40 +146,7 @@ bool MediaDecoder::Convert(AVFrame* frame) {
 		{
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
 		{
-			ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
-			ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
-
-			if (this->m_d3d11_renderTexture->Initialize(device.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height()) &&
-				this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get()))
-			{
-				device_ctx->ClearState();
-
-				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-				this->m_vertex->Set(device_ctx.Get());
-
-				this->m_d3d11_pixel_Nv12ToBgra->Set(
-					device_ctx.Get(),
-					this->m_d3d11_inputNv12->GetLuminanceView(),
-					this->m_d3d11_inputNv12->GetChrominanceView());
-
-				this->m_d3d11_renderTexture->SetRenderTarget(device_ctx.Get(), nullptr);
-				this->m_d3d11_renderTexture->SetViewPort(device_ctx.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height());
-
-				/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
-				device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
-
-				UINT x = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Width()) / 8);
-				UINT y = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Height()) / 8);
-				UINT z = 1;
-				device_ctx->Dispatch(x, y, z);
-
-
-				this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
-				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
-
-				result = this->m_d3d11_renderTexture->GetImage(device_ctx.Get(), _decoding_frame, frame);
-			}
+			result = Nv12Convert(frame);
 			break;
 		}
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_CUDA://nvidia 
@@ -252,12 +171,46 @@ bool MediaDecoder::Convert(AVFrame* frame) {
 			break;
 		}
 		}
-
-		_mtx_frame.unlock();
 	}
 
 	_mtx_frame.unlock();
 	return result;
+}
+bool MediaDecoder::Nv12Convert(AVFrame* frame) {
+	ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
+	ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
+
+	if (this->m_d3d11_renderTexture->Initialize(device.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height()) &&
+		this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get()))
+	{
+		device_ctx->ClearState();
+
+		device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		this->m_vertex->Set(device_ctx.Get());
+
+		this->m_d3d11_pixel_Nv12ToBgra->Set(
+			device_ctx.Get(),
+			this->m_d3d11_inputNv12->GetLuminanceView(),
+			this->m_d3d11_inputNv12->GetChrominanceView());
+
+		this->m_d3d11_renderTexture->SetRenderTarget(device_ctx.Get(), nullptr);
+		this->m_d3d11_renderTexture->SetViewPort(device_ctx.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height());
+
+		/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
+		device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
+
+		UINT x = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Width()) / 8);
+		UINT y = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Height()) / 8);
+		UINT z = 1;
+		device_ctx->Dispatch(x, y, z);
+
+		this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
+		device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
+
+		return this->m_d3d11_renderTexture->GetImage(device_ctx.Get(), _decoding_frame, frame);
+	}
+	return false;
 }
 
 bool MediaDecoder::IsNewFrame(INT64& pts) {
@@ -305,84 +258,40 @@ bool MediaDecoder::Draw(D3DImageView* view, IUnknown* surface, bool isNewSurface
 	{
 		_mtx_frame.lock();
 
-		if (_decoding_frame->hw_frames_ctx == nullptr)//HW failed
+		ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
+		ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
+
+		if (view->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface) &&
+			this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get()) &&
+			this->m_vertex->Initialize(device.Get()))
 		{
-			ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
-			ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
+			bool isNewFrame = view->IsNewFrame(_decoding_frame->pts);
 
-			if (view->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface) &&
-				this->m_d3d11_pixel_Yuv420ToBgra->Initialize(device.Get()) &&
-				this->m_vertex->Initialize(device.Get()))
+			if (isNewFrame || isNewSurface)
 			{
-				bool isNewFrame = view->IsNewFrame(_decoding_frame->pts);
+				device_ctx->ClearState();
 
-				if (isNewFrame || isNewSurface)
-				{
-					device_ctx->ClearState();
+				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-					device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				this->m_vertex->Set(device_ctx.Get());
 
-					this->m_vertex->Set(device_ctx.Get());
+				this->m_d3d11_pixel_Nv12ToBgra->Set(
+					device_ctx.Get(),
+					this->m_d3d11_inputNv12->GetLuminanceView(),
+					this->m_d3d11_inputNv12->GetChrominanceView());
 
-					this->m_d3d11_pixel_Yuv420ToBgra->Set(
-						device_ctx.Get(),
-						this->m_d3d11_inputYv12->GetYView(),
-						this->m_d3d11_inputYv12->GetUView(),
-						this->m_d3d11_inputYv12->GetVView());
+				view->m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
+				view->m_renderTextureSurface.SetViewPort(device_ctx.Get());
 
-					view->m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
-					view->m_renderTextureSurface.SetViewPort(device_ctx.Get());
+				UINT x = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Width()) / 8);
+				UINT y = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Height()) / 8);
+				UINT z = 1;
+				device_ctx->Dispatch(x, y, z);
 
-					UINT x = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Width()) / 8);
-					UINT y = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Height()) / 8);
-					UINT z = 1;
-					device_ctx->Dispatch(x, y, z);
-
-					this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
-					device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
-
-				}
-				result = true;
+				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
+				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
 			}
-		}
-		else
-		{
-			ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
-			ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
-
-			if (view->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface) &&
-				this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get()) && 
-				this->m_vertex->Initialize(device.Get()))
-			{
-				bool isNewFrame = view->IsNewFrame(_decoding_frame->pts);
-
-				if (isNewFrame || isNewSurface)
-				{
-					device_ctx->ClearState();
-
-					device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-					this->m_vertex->Set(device_ctx.Get());
-
-					this->m_d3d11_pixel_Nv12ToBgra->Set(
-						device_ctx.Get(),
-						this->m_d3d11_inputNv12->GetLuminanceView(),
-						this->m_d3d11_inputNv12->GetChrominanceView());
-
-					view->m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
-					view->m_renderTextureSurface.SetViewPort(device_ctx.Get());
-
-					UINT x = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Width()) / 8);
-					UINT y = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Height()) / 8);
-					UINT z = 1;
-					device_ctx->Dispatch(x, y, z);
-
-					this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
-					device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
-
-				}
-				result = true;
-			}
+			result = true;
 		}
 
 		_mtx_frame.unlock();

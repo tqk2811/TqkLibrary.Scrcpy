@@ -18,7 +18,7 @@ public:
 private:
 	bool TransferNoHw(AVFrame* frame);
 	bool FFmpegTransfer(AVFrame* frame);
-
+	bool Nv12Convert(AVFrame* frame);
 
 	ScrcpyNativeConfig _nativeConfig{};
 	AVFrame* _decoding_frame = nullptr;
@@ -34,12 +34,10 @@ private:
 	VertexShaderClass* m_vertex;
 
 	InputTextureNv12Class* m_d3d11_inputNv12;
-	InputTextureYv12Class* m_d3d11_inputYv12;
 
 	PixelShaderNv12ToRgbaClass* m_d3d11_pixel_Nv12ToRgba;//get screen shot
 
 	PixelShaderNv12ToBgraClass* m_d3d11_pixel_Nv12ToBgra;//video render
-	PixelShaderYuv420ToBgraClass* m_d3d11_pixel_Yuv420ToBgra;//video render
 
 	RenderTextureClass* m_d3d11_renderTexture;
 

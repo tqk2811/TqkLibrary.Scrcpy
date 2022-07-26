@@ -1,5 +1,63 @@
 #include "pch.h"
 #include "InputTextureNv12Class.h"
+//
+//  420ToNv12.c
+//  420ToNv12
+//
+//  Created by Hank Lee on 5/31/15.
+//  Copyright (c) 2015 Hank Lee. All rights reserved.
+//
+extern "C" {
+	//#define SSE
+#ifdef SSE
+#include <stdint.h>
+	typedef char __attribute__((vector_size(8)))    v8qi;
+	int planar_to_interleave(
+		uint32_t		uv_size,
+		uint64_t* u_et_v,
+		const uint64_t* u,
+		const uint64_t* v
+	)
+	{
+		int i;
+		v8qi* res;
+
+		res = (v8qi*)u_et_v;
+
+		for (i = 0; i < wxh / 32; i++)
+		{
+			res[0] = __builtin_ia32_punpcklbw((v8qi)u[i], (v8qi)v[i]);
+			res[1] = __builtin_ia32_punpckhbw((v8qi)u[i], (v8qi)v[i]);
+
+			res += 2;
+		}
+
+		return 0;
+	}
+#else
+	int planar_to_interleave
+	(
+		uint32_t		uv_size,
+		uint8_t* u_et_v,
+		const uint8_t* u,
+		const uint8_t* v
+	)
+	{
+		int i;
+		int size = uv_size / 4;
+		for (i = 0; i < size; i++)
+		{
+			uint8_t u_data = u[i];  // fetch u data
+			uint8_t v_data = v[i];  // fetch v data
+
+			u_et_v[2 * i] = u_data;   // write u data
+			u_et_v[2 * i + 1] = v_data;   // write v data
+		}
+
+		return 0;
+	}
+#endif
+}
 
 InputTextureNv12Class::InputTextureNv12Class() {
 
@@ -37,6 +95,11 @@ bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int heig
 	if (FAILED(hr))
 		return false;
 
+	hr = device->CreateTexture2D(&texDesc_nv12, nullptr, this->m_texture_nv12_cache.GetAddressOf());
+	if (FAILED(hr))
+		return false;
+
+
 	D3D11_SHADER_RESOURCE_VIEW_DESC const luminancePlaneDesc
 		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_nv12.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
 	hr = device->CreateShaderResourceView(this->m_texture_nv12.Get(), &luminancePlaneDesc, this->m_luminanceView.GetAddressOf());
@@ -58,12 +121,15 @@ bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int heig
 
 void InputTextureNv12Class::Shutdown() {
 	m_texture_nv12.Reset();
+	m_texture_nv12_cache.Reset();
 	m_luminanceView.Reset();
 	m_chrominanceView.Reset();
 }
+
 ID3D11ShaderResourceView* InputTextureNv12Class::GetLuminanceView() {
 	return this->m_luminanceView.Get();
 }
+
 ID3D11ShaderResourceView* InputTextureNv12Class::GetChrominanceView() {
 	return this->m_chrominanceView.Get();
 }
@@ -97,6 +163,28 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 			this->m_texture_nv12.Get(), 0, 0, 0, 0,
 			texture.Get(), texture_index, &box
 		);
+		return true;
+	}
+	else if (sourceFrame->format == AV_PIX_FMT_YUV420P)
+	{
+		device_ctx->CopyResource(this->m_texture_nv12.Get(), this->m_texture_nv12_cache.Get());
+
+		D3D11_MAPPED_SUBRESOURCE map;
+		device_ctx->Map(this->m_texture_nv12_cache.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &map);
+
+		INT64 y_size = sourceFrame->linesize[0] * sourceFrame->height;
+		INT64 uv_size = sourceFrame->linesize[1] * 2 * sourceFrame->height;
+		INT64 totalSize = y_size + uv_size;
+
+		assert(map.DepthPitch == 0 || map.DepthPitch == totalSize);
+		assert(sourceFrame->linesize[1] == sourceFrame->linesize[2]);
+
+		memcpy(map.pData, sourceFrame->data[0], y_size);
+		planar_to_interleave(uv_size, (uint8_t*)((UINT64)map.pData + y_size), sourceFrame->data[1], sourceFrame->data[2]);
+
+		device_ctx->Unmap(this->m_texture_nv12_cache.Get(), 0);
+
+
 		return true;
 	}
 	return false;

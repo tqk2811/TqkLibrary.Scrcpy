@@ -23,6 +23,7 @@ private:
 	int m_height{ 0 };
 
 	ComPtr<ID3D11Texture2D> m_texture_nv12 = nullptr;
+	ComPtr<ID3D11Texture2D> m_texture_nv12_cache = nullptr;
 
 	ComPtr<ID3D11ShaderResourceView> m_luminanceView = nullptr;
 	ComPtr<ID3D11ShaderResourceView> m_chrominanceView = nullptr;

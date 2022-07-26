@@ -4,14 +4,13 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TestRenderWpf" WindowStartupLocation="CenterScreen"
-        xmlns:DXExtensions="clr-namespace:Microsoft.Wpf.Interop.DirectX;assembly=Microsoft.Wpf.Interop.DirectX"
+        xmlns:scrcpy="clr-namespace:TqkLibrary.Scrcpy.Wpf;assembly=TqkLibrary.Scrcpy.Wpf"
         mc:Ignorable="d" Loaded="Window_Loaded" Unloaded="Window_Unloaded"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid x:Name="host" Loaded="host_Loaded" SizeChanged="host_SizeChanged">
-        <Image x:Name="img" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-            <Image.Source>
-                <DXExtensions:D3D11Image x:Name="InteropImage"/>
-            </Image.Source>
-        </Image>
+        Title="MainWindow" Height="900" Width="500">
+    <Window.DataContext>
+        <local:MainWindowVM/>
+    </Window.DataContext>
+    <Grid Background="Black">
+        <scrcpy:ScrcpyControl IsControl="{Binding IsControl}" Control="{Binding Control}" ScrcpyUiView="{Binding ScrcpyUiView}"/>
     </Grid>
 </Window>

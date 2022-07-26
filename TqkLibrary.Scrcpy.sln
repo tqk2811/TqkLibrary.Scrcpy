@@ -23,7 +23,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAutoConsole", "TestAutoConsole\TestAutoConsole.csproj", "{4075353F-BE73-415E-B6C5-081B8958147C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestRenderWpf", "TestRenderWpf\TestRenderWpf.csproj", "{447A817D-93FE-49FC-B8C3-44751EE1FD7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRenderWpf", "TestRenderWpf\TestRenderWpf.csproj", "{447A817D-93FE-49FC-B8C3-44751EE1FD7B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TqkLibrary.Scrcpy.Wpf", "TqkLibrary.Scrcpy.Wpf\TqkLibrary.Scrcpy.Wpf.csproj", "{B992530F-04E2-4FCB-9913-C88D8883CA11}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,8 +51,12 @@ Global
 		{4075353F-BE73-415E-B6C5-081B8958147C}.Release|x64.Build.0 = Release|Any CPU
 		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Debug|x64.ActiveCfg = Debug|x64
 		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Debug|x64.Build.0 = Debug|x64
-		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Release|x64.ActiveCfg = Release|Any CPU
-		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Release|x64.Build.0 = Release|Any CPU
+		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Release|x64.ActiveCfg = Release|x64
+		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Release|x64.Build.0 = Release|x64
+		{B992530F-04E2-4FCB-9913-C88D8883CA11}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B992530F-04E2-4FCB-9913-C88D8883CA11}.Debug|x64.Build.0 = Debug|Any CPU
+		{B992530F-04E2-4FCB-9913-C88D8883CA11}.Release|x64.ActiveCfg = Release|Any CPU
+		{B992530F-04E2-4FCB-9913-C88D8883CA11}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

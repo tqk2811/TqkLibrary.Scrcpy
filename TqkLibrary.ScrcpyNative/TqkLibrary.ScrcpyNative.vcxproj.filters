@@ -102,12 +102,6 @@
     <ClInclude Include="RenderTextureSurfaceClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PixelShaderYuv420ToBgraClass.h">
-      <Filter>D3D11\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="InputTextureYv12Class.h">
-      <Filter>D3D11\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="D3DImageView.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
@@ -170,12 +164,6 @@
     <ClCompile Include="RenderTextureSurfaceClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PixelShaderYuv420ToBgraClass.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="InputTextureYv12Class.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="D3DImageView.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
@@ -188,9 +176,6 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="PixelShaderYuv420ToBgra.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>

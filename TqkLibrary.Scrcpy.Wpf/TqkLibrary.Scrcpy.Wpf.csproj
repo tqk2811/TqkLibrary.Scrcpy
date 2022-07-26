@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net462</TargetFrameworks>
+		<LangVersion>10.0</LangVersion>
+		<UseWPF>true</UseWPF>
+		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Wpf.Interop.DirectX-x64" Version="0.9.0-beta-22856" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\TqkLibrary.Scrcpy\TqkLibrary.Scrcpy.csproj" />
+	</ItemGroup>
+</Project>

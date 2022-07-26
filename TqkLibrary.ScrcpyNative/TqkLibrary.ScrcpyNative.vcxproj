@@ -60,6 +60,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\ffmpeg\include;$(SolutionDir)glew-2.1.0\include;$(SolutionDir)glut-3.7.6-bin;$(SolutionDir)glfw-3.3.6\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -80,6 +81,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)..\ffmpeg\include;$(SolutionDir)glew-2.1.0\include;$(SolutionDir)glut-3.7.6-bin;$(SolutionDir)glfw-3.3.6\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -99,7 +101,6 @@
     <ClInclude Include="Exports.h" />
     <ClInclude Include="FrameConventer.h" />
     <ClInclude Include="InputTextureNv12Class.h" />
-    <ClInclude Include="InputTextureYv12Class.h" />
     <ClInclude Include="libav.h" />
     <ClInclude Include="MediaDecoder.h" />
     <ClInclude Include="opengl.h" />
@@ -107,7 +108,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="PixelShaderNv12ToBgraClass.h" />
     <ClInclude Include="PixelShaderNv12ToRgbaClass.h" />
-    <ClInclude Include="PixelShaderYuv420ToBgraClass.h" />
     <ClInclude Include="ProcessWrapper.h" />
     <ClInclude Include="RenderTextureClass.h" />
     <ClInclude Include="RenderTextureSurfaceClass.h" />
@@ -127,7 +127,6 @@
     <ClCompile Include="Exports.cpp" />
     <ClCompile Include="FrameConventer.cpp" />
     <ClCompile Include="InputTextureNv12Class.cpp" />
-    <ClCompile Include="InputTextureYv12Class.cpp" />
     <ClCompile Include="MediaDecoder.cpp" />
     <ClCompile Include="ParsePacket.cpp" />
     <ClCompile Include="pch.cpp">
@@ -136,7 +135,6 @@
     </ClCompile>
     <ClCompile Include="PixelShaderNv12ToBgraClass.cpp" />
     <ClCompile Include="PixelShaderNv12ToRgbaClass.cpp" />
-    <ClCompile Include="PixelShaderYuv420ToBgraClass.cpp" />
     <ClCompile Include="ProcessWrapper.cpp" />
     <ClCompile Include="RenderTextureClass.cpp" />
     <ClCompile Include="RenderTextureSurfaceClass.cpp" />
@@ -171,16 +169,6 @@
       <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).h</HeaderFileOutput>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-    </FxCompile>
-    <FxCompile Include="PixelShaderYuv420ToBgra.hlsl">
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">PS</EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PS</EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)%(Filename).h</HeaderFileOutput>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)%(Filename).h</HeaderFileOutput>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VS</EntryPointName>
