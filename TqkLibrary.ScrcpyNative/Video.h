@@ -15,8 +15,9 @@ public:
 	bool GetScreenSize(int& w, int& h);
 	bool GetCurrentRgbaFrame(AVFrame* frame);
 private:
-	const Scrcpy* scrcpy;
+	const Scrcpy* _scrcpy;
 
+	bool _isStopped{ false };
 
 	std::string _deviceName{};
 	bool _ishaveFrame{ false };

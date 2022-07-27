@@ -48,10 +48,10 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
+		<None Include="..\x64\ReleaseNoScreenShot\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.pdb" Link="x64\TqkLibrary.ScrcpyNative.pdb">
+		<None Include="..\x64\ReleaseNoScreenShot\TqkLibrary.ScrcpyNative.pdb" Link="x64\TqkLibrary.ScrcpyNative.pdb">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

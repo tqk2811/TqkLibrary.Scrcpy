@@ -16,7 +16,7 @@
 #define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
 
 Video::Video(const Scrcpy* scrcpy, SOCKET sock, const ScrcpyNativeConfig& nativeConfig) {
-	this->scrcpy = scrcpy;
+	this->_scrcpy = scrcpy;
 	this->_videoSock = new SocketWrapper(sock);
 	this->_videoBuffer = new BYTE[DEVICE_NAME_SIZE];
 	const AVCodec* h264_decoder = avcodec_find_decoder(AV_CODEC_ID_H264);
@@ -68,7 +68,10 @@ bool Video::Init() {
 }
 
 DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
-	((Video*)lpParam)->threadStart();
+	Video* video = (Video*)lpParam;
+	video->threadStart();
+	video->_isStopped = true;
+	video->_scrcpy->disconnectCallback();
 	return 0;
 }
 
@@ -111,20 +114,20 @@ void Video::threadStart() {
 	while (!this->_isStop)
 	{
 		if (this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) != HEADER_SIZE)
-			break;
+			return;
 
 		UINT64 pts_flags = sc_read64be(this->_videoBuffer);
 		INT32 len = sc_read32be(&this->_videoBuffer[8]);
 
 		AVPacket packet;
 		if (!avcheck(av_new_packet(&packet, len))) {
-			break;
+			return;
 		}
 
 		if (this->_videoSock->ReadAll(packet.data, len) != len)
 		{
 			av_packet_unref(&packet);
-			break;
+			return;
 		}
 		if (pts_flags & SC_PACKET_FLAG_CONFIG) {
 			packet.pts = AV_NOPTS_VALUE;
@@ -156,13 +159,11 @@ void Video::threadStart() {
 			}
 			else
 			{
-				break;
+				return;
 			}
 		}
 		av_packet_unref(&packet);
 	}
-
-	this->scrcpy->disconnectCallback();
 }
 
 bool Video::GetScreenSize(int& w, int& h) {

@@ -12,24 +12,15 @@
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="System.Drawing.Common" version="6.0.0" />
-			</group>
-			<group targetFramework="net5.0-windows7.0">
-				<dependency id="System.Drawing.Common" version="6.0.0" />
-			</group>
-			<group targetFramework="net6.0-windows7.0">
-				<dependency id="System.Drawing.Common" version="6.0.0" />
+				<dependency id="TqkLibrary.Scrcpy" version="1.0.0" />
+				<dependency id="Microsoft.Wpf.Interop.DirectX-x64" version="0.9.0-beta-22856" />
 			</group>
 		</dependencies>
-		<contentFiles>
-			<files include="**/*.*" copyToOutput="true" buildAction="None"/>
-		</contentFiles>
 	</metadata>
 
 	<files>
 		<file src="bin\Release\**\$id$.dll" target="lib\" />
 		<file src="bin\Release\**\$id$.pdb" target="lib\" />
 		<file src="bin\Release\**\$id$.xml" target="lib\" />
-		<file src="bin\Release\net462\x64\*.dll" target="contentFiles\any\any\x64\" />
-		<file src="bin\Release\net462\scrcpy-server-v1.24.jar" target="contentFiles\any\any\" />
 	</files>
 </package>
