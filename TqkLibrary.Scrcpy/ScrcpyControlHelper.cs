@@ -481,7 +481,7 @@ namespace TqkLibrary.Scrcpy
         public static async Task<string> GetClipboardAsync(this IControl control, CopyKey copyKey = CopyKey.None, CancellationToken cancellationToken = default)
         {
             TaskCompletionSource<string> taskCompletionSource = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
-            OnDataReceived<string> dataDelegate = (text) => taskCompletionSource.TrySetResult(text);
+            OnDataReceived<string> dataDelegate = (control, text) => taskCompletionSource.TrySetResult(text);
             try
             {
                 using var register = cancellationToken.Register(() => taskCompletionSource.TrySetCanceled());

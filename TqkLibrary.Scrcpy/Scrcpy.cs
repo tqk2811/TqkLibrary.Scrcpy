@@ -88,7 +88,7 @@ namespace TqkLibrary.Scrcpy
             if (_handle == IntPtr.Zero) throw new ObjectDisposedException(nameof(Scrcpy));
         }
 
-        private void Control_OnClipboardReceived(string data)
+        private void Control_OnClipboardReceived(IControl control, string data)
         {
             this.LastClipboard = data;
         }

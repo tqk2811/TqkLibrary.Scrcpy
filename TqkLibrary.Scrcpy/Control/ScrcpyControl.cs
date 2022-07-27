@@ -76,7 +76,7 @@ namespace TqkLibrary.Scrcpy.Control
             {
                 ThreadPool.QueueUserWorkItem((o) =>//use thread pool for not hold native thread
                 {
-                    OnClipboardReceived?.Invoke(string.Empty);
+                    OnClipboardReceived?.Invoke(this, string.Empty);
                 });
             }
             else
@@ -85,7 +85,7 @@ namespace TqkLibrary.Scrcpy.Control
                 Marshal.Copy(intPtr, buffer, 0, length);
                 ThreadPool.QueueUserWorkItem((o) =>//use thread pool for not hold native thread
                 {
-                    OnClipboardReceived?.Invoke(Encoding.UTF8.GetString(buffer));
+                    OnClipboardReceived?.Invoke(this, Encoding.UTF8.GetString(buffer));
                 });
             }
         }
@@ -93,7 +93,7 @@ namespace TqkLibrary.Scrcpy.Control
         {
             ThreadPool.QueueUserWorkItem((o) =>//use thread pool for not hold native thread
             {
-                OnSetClipboardAcknowledgement?.Invoke(sequence);
+                OnSetClipboardAcknowledgement?.Invoke(this, sequence);
             });
         }
         #endregion

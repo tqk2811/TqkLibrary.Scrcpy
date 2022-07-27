@@ -12,8 +12,9 @@ namespace TqkLibrary.Scrcpy
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    /// <param name="control"></param>
     /// <param name="data"></param>
-    public delegate void OnDataReceived<T>(T data);
+    public delegate void OnDataReceived<T>(IControl control, T data);
     /// <summary>
     /// 
     /// </summary>
@@ -80,9 +81,9 @@ namespace TqkLibrary.Scrcpy
         /// <param name="button"></param>
         /// <returns></returns>
         bool InjectScrollEvent(
-                                    Rectangle position, 
-                                    int vScroll, 
-                                    int hScroll = 0, 
+                                    Rectangle position,
+                                    int vScroll,
+                                    int hScroll = 0,
                                     AndroidMotionEventButton button = AndroidMotionEventButton.BUTTON_PRIMARY);
 
         /// <summary>
