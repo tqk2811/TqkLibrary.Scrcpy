@@ -20,6 +20,10 @@ namespace TqkLibrary.Scrcpy
         readonly object _lock = new object();
         private IntPtr _handle = IntPtr.Zero;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        public string DeviceId { get; }
 
         /// <summary>
         /// 
@@ -27,6 +31,9 @@ namespace TqkLibrary.Scrcpy
         /// <param name="deviceId"></param>
         public Scrcpy(string deviceId)
         {
+            if(string.IsNullOrWhiteSpace(deviceId)) throw new ArgumentNullException(nameof(deviceId));
+            this.DeviceId = deviceId;
+
             _handle = NativeWrapper.ScrcpyAlloc(deviceId);
 
             Control = new ScrcpyControl(this);
@@ -223,7 +230,6 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                CheckDispose();
                 return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface);
             }
         }

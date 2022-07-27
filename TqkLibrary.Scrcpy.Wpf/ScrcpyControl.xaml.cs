@@ -30,19 +30,19 @@ namespace TqkLibrary.Scrcpy.Wpf
           nameof(ScrcpyUiView),
           typeof(ScrcpyUiView),
           typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty ControlProperty = DependencyProperty.Register(
           nameof(Control),
           typeof(IControl),
           typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty IsControlProperty = DependencyProperty.Register(
           nameof(IsControl),
           typeof(bool),
           typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+          new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.None));
 
         public ScrcpyUiView ScrcpyUiView
         {
@@ -73,7 +73,11 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         private void host_Loaded(object sender, RoutedEventArgs e)
         {
-            InteropImage.WindowOwner = (new System.Windows.Interop.WindowInteropHelper(Window.GetWindow(this))).Handle;
+            Window window = Window.GetWindow(this);
+            if (window == null) return;
+            WindowInteropHelper windowInteropHelper = new WindowInteropHelper(window);
+
+            InteropImage.WindowOwner = windowInteropHelper.Handle;
             InteropImage.OnRender = this.DoRender;
             InteropImage.RequestRender();
         }
@@ -84,7 +88,7 @@ namespace TqkLibrary.Scrcpy.Wpf
 
             // determine DPI
             // (as of .NET 4.6.1, this returns the DPI of the primary monitor, if you have several different DPIs)
-            var hwndTarget = PresentationSource.FromVisual(this).CompositionTarget as HwndTarget;
+            var hwndTarget = PresentationSource.FromVisual(this)?.CompositionTarget as HwndTarget;
             if (hwndTarget != null)
             {
                 dpiScale = hwndTarget.TransformToDevice.M11;
@@ -111,7 +115,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                 (int)surfHeight);
             // Notify the D3D11Image of the pixel size desired for the DirectX rendering.
             // The D3DRendering component will determine the size of the new surface it is given, at that point.
-            InteropImage.SetPixelSize(drawRect.Width, drawRect.Height);
+            InteropImage?.SetPixelSize(drawRect.Width, drawRect.Height);
 
 
 
@@ -148,11 +152,11 @@ namespace TqkLibrary.Scrcpy.Wpf
             if (this.lastRender != args.RenderingTime)
             {
                 var videoSize = ScrcpyUiView?.Scrcpy.ScreenSize;
-                if (videoSize != this.videoSize)
+                if (videoSize != this.videoSize && host != null)
                 {
                     host_SizeChanged(null, null);
                 }
-                InteropImage.RequestRender();
+                InteropImage?.RequestRender();
                 this.lastRender = args.RenderingTime;
             }
         }
