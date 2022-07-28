@@ -12,9 +12,9 @@ ScrcpyNativeExport bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& h);
 ScrcpyNativeExport bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command, const int sizeInByte);
 ScrcpyNativeExport bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize);
 
-ScrcpyNativeExport D3DImageView* D3DImageViewAlloc();
-ScrcpyNativeExport void D3DImageViewFree(D3DImageView* d3dView);
-ScrcpyNativeExport bool D3DImageViewRender(D3DImageView* d3dView, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface);
+ScrcpyNativeExport RenderTextureSurfaceClass* D3DImageViewAlloc();
+ScrcpyNativeExport void D3DImageViewFree(RenderTextureSurfaceClass* renderSurface);
+ScrcpyNativeExport bool D3DImageViewRender(RenderTextureSurfaceClass* renderSurface, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
 
 typedef bool (*ClipboardReceivedDelegate)(BYTE* buffer, int length);
 typedef bool (*ClipboardAcknowledgementDelegate)(UINT64 sequence);

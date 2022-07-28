@@ -102,9 +102,6 @@
     <ClInclude Include="RenderTextureSurfaceClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="D3DImageView.h">
-      <Filter>D3D11\Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -162,9 +159,6 @@
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderTextureSurfaceClass.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="D3DImageView.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
   </ItemGroup>

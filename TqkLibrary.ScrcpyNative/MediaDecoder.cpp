@@ -250,8 +250,8 @@ bool MediaDecoder::FFmpegTransfer(AVFrame* frame) {
 	return result;
 }
 
-bool MediaDecoder::Draw(D3DImageView* view, IUnknown* surface, bool isNewSurface) {
-	assert(view != nullptr);
+bool MediaDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView) {
+	assert(renderSurface != nullptr);
 
 	bool result = false;
 
@@ -262,11 +262,11 @@ bool MediaDecoder::Draw(D3DImageView* view, IUnknown* surface, bool isNewSurface
 		ComPtr<ID3D11DeviceContext> device_ctx = this->m_d3d11->GetDeviceContext();
 		ComPtr<ID3D11Device> device = this->m_d3d11->GetDevice();
 
-		if (view->m_renderTextureSurface.Initialize(device.Get(), surface, isNewSurface) &&
+		if (renderSurface->Initialize(device.Get(), surface, isNewSurface, isNewtargetView) &&
 			this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get()) &&
 			this->m_vertex->Initialize(device.Get()))
 		{
-			bool isNewFrame = view->IsNewFrame(_decoding_frame->pts);
+			bool isNewFrame = renderSurface->IsNewFrame(_decoding_frame->pts);
 
 			if (isNewFrame || isNewSurface)
 			{
@@ -284,11 +284,11 @@ bool MediaDecoder::Draw(D3DImageView* view, IUnknown* surface, bool isNewSurface
 					this->m_d3d11_inputNv12->GetLuminanceView(),
 					this->m_d3d11_inputNv12->GetChrominanceView());
 
-				view->m_renderTextureSurface.SetRenderTarget(device_ctx.Get(), nullptr);
-				view->m_renderTextureSurface.SetViewPort(device_ctx.Get());
+				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
+				renderSurface->SetViewPort(device_ctx.Get());
 
-				UINT x = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Width()) / 8);
-				UINT y = (UINT)ceil(static_cast<FLOAT>(view->m_renderTextureSurface.Height()) / 8);
+				UINT x = (UINT)ceil(static_cast<FLOAT>(renderSurface->Width()) / 8);
+				UINT y = (UINT)ceil(static_cast<FLOAT>(renderSurface->Height()) / 8);
 				UINT z = 1;
 				device_ctx->Dispatch(x, y, z);
 

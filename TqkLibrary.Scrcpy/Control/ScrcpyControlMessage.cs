@@ -136,7 +136,7 @@ namespace TqkLibrary.Scrcpy.Control
 
         ushort ToFixedPoint16(float f)
         {
-            uint u = (uint)f * 2 << 15;
+            uint u = (uint)(f * 65536.0f);// 0x1p16f; // 2^16
             if (u >= 0xffff)
             {
                 u = 0xffff;

@@ -43,16 +43,16 @@ bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, con
 #endif // Scrcpy_ScreenShot
 }
 
-D3DImageView* D3DImageViewAlloc() {
-	return new D3DImageView();
+RenderTextureSurfaceClass* D3DImageViewAlloc() {
+	return new RenderTextureSurfaceClass();
 }
-void D3DImageViewFree(D3DImageView* d3dView) {
-	delete d3dView;
+void D3DImageViewFree(RenderTextureSurfaceClass* renderSurface) {
+	delete renderSurface;
 }
-bool D3DImageViewRender(D3DImageView* d3dView, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface) {
-	if (d3dView == nullptr || scrcpy == nullptr || surface == nullptr)
+bool D3DImageViewRender(RenderTextureSurfaceClass* renderSurface, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface, bool& isNewtargetView) {
+	if (renderSurface == nullptr || scrcpy == nullptr || surface == nullptr)
 		return false;
-	return scrcpy->Draw(d3dView, surface, isNewSurface);
+	return scrcpy->Draw(renderSurface, surface, isNewSurface, isNewtargetView);
 }
 
 

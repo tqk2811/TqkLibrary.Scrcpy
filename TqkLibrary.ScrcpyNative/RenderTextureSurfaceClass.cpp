@@ -11,7 +11,7 @@ RenderTextureSurfaceClass::~RenderTextureSurfaceClass() {
 }
 
 
-bool RenderTextureSurfaceClass::Initialize(ID3D11Device* device, IUnknown* surface, bool isNewSurface) {
+bool RenderTextureSurfaceClass::Initialize(ID3D11Device* device, IUnknown* surface, bool isNewSurface, bool& isNewtargetView) {
 	assert(device != nullptr);
 	if (surface == nullptr)
 		return false;
@@ -60,21 +60,24 @@ bool RenderTextureSurfaceClass::Initialize(ID3D11Device* device, IUnknown* surfa
 
 		D3D11_TEXTURE2D_DESC outputResourceDesc;
 		pOutputResource->GetDesc(&outputResourceDesc);
-		if (outputResourceDesc.Width != m_Width || outputResourceDesc.Height != m_Height)
-		{
-			m_Width = outputResourceDesc.Width;
-			m_Height = outputResourceDesc.Height;
-		}
-
+		this->m_Width = outputResourceDesc.Width;
+		this->m_Height = outputResourceDesc.Height;
+		isNewtargetView = true;
 		//pOutputResource->Release();
 	}
 
 	return true;
 }
+bool RenderTextureSurfaceClass::IsNewFrame(INT64 pts) {
+	bool isNewFrame = this->m_currentPts < pts;
+	if (isNewFrame) this->m_currentPts = pts;
+	return isNewFrame;
+}
 void RenderTextureSurfaceClass::Shutdown() {
 	this->m_pRenderTargetView.Reset();
 	this->m_Width = 0;
 	this->m_Height = 0;
+	this->m_currentPts = 0;
 }
 
 void RenderTextureSurfaceClass::SetRenderTarget(ID3D11DeviceContext* deviceContext, ID3D11DepthStencilView* depthStencilView) {

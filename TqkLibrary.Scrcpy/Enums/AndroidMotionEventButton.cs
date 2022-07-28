@@ -9,6 +9,10 @@ namespace TqkLibrary.Scrcpy
     public enum AndroidMotionEventButton : int
     {
         /// <summary>
+        /// 
+        /// </summary>
+        None = 0,
+        /// <summary>
         /// left mouse button
         /// </summary>
         BUTTON_PRIMARY = 1,
@@ -20,9 +24,21 @@ namespace TqkLibrary.Scrcpy
         /// middle mouse button
         /// </summary>
         BUTTON_TERTIARY = 4,
+        /// <summary>
+        /// 
+        /// </summary>
         BUTTON_BACK = 8,
+        /// <summary>
+        /// 
+        /// </summary>
         BUTTON_FORWARD = 16,
+        /// <summary>
+        /// 
+        /// </summary>
         BUTTON_STYLUS_PRIMARY = 32,
+        /// <summary>
+        /// 
+        /// </summary>
         BUTTON_STYLUS_SECONDARY = 64,
     }
 }

@@ -138,7 +138,6 @@
     <ClInclude Include="Control.h" />
     <ClInclude Include="D3D11Header.h" />
     <ClInclude Include="D3DClass.h" />
-    <ClInclude Include="D3DImageView.h" />
     <ClInclude Include="Exports.h" />
     <ClInclude Include="FrameConventer.h" />
     <ClInclude Include="InputTextureNv12Class.h" />
@@ -163,7 +162,6 @@
   <ItemGroup>
     <ClCompile Include="Control.cpp" />
     <ClCompile Include="D3DClass.cpp" />
-    <ClCompile Include="D3DImageView.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Exports.cpp" />
     <ClCompile Include="FrameConventer.cpp" />

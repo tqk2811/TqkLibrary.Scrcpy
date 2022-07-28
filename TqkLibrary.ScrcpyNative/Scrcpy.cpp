@@ -103,19 +103,24 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	return result;
 }
 
-bool Scrcpy::Draw(D3DImageView* d3d_imgView, IUnknown* surface, bool isNewSurface) {
-	assert(d3d_imgView != nullptr);
+bool Scrcpy::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView) {
+	assert(renderSurface != nullptr);
 
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyInstance != nullptr &&
+	if (this->_scrcpyInstance == nullptr)
+	{
+		renderSurface->Shutdown();
+	}
+	else if (this->_scrcpyInstance != nullptr &&
 		this->_scrcpyInstance->_video != nullptr &&
 		this->_scrcpyInstance->_video->_h264_mediaDecoder != nullptr) {
 		result = this->_scrcpyInstance->_video->_h264_mediaDecoder->Draw(
-			d3d_imgView,
+			renderSurface,
 			surface,
-			isNewSurface);
+			isNewSurface,
+			isNewtargetView);
 	}
 	_mutex.unlock();
 	return result;

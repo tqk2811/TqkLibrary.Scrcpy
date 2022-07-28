@@ -19,7 +19,7 @@ public:
 	bool RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate);
 	bool RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate);
 
-	bool Draw(D3DImageView* d3d_imgView, IUnknown* surface, bool isNewSurface);
+	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
 private:
 	//const
 	std::wstring _deviceId;

@@ -25,6 +25,8 @@ namespace TestRenderWpf
     public partial class MainWindow : Window
     {
         Scrcpy scrcpy;
+        Adb adb;
+        string deviceId;
         readonly MainWindowVM mainWindowVM;
         public MainWindow()
         {
@@ -34,9 +36,10 @@ namespace TestRenderWpf
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            string deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault().DeviceId;
-
+            deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault().DeviceId;
+            adb = new Adb(deviceId);
             scrcpy = new Scrcpy(deviceId);
+            scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
             mainWindowVM.Control = scrcpy.Control;
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
             scrcpy.Connect(new ScrcpyConfig()
@@ -45,7 +48,20 @@ namespace TestRenderWpf
                 IsUseD3D11Shader = true,
                 IsControl = true,
                 MaxFps = 24,
-                ConnectionTimeout = 99999999
+                ConnectionTimeout = 3000
+            });
+        }
+
+        private async void Scrcpy_OnDisconnect()
+        {
+            await adb.WaitFor(WaitForType.Device).ExecuteAsync();
+            scrcpy.Connect(new ScrcpyConfig()
+            {
+                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                IsUseD3D11Shader = true,
+                IsControl = true,
+                MaxFps = 24,
+                ConnectionTimeout = 3000
             });
         }
 

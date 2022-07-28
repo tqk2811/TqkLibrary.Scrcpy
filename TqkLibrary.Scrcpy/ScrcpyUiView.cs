@@ -59,9 +59,9 @@ namespace TqkLibrary.Scrcpy
         /// <param name="surface"></param>
         /// <param name="isNewSurface"></param>
         /// <returns></returns>
-        public bool DoRender(IntPtr surface, bool isNewSurface)
+        public bool DoRender(IntPtr surface, bool isNewSurface,ref bool isNewtargetView)
         {
-            lock (_lock) return Scrcpy.D3DImageViewRender(d3dView, surface, isNewSurface);
+            lock (_lock) return Scrcpy.D3DImageViewRender(d3dView, surface, isNewSurface,ref isNewtargetView);
         }
     }
 }

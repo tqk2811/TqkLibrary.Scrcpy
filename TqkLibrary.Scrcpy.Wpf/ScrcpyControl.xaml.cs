@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,6 +19,15 @@ using TqkLibrary.Scrcpy;
 
 namespace TqkLibrary.Scrcpy.Wpf
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="scrcpyControl"></param>
+    /// <param name="data"></param>
+    public delegate void OnUiChanged<T>(ScrcpyControl scrcpyControl, T data);
+
+
     /// <summary>
     /// Interaction logic for ScrcpyControl.xaml
     /// </summary>
@@ -59,6 +69,10 @@ namespace TqkLibrary.Scrcpy.Wpf
             get { return (bool)GetValue(IsControlProperty); }
             set { SetValue(IsControlProperty, value); }
         }
+        public event OnUiChanged<System.Drawing.Size> OnResize;
+
+        public System.Drawing.Size VideoSize { get { return videoSize; } }
+        public System.Drawing.Size RenderVideoSize { get { return drawRect.Size; } }
 
 
         bool lastVisible;
@@ -128,6 +142,10 @@ namespace TqkLibrary.Scrcpy.Wpf
                 lastVisible = isVisible;
                 if (lastVisible)
                 {
+                    ThreadPool.QueueUserWorkItem(o =>
+                    {
+                        OnResize?.Invoke(this, this.RenderVideoSize);
+                    });
                     CompositionTarget.Rendering += CompositionTarget_Rendering;
                 }
                 else
@@ -140,7 +158,13 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         private void DoRender(IntPtr surface, bool isNewSurface)
         {
-            ScrcpyUiView?.DoRender(surface, isNewSurface);
+            var view = ScrcpyUiView;
+            bool isNewtargetView = false;
+            bool? renderResult = view?.DoRender(surface, isNewSurface,ref isNewtargetView);
+            if(isNewtargetView)
+            {
+                host_SizeChanged(null, null);
+            }
         }
 
         private void CompositionTarget_Rendering(object sender, EventArgs e)
@@ -164,7 +188,7 @@ namespace TqkLibrary.Scrcpy.Wpf
 
 
         #region Control
-        const long ponterid = 0x2bac3412;
+        const long ponterid = 0xffffffff;
         bool isdown = false;
         private void img_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -174,21 +198,15 @@ namespace TqkLibrary.Scrcpy.Wpf
             var control = Control;
             if (IsControl && control != null)
             {
-                if (e.RightButton == MouseButtonState.Pressed)
-                {
-                    control.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, AndroidKeyCode.AKEYCODE_BACK);
-                }
-                else
-                {
-                    Control.InjectTouchEvent(
-                       AndroidMotionEventAction.ACTION_DOWN,
-                       ponterid,
-                       p);
+                Control.InjectTouchEvent(
+                        AndroidMotionEventAction.ACTION_DOWN,
+                        ponterid,
+                        p,
+                        1,
+                        HandleMouse(e));
 
-                    isdown = true;
-                    img.CaptureMouse();
-                }
-
+                isdown = true;
+                img.CaptureMouse();
             }
         }
 
@@ -199,21 +217,15 @@ namespace TqkLibrary.Scrcpy.Wpf
             var control = Control;
             if (IsControl && control != null)
             {
-                if (e.RightButton == MouseButtonState.Pressed)
-                {
-                    control.InjectKeycode(AndroidKeyEventAction.ACTION_UP, AndroidKeyCode.AKEYCODE_BACK);
-                }
-                else
-                {
-                    control.InjectTouchEvent(
-                         AndroidMotionEventAction.ACTION_UP,
-                         ponterid,
-                         p);
+                control.InjectTouchEvent(
+                          AndroidMotionEventAction.ACTION_UP,
+                          ponterid,
+                          p,
+                          0,
+                          HandleMouse(e));
 
-                    isdown = false;
-                    img.ReleaseMouseCapture();
-                }
-
+                isdown = false;
+                img.ReleaseMouseCapture();
             }
         }
 
@@ -228,7 +240,9 @@ namespace TqkLibrary.Scrcpy.Wpf
                     control.InjectTouchEvent(
                         AndroidMotionEventAction.ACTION_MOVE,
                         ponterid,
-                        p);
+                        p,
+                        1,
+                        HandleMouse(e));
             }
         }
 
@@ -316,6 +330,17 @@ namespace TqkLibrary.Scrcpy.Wpf
             return outpoint;
         }
 
+
+        AndroidMotionEventButton HandleMouse(MouseEventArgs e)
+        {
+            AndroidMotionEventButton button = AndroidMotionEventButton.None;
+            if (e.LeftButton == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_PRIMARY;
+            if (e.RightButton == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_SECONDARY;
+            if (e.MiddleButton == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_TERTIARY;
+            if (e.XButton1 == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_BACK;
+            if (e.XButton2 == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_FORWARD;
+            return button;
+        }
 
 
 

@@ -13,7 +13,7 @@ public:
 	bool Convert(AVFrame* frame);
 	bool GetFrameSize(int& w, int& h);
 	bool IsNewFrame(INT64& pts);
-	bool Draw(D3DImageView* view, IUnknown* surface, bool isNewSurface);
+	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
 
 private:
 	bool TransferNoHw(AVFrame* frame);

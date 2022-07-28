@@ -9,7 +9,6 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-typedef class D3DImageView;
 typedef class D3DClass;
 
 typedef class InputTextureNv12Class;
@@ -33,6 +32,4 @@ typedef class VertexShaderClass;
 #include "RenderTextureSurfaceClass.h"
 
 #include "VertexShaderClass.h"
-
-#include "D3DImageView.h"
 #endif

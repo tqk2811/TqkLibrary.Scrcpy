@@ -31,7 +31,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="deviceId"></param>
         public Scrcpy(string deviceId)
         {
-            if(string.IsNullOrWhiteSpace(deviceId)) throw new ArgumentNullException(nameof(deviceId));
+            if (string.IsNullOrWhiteSpace(deviceId)) throw new ArgumentNullException(nameof(deviceId));
             this.DeviceId = deviceId;
 
             _handle = NativeWrapper.ScrcpyAlloc(deviceId);
@@ -107,10 +107,11 @@ namespace TqkLibrary.Scrcpy
         readonly NativeOnDisconnectDelegate NativeOnDisconnectDelegate;
         void onDisconnect()
         {
-            if (OnDisconnect != null)
+            ThreadPool.QueueUserWorkItem(o =>
             {
-                ThreadPool.QueueUserWorkItem((o) => OnDisconnect?.Invoke());
-            }
+                Stop();//clean data
+                OnDisconnect?.Invoke();
+            });
         }
 
 
@@ -226,11 +227,11 @@ namespace TqkLibrary.Scrcpy
             return new ScrcpyUiView(this);
         }
 
-        internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface)
+        internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface, ref bool isNewtargetView)
         {
             lock (_lock)
             {
-                return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface);
+                return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface,ref isNewtargetView);
             }
         }
 
