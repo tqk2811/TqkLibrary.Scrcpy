@@ -54,6 +54,7 @@ namespace TestRenderWpf
 
         private async void Scrcpy_OnDisconnect()
         {
+            if (windowClosed) return;
             await adb.WaitFor(WaitForType.Device).ExecuteAsync();
             scrcpy.Connect(new ScrcpyConfig()
             {
@@ -67,6 +68,13 @@ namespace TestRenderWpf
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
+            
+        }
+
+        bool windowClosed = false;
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            windowClosed = true;
             scrcpy.Stop();
             mainWindowVM.ScrcpyUiView.Dispose();
             mainWindowVM.ScrcpyUiView = null;

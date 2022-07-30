@@ -5,6 +5,7 @@
     /// </summary>
     public enum AndroidMotionEventAction : byte
     {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         ACTION_DOWN = 0,
         ACTION_UP = 1,
         ACTION_MOVE = 2,
@@ -19,8 +20,8 @@
         ACTION_HOVER_EXIT = 10,
         ACTION_BUTTON_PRESS = 11,
         ACTION_BUTTON_RELEASE = 12,
-
         ACTION_MASK = 255,
         //ACTION_POINTER_INDEX_MASK = 65280,
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
 }

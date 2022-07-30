@@ -160,8 +160,8 @@ namespace TqkLibrary.Scrcpy.Wpf
         {
             var view = ScrcpyUiView;
             bool isNewtargetView = false;
-            bool? renderResult = view?.DoRender(surface, isNewSurface,ref isNewtargetView);
-            if(isNewtargetView)
+            view?.DoRender(surface, isNewSurface, ref isNewtargetView);
+            if (isNewtargetView)
             {
                 host_SizeChanged(null, null);
             }
@@ -198,15 +198,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             var control = Control;
             if (IsControl && control != null)
             {
-                Control.InjectTouchEvent(
-                        AndroidMotionEventAction.ACTION_DOWN,
-                        ponterid,
-                        p,
-                        1,
-                        HandleMouse(e));
-
-                isdown = true;
-                img.CaptureMouse();
+                ResolveMouseButton(control, p, e.ChangedButton, AndroidMotionEventAction.ACTION_DOWN);
             }
         }
 
@@ -217,15 +209,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             var control = Control;
             if (IsControl && control != null)
             {
-                control.InjectTouchEvent(
-                          AndroidMotionEventAction.ACTION_UP,
-                          ponterid,
-                          p,
-                          0,
-                          HandleMouse(e));
-
-                isdown = false;
-                img.ReleaseMouseCapture();
+                ResolveMouseButton(control, p, e.ChangedButton, AndroidMotionEventAction.ACTION_UP);
             }
         }
 
@@ -241,8 +225,8 @@ namespace TqkLibrary.Scrcpy.Wpf
                         AndroidMotionEventAction.ACTION_MOVE,
                         ponterid,
                         p,
-                        1,
-                        HandleMouse(e));
+                        1.0f,
+                        HandleMouseButton(e));
             }
         }
 
@@ -261,7 +245,7 @@ namespace TqkLibrary.Scrcpy.Wpf
         private void img_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
-            var p = GetRemotePoint(e.GetPosition(null));
+            var p = GetRemotePoint(e.GetPosition((IInputElement)sender));
             var control = Control;
             if (IsControl && control != null)
             {
@@ -269,17 +253,18 @@ namespace TqkLibrary.Scrcpy.Wpf
             }
         }
 
-        private void img_KeyDown(object sender, KeyEventArgs e)
+        private async void img_KeyDown(object sender, KeyEventArgs e)
         {
             e.Handled = true;
-            if (IsControl)
+            var control = Control;
+            if (IsControl && control != null)
             {
                 if (e.SystemKey == Key.None)
                 {
-                    AndroidKeyCode keyCode = ResolveKey(e);
+                    AndroidKeyCode keyCode = await ResolveKey(e);
                     if (keyCode != AndroidKeyCode.AKEYCODE_UNKNOWN)
                     {
-                        Control?.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, keyCode);
+                        control.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, keyCode, 1, ResolveMetaKey(e));
 #if DEBUG
                         Console.WriteLine($"ACTION_DOWN: {keyCode}");
 #endif
@@ -292,17 +277,18 @@ namespace TqkLibrary.Scrcpy.Wpf
             }
         }
 
-        private void img_KeyUp(object sender, KeyEventArgs e)
+        private async void img_KeyUp(object sender, KeyEventArgs e)
         {
             e.Handled = true;
-            if (IsControl)
+            var control = Control;
+            if (IsControl && control != null)
             {
                 if (e.SystemKey == Key.None)
                 {
-                    AndroidKeyCode keyCode = ResolveKey(e);
+                    AndroidKeyCode keyCode = await ResolveKey(e);
                     if (keyCode != AndroidKeyCode.AKEYCODE_UNKNOWN)
                     {
-                        Control?.InjectKeycode(AndroidKeyEventAction.ACTION_UP, keyCode);
+                        control.InjectKeycode(AndroidKeyEventAction.ACTION_UP, keyCode, 1, ResolveMetaKey(e));
 #if DEBUG
                         Console.WriteLine($"ACTION_UP: {keyCode}");
 #endif
@@ -330,8 +316,50 @@ namespace TqkLibrary.Scrcpy.Wpf
             return outpoint;
         }
 
+        void ResolveMouseButton(IControl control, System.Drawing.Point point, MouseButton mouseButton, AndroidMotionEventAction action)
+        {
+            if (action == AndroidMotionEventAction.ACTION_DOWN || action == AndroidMotionEventAction.ACTION_UP)
+            {
+                switch (mouseButton)
+                {
+                    case MouseButton.Left:
+                        isdown = action == AndroidMotionEventAction.ACTION_DOWN;
+                        if (isdown) img.CaptureMouse();
+                        else img.ReleaseMouseCapture();
+                        control.InjectTouchEvent(
+                            action,
+                            ponterid,
+                            point,
+                            action == AndroidMotionEventAction.ACTION_DOWN ? 1.0f : 0.0f);
+                        break;
 
-        AndroidMotionEventButton HandleMouse(MouseEventArgs e)
+                    case MouseButton.Right:
+                        control.BackOrScreenOn(
+                            action == AndroidMotionEventAction.ACTION_DOWN ? AndroidKeyEventAction.ACTION_DOWN : AndroidKeyEventAction.ACTION_UP);
+                        break;
+
+                    case MouseButton.Middle:
+                        control.InjectKeycode(
+                            action == AndroidMotionEventAction.ACTION_DOWN ? AndroidKeyEventAction.ACTION_DOWN : AndroidKeyEventAction.ACTION_UP,
+                            AndroidKeyCode.AKEYCODE_HOME);
+                        break;
+
+                    case MouseButton.XButton1:
+                        control.InjectKeycode(
+                            action == AndroidMotionEventAction.ACTION_DOWN ? AndroidKeyEventAction.ACTION_DOWN : AndroidKeyEventAction.ACTION_UP,
+                            AndroidKeyCode.AKEYCODE_APP_SWITCH);
+                        break;
+
+                    case MouseButton.XButton2:
+                        if (action == AndroidMotionEventAction.ACTION_DOWN)
+                        {
+                            control.ExpandNotificationPanel();
+                        }
+                        break;
+                }
+            }
+        }
+        AndroidMotionEventButton HandleMouseButton(MouseEventArgs e)
         {
             AndroidMotionEventButton button = AndroidMotionEventButton.None;
             if (e.LeftButton == MouseButtonState.Pressed) button |= AndroidMotionEventButton.BUTTON_PRIMARY;
@@ -344,6 +372,14 @@ namespace TqkLibrary.Scrcpy.Wpf
 
 
 
+
+
+
+
+
+
+
+        #region Key
 
         static readonly Dictionary<Key, AndroidKeyCode> special_keys = new Dictionary<Key, AndroidKeyCode>() {
             // Navigation keys and ENTER.
@@ -367,104 +403,169 @@ namespace TqkLibrary.Scrcpy.Wpf
             { Key.RightShift, AndroidKeyCode.AKEYCODE_SHIFT_RIGHT },
         };
 
-
-        // Numpad navigation keys.
-        // Used in all modes, when NumLock and Shift are disabled.
-        static readonly Dictionary<Key, AndroidKeyCode> kp_nav_keys = new Dictionary<Key, AndroidKeyCode>()
+        static readonly Dictionary<Key, AndroidKeyCode> alphaspace_keys = new Dictionary<Key, AndroidKeyCode>()
         {
-            { Key.NumPad0, AndroidKeyCode.AKEYCODE_INSERT },
-            { Key.NumPad1, AndroidKeyCode.AKEYCODE_MOVE_END },
-            { Key.NumPad2, AndroidKeyCode.AKEYCODE_DPAD_DOWN },
-            { Key.NumPad3, AndroidKeyCode.AKEYCODE_PAGE_DOWN },
-            { Key.NumPad4, AndroidKeyCode.AKEYCODE_DPAD_LEFT },
-            { Key.NumPad6, AndroidKeyCode.AKEYCODE_DPAD_RIGHT },
-            { Key.NumPad7, AndroidKeyCode.AKEYCODE_MOVE_HOME },
-            { Key.NumPad8, AndroidKeyCode.AKEYCODE_DPAD_UP },
-            { Key.NumPad9, AndroidKeyCode.AKEYCODE_PAGE_UP },
+            { Key.A, AndroidKeyCode.AKEYCODE_A },
+            { Key.B, AndroidKeyCode.AKEYCODE_B },
+            { Key.C, AndroidKeyCode.AKEYCODE_C },
+            { Key.D, AndroidKeyCode.AKEYCODE_D },
+            { Key.E, AndroidKeyCode.AKEYCODE_E },
+            { Key.F, AndroidKeyCode.AKEYCODE_F },
+            { Key.G, AndroidKeyCode.AKEYCODE_G },
+            { Key.H, AndroidKeyCode.AKEYCODE_H },
+            { Key.I, AndroidKeyCode.AKEYCODE_I },
+            { Key.J, AndroidKeyCode.AKEYCODE_J },
+            { Key.K, AndroidKeyCode.AKEYCODE_K },
+            { Key.L, AndroidKeyCode.AKEYCODE_L },
+            { Key.M, AndroidKeyCode.AKEYCODE_M },
+            { Key.N, AndroidKeyCode.AKEYCODE_N },
+            { Key.O, AndroidKeyCode.AKEYCODE_O },
+            { Key.P, AndroidKeyCode.AKEYCODE_P },
+            { Key.Q, AndroidKeyCode.AKEYCODE_Q },
+            { Key.R, AndroidKeyCode.AKEYCODE_R },
+            { Key.S, AndroidKeyCode.AKEYCODE_S },
+            { Key.T, AndroidKeyCode.AKEYCODE_T },
+            { Key.U, AndroidKeyCode.AKEYCODE_U },
+            { Key.V, AndroidKeyCode.AKEYCODE_V },
+            { Key.W, AndroidKeyCode.AKEYCODE_W },
+            { Key.X, AndroidKeyCode.AKEYCODE_X },
+            { Key.Y, AndroidKeyCode.AKEYCODE_Y },
+            { Key.Z, AndroidKeyCode.AKEYCODE_Z },
+            { Key.Space, AndroidKeyCode.AKEYCODE_SPACE },
 
         };
 
-        //    static const struct sc_intmap_entry kp_nav_keys[] = {
-        //    {SC_KEYCODE_KP_0,      AKEYCODE_INSERT },
-        //    {SC_KEYCODE_KP_1,      AKEYCODE_MOVE_END },
-        //    { SC_KEYCODE_KP_2,      AKEYCODE_DPAD_DOWN},
-        //    { SC_KEYCODE_KP_3,      AKEYCODE_PAGE_DOWN},
-        //    { SC_KEYCODE_KP_4,      AKEYCODE_DPAD_LEFT},
-        //    { SC_KEYCODE_KP_6,      AKEYCODE_DPAD_RIGHT},
-        //    { SC_KEYCODE_KP_7,      AKEYCODE_MOVE_HOME},
-        //    { SC_KEYCODE_KP_8,      AKEYCODE_DPAD_UP},
-        //    { SC_KEYCODE_KP_9,      AKEYCODE_PAGE_UP},
-        //    { SC_KEYCODE_KP_PERIOD, AKEYCODE_FORWARD_DEL},
-        //};
+        static readonly Dictionary<Key, AndroidKeyCode> numbers_punct_keys = new Dictionary<Key, AndroidKeyCode>()
+        {
+            //{SC_KEYCODE_HASH,           AndroidKeyCode.AKEYCODE_POUND},
+            //{SC_KEYCODE_PERCENT,        AndroidKeyCode.AKEYCODE_PERIOD},            
+            {Key.Multiply,              AndroidKeyCode.AKEYCODE_STAR},
+            {Key.Divide,                AndroidKeyCode.AKEYCODE_NUMPAD_DIVIDE},
+            {Key.Subtract,              AndroidKeyCode.AKEYCODE_MINUS},
+            {Key.Add,                   AndroidKeyCode.AKEYCODE_NUMPAD_ADD},
 
+            {Key.Decimal,               AndroidKeyCode.AKEYCODE_NUMPAD_DOT},
 
+            {Key.OemPeriod,             AndroidKeyCode.AKEYCODE_PERIOD},
+            {Key.OemQuotes,             AndroidKeyCode.AKEYCODE_APOSTROPHE},
+            {Key.OemPlus,               AndroidKeyCode.AKEYCODE_EQUALS},
+            {Key.OemComma,              AndroidKeyCode.AKEYCODE_COMMA},
+            {Key.OemQuestion,           AndroidKeyCode.AKEYCODE_SLASH},
+            {Key.OemMinus,              AndroidKeyCode.AKEYCODE_MINUS},
+            //{Key.OemPlus,               AndroidKeyCode.AKEYCODE_EQUALS},
+            {Key.OemOpenBrackets,       AndroidKeyCode.AKEYCODE_LEFT_BRACKET},
 
+            {Key.D0,                    AndroidKeyCode.AKEYCODE_0},
+            {Key.D1,                    AndroidKeyCode.AKEYCODE_1},
+            {Key.D2,                    AndroidKeyCode.AKEYCODE_2},
+            {Key.D3,                    AndroidKeyCode.AKEYCODE_3},
+            {Key.D4,                    AndroidKeyCode.AKEYCODE_4},
+            {Key.D5,                    AndroidKeyCode.AKEYCODE_5},
+            {Key.D6,                    AndroidKeyCode.AKEYCODE_6},
+            {Key.D7,                    AndroidKeyCode.AKEYCODE_7},
+            {Key.D8,                    AndroidKeyCode.AKEYCODE_8},
+            {Key.D9,                    AndroidKeyCode.AKEYCODE_9},
 
-        AndroidKeyCode ResolveKey(KeyEventArgs e)
+            {Key.Oem1,                  AndroidKeyCode.AKEYCODE_SEMICOLON},
+            {Key.Oem3,                  AndroidKeyCode.AKEYCODE_GRAVE},
+            {Key.Oem5,                  AndroidKeyCode.AKEYCODE_BACKSLASH},
+            {Key.Oem6,                  AndroidKeyCode.AKEYCODE_RIGHT_BRACKET},
+
+            //{Key.D2 + shift,             AndroidKeyCode.AKEYCODE_AT},
+
+            {Key.NumPad1,               AndroidKeyCode.AKEYCODE_NUMPAD_1},
+            {Key.NumPad2,               AndroidKeyCode.AKEYCODE_NUMPAD_2},
+            {Key.NumPad3,               AndroidKeyCode.AKEYCODE_NUMPAD_3},
+            {Key.NumPad4,               AndroidKeyCode.AKEYCODE_NUMPAD_4},
+            {Key.NumPad5,               AndroidKeyCode.AKEYCODE_NUMPAD_5},
+            {Key.NumPad6,               AndroidKeyCode.AKEYCODE_NUMPAD_6},
+            {Key.NumPad7,               AndroidKeyCode.AKEYCODE_NUMPAD_7},
+            {Key.NumPad8,               AndroidKeyCode.AKEYCODE_NUMPAD_8},
+            {Key.NumPad9,               AndroidKeyCode.AKEYCODE_NUMPAD_9},
+            {Key.NumPad0,               AndroidKeyCode.AKEYCODE_NUMPAD_0},
+            //{Key.Multiply,              AndroidKeyCode.AKEYCODE_NUMPAD_MULTIPLY},
+            //{Key.Subtract,            AndroidKeyCode.AKEYCODE_NUMPAD_SUBTRACT},
+            //{SC_KEYCODE_KP_EQUALS,      AndroidKeyCode.AKEYCODE_NUMPAD_EQUALS},
+            //{Key.D9,   AndroidKeyCode.AKEYCODE_NUMPAD_LEFT_PAREN},
+            //{Key.D0,  AndroidKeyCode.AKEYCODE_NUMPAD_RIGHT_PAREN},
+        };
+
+        async Task<AndroidKeyCode> ResolveKey(KeyEventArgs e)
         {
             Key key = e.Key;
-            if (IsShift(e))
+#if DEBUG
+            Debug.WriteLine($"Key: {key} is {e.KeyStates}");
+#endif
+            switch (key)
             {
-                switch (e.Key)
-                {
-                    case >= Key.D0 and <= Key.D9: return (AndroidKeyCode)((int)key + ((int)AndroidKeyCode.AKEYCODE_0 - (int)Key.D0));
-                    case >= Key.A and <= Key.Z: return (AndroidKeyCode)((int)key + ((int)AndroidKeyCode.AKEYCODE_A - (int)Key.A));
-                    case Key.Space: return AndroidKeyCode.AKEYCODE_SPACE;
-
-                    case Key.OemPlus: return AndroidKeyCode.AKEYCODE_PLUS;
-                    case Key.OemMinus: return AndroidKeyCode.AKEYCODE_SWITCH_CHARSET;
-
-                    default: return AndroidKeyCode.AKEYCODE_UNKNOWN;
-                }
+                case Key.LeftCtrl:
+                case Key.RightCtrl:
+                case Key.LeftAlt:
+                case Key.RightAlt:
+                case Key.LeftShift:
+                case Key.RightShift:
+                    return AndroidKeyCode.AKEYCODE_UNKNOWN;//skip system key, it using in AndroidKeyEventMeta
             }
-            else
+            if (IsKeyDown(e, Key.C) && IsCtrl(e))
             {
-                switch (e.Key)
-                {
-                    case >= Key.D0 and <= Key.D9: return (AndroidKeyCode)((int)key + ((int)AndroidKeyCode.AKEYCODE_0 - (int)Key.D0));
-                    case >= Key.A and <= Key.Z: return (AndroidKeyCode)((int)key + ((int)AndroidKeyCode.AKEYCODE_A - (int)Key.A));
-                    case Key.Space: return AndroidKeyCode.AKEYCODE_SPACE;
-
-                    case Key.Enter: return AndroidKeyCode.AKEYCODE_ENTER;
-                    case Key.Escape: return AndroidKeyCode.AKEYCODE_ESCAPE;
-                    case Key.Tab: return AndroidKeyCode.AKEYCODE_TAB;
-                    case Key.Back: return AndroidKeyCode.AKEYCODE_DEL;
-
-                    case Key.CapsLock: return AndroidKeyCode.AKEYCODE_CAPS_LOCK;
-                    case Key.LeftShift: return AndroidKeyCode.AKEYCODE_SHIFT_LEFT;
-                    case Key.RightShift: return AndroidKeyCode.AKEYCODE_SHIFT_RIGHT;
-                    case Key.LeftAlt: return AndroidKeyCode.AKEYCODE_ALT_LEFT;
-                    case Key.RightAlt: return AndroidKeyCode.AKEYCODE_ALT_RIGHT;
-                    case Key.LeftCtrl: return AndroidKeyCode.AKEYCODE_CTRL_LEFT;
-                    case Key.RightCtrl: return AndroidKeyCode.AKEYCODE_CTRL_RIGHT;
-
-                    case Key.Left: return AndroidKeyCode.AKEYCODE_DPAD_LEFT;
-                    case Key.Right: return AndroidKeyCode.AKEYCODE_DPAD_RIGHT;
-                    case Key.Up: return AndroidKeyCode.AKEYCODE_DPAD_UP;
-                    case Key.Down: return AndroidKeyCode.AKEYCODE_DPAD_DOWN;
-
-                    case Key.Home: return AndroidKeyCode.AKEYCODE_MOVE_HOME;
-                    case Key.End: return AndroidKeyCode.AKEYCODE_MOVE_END;
-                    case Key.PageUp: return AndroidKeyCode.AKEYCODE_PAGE_UP;
-                    case Key.PageDown: return AndroidKeyCode.AKEYCODE_PAGE_DOWN;
-
-                    case Key.OemPlus: return AndroidKeyCode.AKEYCODE_NUMPAD_ADD;
-                    case Key.OemMinus: return AndroidKeyCode.AKEYCODE_NUMPAD_SUBTRACT;
-                    case Key.Divide: return AndroidKeyCode.AKEYCODE_NUMPAD_DIVIDE;
-                    case Key.Multiply: return AndroidKeyCode.AKEYCODE_NUMPAD_MULTIPLY;
-                    case Key.OemPeriod: return AndroidKeyCode.AKEYCODE_PERIOD;
-
-                    default: return AndroidKeyCode.AKEYCODE_UNKNOWN;
-                }
+                string text = await Control.GetClipboardAsync(CopyKey.Copy);
+                if (!string.IsNullOrEmpty(text)) Clipboard.SetText(text);
+                return AndroidKeyCode.AKEYCODE_UNKNOWN;
+            }
+            if (IsKeyDown(e, Key.V) && IsCtrl(e))
+            {
+                string text = Clipboard.GetText();
+                if (!string.IsNullOrEmpty(text)) Control.SetClipboard(Clipboard.GetText(), true);
+                return AndroidKeyCode.AKEYCODE_UNKNOWN;
             }
 
+            if (special_keys.ContainsKey(key))
+                return special_keys[key];
+
+            if (numbers_punct_keys.ContainsKey(key))
+                return numbers_punct_keys[key];
+
+            if (/*!IsCtrl(e) && !IsAlt(e) &&*/ alphaspace_keys.ContainsKey(key))
+                return alphaspace_keys[key];
+
+            return AndroidKeyCode.AKEYCODE_UNKNOWN;
         }
-        bool IsShift(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftShift) == KeyStates.Down || e.KeyboardDevice.GetKeyStates(Key.RightShift) == KeyStates.Down;
-        bool IsAlt(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftAlt) == KeyStates.Down || e.KeyboardDevice.GetKeyStates(Key.RightAlt) == KeyStates.Down;
-        bool IsCtrl(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftCtrl) == KeyStates.Down || e.KeyboardDevice.GetKeyStates(Key.RightCtrl) == KeyStates.Down;
-        bool IsNumlock(KeyEventArgs e) => false;
-        bool IsCaptlock(KeyEventArgs e) => false;
+
+        AndroidKeyEventMeta ResolveMetaKey(KeyEventArgs e)
+        {
+            AndroidKeyEventMeta result = AndroidKeyEventMeta.META_NONE;
+
+            if (e.KeyboardDevice.GetKeyStates(Key.LeftShift).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_SHIFT_LEFT_ON;
+            if (e.KeyboardDevice.GetKeyStates(Key.RightShift).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_SHIFT_RIGHT_ON;
+
+            if (e.KeyboardDevice.GetKeyStates(Key.LeftAlt).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_ALT_LEFT_ON;
+            if (e.KeyboardDevice.GetKeyStates(Key.RightAlt).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_ALT_RIGHT_ON;
+
+            if (e.KeyboardDevice.GetKeyStates(Key.LeftCtrl).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_CTRL_LEFT_ON;
+            if (e.KeyboardDevice.GetKeyStates(Key.RightCtrl).HasFlag(KeyStates.Down)) result |= AndroidKeyEventMeta.META_CTRL_RIGHT_ON;
+
+            if (IsNumlock(e)) result |= AndroidKeyEventMeta.META_NUM_LOCK_ON;
+            if (IsCaptlock(e)) result |= AndroidKeyEventMeta.META_CAPS_LOCK_ON;
+#if DEBUG
+            Debug.WriteLine($"MetaKey: {result}");
+#endif
+            return result;
+        }
+        bool IsShift(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftShift).HasFlag(KeyStates.Down) ||
+                                        e.KeyboardDevice.GetKeyStates(Key.RightShift).HasFlag(KeyStates.Down);
+        bool IsAlt(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftAlt).HasFlag(KeyStates.Down) ||
+                                        e.KeyboardDevice.GetKeyStates(Key.RightAlt).HasFlag(KeyStates.Down);
+        bool IsCtrl(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.LeftCtrl).HasFlag(KeyStates.Down) ||
+                                        e.KeyboardDevice.GetKeyStates(Key.RightCtrl).HasFlag(KeyStates.Down);
+        bool IsNumlock(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.NumLock).HasFlag(KeyStates.Toggled);
+        bool IsCaptlock(KeyEventArgs e) => e.KeyboardDevice.GetKeyStates(Key.CapsLock).HasFlag(KeyStates.Toggled);
+
+        bool IsKeyDown(KeyEventArgs e, Key key) => e.KeyboardDevice.GetKeyStates(key).HasFlag(KeyStates.Down);
+
         #endregion
 
+
+
+        #endregion
     }
 }

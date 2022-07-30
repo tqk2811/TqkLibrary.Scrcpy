@@ -65,8 +65,10 @@ namespace TqkLibrary.Scrcpy
         {
             if (_handle != IntPtr.Zero)
             {
+                Stop();
                 lock (_lock)
                 {
+                    var hold = NativeOnDisconnectDelegate;
                     NativeWrapper.ScrcpyFree(_handle);
                     _handle = IntPtr.Zero;
                 }
@@ -82,8 +84,8 @@ namespace TqkLibrary.Scrcpy
             {
                 lock (_lock)
                 {
-                    CheckDispose();
-                    return GetScreenSize();
+                    if (IsDispose()) return new Size(0, 0);
+                    else return GetScreenSize();
                 }
             }
         }
@@ -115,10 +117,7 @@ namespace TqkLibrary.Scrcpy
         }
 
 
-        private void CheckDispose()
-        {
-            if (_handle == IntPtr.Zero) throw new ObjectDisposedException(nameof(Scrcpy));
-        }
+        private bool IsDispose() => _handle == IntPtr.Zero;
 
         private void Control_OnClipboardReceived(IControl control, string data)
         {
@@ -130,7 +129,7 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                CheckDispose();
+                if (IsDispose()) return false;
                 byte[] command = scrcpyControlMessage.GetCommand();
                 return NativeWrapper.ScrcpyControlCommand(_handle, command, command.Length);
             }
@@ -157,7 +156,7 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                CheckDispose();
+                if (IsDispose()) return false;
                 if (config == null) config = new ScrcpyConfig();
                 string config_str = config.ToString();
                 ScrcpyNativeConfig nativeConfig = config.NativeConfig();
@@ -173,7 +172,7 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                CheckDispose();
+                if (IsDispose()) return;
                 NativeWrapper.ScrcpyStop(_handle);
             }
         }
@@ -187,7 +186,7 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                CheckDispose();
+                if (IsDispose()) return null;
                 Size size = GetScreenSize();
                 Size fix_size = new Size(size.Width + size.Width % 16, size.Height);
 
@@ -231,7 +230,7 @@ namespace TqkLibrary.Scrcpy
         {
             lock (_lock)
             {
-                return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface,ref isNewtargetView);
+                return NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface, ref isNewtargetView);
             }
         }
 

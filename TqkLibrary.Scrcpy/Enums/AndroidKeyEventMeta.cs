@@ -8,6 +8,7 @@ namespace TqkLibrary.Scrcpy
     [Flags]
     public enum AndroidKeyEventMeta : uint
     {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         META_NONE = 0,
         META_SYM_ON = 1 << 2,//4
         META_FUNCTION_ON = 1 << 3,//8
@@ -34,5 +35,6 @@ namespace TqkLibrary.Scrcpy
         META_META_LEFT_ON = 1 << 17,//131072
         META_META_RIGHT_ON = 1 << 18,//262144
         META_META_MASK = META_META_ON | META_META_LEFT_ON | META_META_RIGHT_ON,// 458752
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
     }
 }
