@@ -105,7 +105,7 @@ ScrcpyInstance::~ScrcpyInstance() {
 		delete this->_control;
 	}
 
-	if (this->_process != nullptr) {
+	if (this->_video != nullptr) {
 		this->_video->Stop();
 		delete this->_video;
 	}
