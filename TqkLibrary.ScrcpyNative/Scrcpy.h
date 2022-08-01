@@ -24,6 +24,7 @@ private:
 	//const
 	std::wstring _deviceId;
 	std::mutex _mutex;
+	std::mutex _mutex_instance;
 
 	AVFrame cache;
 	//need release

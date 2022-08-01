@@ -17,20 +17,29 @@ Scrcpy::~Scrcpy() {
 
 bool Scrcpy::Connect(LPCWSTR config, const ScrcpyNativeConfig& nativeConfig) {
 	_mutex.lock();
-	if (this->_scrcpyInstance != nullptr) {
+	_mutex_instance.lock();
+	bool result = false;
+	if (this->_scrcpyInstance == nullptr) {
 		_mutex.unlock();
-		return false;
-	}
-	this->_scrcpyInstance = new ScrcpyInstance(this, config, nativeConfig);
-	if (!this->_scrcpyInstance->Start()) {
-		delete this->_scrcpyInstance;
-		this->_scrcpyInstance = nullptr;
-		_mutex.unlock();
-		return false;
-	}
 
-	_mutex.unlock();
-	return true;
+		auto instance = new ScrcpyInstance(this, config, nativeConfig);
+		if (instance->Start()) {//long work
+
+			_mutex.lock();
+			this->_scrcpyInstance = instance;
+			_mutex.unlock();
+
+			result = true;
+		}
+		else
+		{
+			delete instance;
+		}
+	}
+	else _mutex.unlock();
+	_mutex_instance.unlock();
+
+	return result;
 }
 
 void Scrcpy::Stop() {
