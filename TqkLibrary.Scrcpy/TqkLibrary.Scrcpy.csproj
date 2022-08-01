@@ -9,7 +9,7 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<Configurations>Debug;Release;ReleaseNoScreenShot</Configurations>
+		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
 <ItemGroup>
 		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avcodec-59.dll" Link="x64\avcodec-59.dll">
@@ -36,6 +36,9 @@
 		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swscale-6.dll" Link="x64\swscale-6.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+		<None Include="..\scrcpy-server-v1.24.jar" Link="scrcpy-server-v1.24.jar">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
@@ -43,16 +46,6 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.pdb" Link="x64\TqkLibrary.ScrcpyNative.pdb">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)' == 'ReleaseNoScreenShot'">
-		<None Include="..\x64\ReleaseNoScreenShot\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)' == 'Release'">
-		<None Include="..\x64\Release\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
