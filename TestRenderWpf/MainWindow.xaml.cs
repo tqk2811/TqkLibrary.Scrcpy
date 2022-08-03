@@ -16,6 +16,7 @@ using TqkLibrary.Scrcpy;
 using TqkLibrary.AdbDotNet;
 using System.Windows.Interop;
 using System.Timers;
+using TqkLibrary.Scrcpy.Wpf;
 
 namespace TestRenderWpf
 {
@@ -40,7 +41,7 @@ namespace TestRenderWpf
             adb = new Adb(deviceId);
             scrcpy = new Scrcpy(deviceId);
             scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
-            mainWindowVM.Control = scrcpy.Control;
+            mainWindowVM.Control = new ControlChain(scrcpy.Control);
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
             scrcpy.Connect(new ScrcpyConfig()
             {
@@ -68,7 +69,7 @@ namespace TestRenderWpf
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         bool windowClosed = false;
