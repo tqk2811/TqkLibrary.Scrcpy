@@ -341,7 +341,9 @@ namespace TqkLibrary.Scrcpy.Wpf
                     case MouseButton.Middle:
                         control.InjectKeycode(
                             action == AndroidMotionEventAction.ACTION_DOWN ? AndroidKeyEventAction.ACTION_DOWN : AndroidKeyEventAction.ACTION_UP,
-                            AndroidKeyCode.AKEYCODE_HOME);
+                            AndroidKeyCode.AKEYCODE_HOME,
+                            0,
+                            AndroidKeyEventMeta.META_NONE);
                         break;
 
                     case MouseButton.XButton1:
