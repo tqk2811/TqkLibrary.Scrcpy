@@ -38,12 +38,12 @@ namespace TqkLibrary.Scrcpy
         public bool StayAwake { get; set; } = true;
 
         /// <summary>
-        /// Default: Orientation.Auto
+        /// Default: <see cref="Orientations.Auto"/>
         /// </summary>
         public Orientations Orientation { get; set; } = Orientations.Auto;
 
         /// <summary>
-        /// Bật để sử dụng <see cref="Scrcpy.Control"/><br>
+        /// Turn on for use <see cref="Scrcpy.Control"/><br>
         /// </br>Default: true
         /// </summary>
         public bool IsControl { get; set; } = true;
@@ -64,21 +64,21 @@ namespace TqkLibrary.Scrcpy
         public int Bitrate { get; set; } = 8000000;
 
         /// <summary>
-        /// Index of screen android
+        /// Index of screen android<br></br>
         /// Default: 0
         /// </summary>
         public int DisplayId { get; set; } = 0;
 
         /// <summary>
-        /// Cắt một vùng màn hình
-        /// Mặc định: null
+        /// Crop a region in base android screen<br></br>
+        /// Default: null
         /// </summary>
         public Rectangle? Crop { get; set; } = null;
 
         /// <summary>
-        /// Dùng phần cứng đặc biệt để giải mã hình ảnh (Ví dụ: VGA/GPU)<br>
-        /// </br>Mặc định: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
-        /// </br>Sử dụng <see cref="ScrcpyConfig.GetHwSupports"/> để lấy danh sách hỗ trợ
+        /// Use Hardware Accelerator for decode image<br>
+        /// </br>Default: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
+        /// </br>Use <see cref="ScrcpyConfig.GetHwSupports"/> for get support list.
         /// </summary>
         public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
@@ -93,11 +93,10 @@ namespace TqkLibrary.Scrcpy
         public bool PowerOffOnClose { get; set; } = false;
 
         /// <summary>
-        /// Dùng directX 11 shader để giải mã ảnh.<br>
-        /// </br>Note: Chỉ hoạt động với <see cref="HwType"/> ở mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/>
+        /// Use directx 11 for convert image.<br>
+        /// </br>Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/>
         /// </summary>
         public bool IsUseD3D11Shader { get; set; } = false;
-
 
         /// <summary>
         /// Default: 3000
@@ -110,7 +109,7 @@ namespace TqkLibrary.Scrcpy
         public string ScrcpyServerPath { get; set; } = "scrcpy-server-v1.24.jar";
 
         /// <summary>
-        /// if true: Use Adb Forward instead of Adb Reverse
+        /// if true: Use Adb Forward instead of Adb Reverse<br></br>
         /// Default: false
         /// </summary>
         internal bool ForceAdbForward { get; } = false;
@@ -136,7 +135,8 @@ namespace TqkLibrary.Scrcpy
         public bool PowerOn { get; set; } = true;
 
         /// <summary>
-        /// Default
+        /// Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/><br></br>
+        /// Default <see cref="D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT"/>
         /// </summary>
         public D3D11Filter Filter { get; set; } = D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
 
