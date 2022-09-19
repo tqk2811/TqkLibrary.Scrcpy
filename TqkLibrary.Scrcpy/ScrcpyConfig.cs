@@ -181,8 +181,6 @@ namespace TqkLibrary.Scrcpy
             if (!Cleanup) args.Add($"cleanup=false");// By default, cleanup is true
             if (!PowerOn) args.Add($"power_on=false");// By default, power_on is true
 
-            if (Orientation != Orientations.Auto) args.Add($"lock_video_orientation={(int)Orientation}");
-
             return string.Join(" ", args);
         }
 
