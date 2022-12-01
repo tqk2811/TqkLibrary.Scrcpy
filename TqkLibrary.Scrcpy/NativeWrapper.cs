@@ -15,7 +15,7 @@ namespace TqkLibrary.Scrcpy
         {
             string path = Path.Combine(
                 Path.GetDirectoryName(Assembly.GetEntryAssembly().Location),
-                Environment.Is64BitProcess ? "x64" : throw new NotSupportedException("Not support x86"));
+                Environment.Is64BitProcess ? "x64" : "x86");
 
             bool r = SetDllDirectory(path);
             if (!r)

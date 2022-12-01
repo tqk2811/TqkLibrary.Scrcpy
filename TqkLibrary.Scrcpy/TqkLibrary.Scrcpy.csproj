@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFrameworks>net462;net5.0-windows7.0;net6.0-windows7.0</TargetFrameworks>
@@ -10,44 +10,49 @@
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Configurations>Debug;Release</Configurations>
+		<Platforms>AnyCPU</Platforms>
 	</PropertyGroup>
 <ItemGroup>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avcodec-59.dll" Link="x64\avcodec-59.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avdevice-59.dll" Link="x64\avdevice-59.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avfilter-8.dll" Link="x64\avfilter-8.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avformat-59.dll" Link="x64\avformat-59.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\avutil-57.dll" Link="x64\avutil-57.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\postproc-56.dll" Link="x64\postproc-56.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swresample-4.dll" Link="x64\swresample-4.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="..\..\..\..\..\..\lib\FFmpeg\ffmpeg-n5.0-latest-win64-gpl-shared-5.0_2022-03-31\bin\swscale-6.dll" Link="x64\swscale-6.dll">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+
 		<None Include="..\scrcpy-server-v1.24.jar" Link="scrcpy-server-v1.24.jar">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-
+	
 	</ItemGroup>
 	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
+		
+		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.dll" Link="x86\TqkLibrary.ScrcpyNative.dll">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.pdb" Link="x86\TqkLibrary.ScrcpyNative.pdb">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avcodec-59.dll" Link="x86\avcodec-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avdevice-59.dll" Link="x86\avdevice-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avfilter-8.dll" Link="x86\avfilter-8.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avformat-59.dll" Link="x86\avformat-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avutil-57.dll" Link="x86\avutil-57.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\postproc-56.dll" Link="x86\postproc-56.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\swresample-4.dll" Link="x86\swresample-4.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\swscale-6.dll" Link="x86\swscale-6.dll" />
+
+
+
 		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.pdb" Link="x64\TqkLibrary.ScrcpyNative.pdb">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avcodec-59.dll" Link="x64\avcodec-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avdevice-59.dll" Link="x64\avdevice-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avfilter-8.dll" Link="x64\avfilter-8.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avformat-59.dll" Link="x64\avformat-59.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avutil-57.dll" Link="x64\avutil-57.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\postproc-56.dll" Link="x64\postproc-56.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\swresample-4.dll" Link="x64\swresample-4.dll" />
+		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\swscale-6.dll" Link="x64\swscale-6.dll" />
+
 	</ItemGroup>
 
 	<ItemGroup>
@@ -55,6 +60,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Folder Include="x86\" />
 		<Folder Include="x64\" />
 	</ItemGroup>
 
