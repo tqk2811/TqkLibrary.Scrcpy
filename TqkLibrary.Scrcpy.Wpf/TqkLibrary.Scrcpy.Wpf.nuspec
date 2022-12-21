@@ -14,7 +14,8 @@
 				<dependency id="System.Drawing.Common" version="6.0.0" />
 				<dependency id="TqkLibrary.Scrcpy" version="1.0.0" />
 				<dependency id="TqkLibrary.ScrcpyNative-x64" version="1.0.0" />
-				<dependency id="Microsoft.Wpf.Interop.DirectX-x64" version="0.9.0-beta-22856" />
+				<!--<dependency id="Microsoft.Wpf.Interop.DirectX-x64" version="0.9.0-beta-22856" />-->
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.0-pre2" />
 			</group>
 		</dependencies>
 	</metadata>
