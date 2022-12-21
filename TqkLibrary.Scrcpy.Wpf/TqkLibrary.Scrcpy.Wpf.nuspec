@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<!--https://docs.microsoft.com/en-us/nuget/reference/nuspec-->
 	<metadata>
-		<id>$id$</id>
-		<version>1.0.1$buildDay$$buildIndex$</version>
+		<id>TqkLibrary.Scrcpy.Wpf</id>
+		<version>1.0.0</version>
 		<description>my private lib</description>
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
@@ -11,18 +11,27 @@
 		<license type="expression">MIT</license>
 		<dependencies>
 			<group targetFramework="net462">
-				<dependency id="System.Drawing.Common" version="6.0.0" />
-				<dependency id="TqkLibrary.Scrcpy" version="1.0.0" />
-				<dependency id="TqkLibrary.ScrcpyNative-x64" version="1.0.0" />
-				<!--<dependency id="Microsoft.Wpf.Interop.DirectX-x64" version="0.9.0-beta-22856" />-->
-				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.0-pre2" />
+				<dependency id="TqkLibrary.Scrcpy" version="1.0.0-pre1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+			</group>
+			<group targetFramework="net5.0-windows7.0">
+				<dependency id="TqkLibrary.Scrcpy" version="1.0.0-pre1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+			</group>
+			<group targetFramework="net6.0-windows7.0">
+				<dependency id="TqkLibrary.Scrcpy" version="1.0.0-pre1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+			</group>
+			<group targetFramework="net7.0-windows7.0">
+				<dependency id="TqkLibrary.Scrcpy" version="1.0.0-pre1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
 			</group>
 		</dependencies>
 	</metadata>
 
 	<files>
-		<file src="bin\Release\**\$id$.dll" target="lib\" />
-		<file src="bin\Release\**\$id$.pdb" target="lib\" />
-		<file src="bin\Release\**\$id$.xml" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.dll" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.pdb" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.xml" target="lib\" />
 	</files>
 </package>

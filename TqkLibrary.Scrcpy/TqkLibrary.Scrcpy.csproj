@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net462;net5.0-windows7.0;net6.0-windows7.0</TargetFrameworks>
+		<TargetFrameworks>net462;net5.0-windows7.0;net6.0-windows7.0;net7.0-windows7.0</TargetFrameworks>
 		<LangVersion>10.0</LangVersion>
 		<PreserveCompilationContext>false</PreserveCompilationContext>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
@@ -10,17 +10,11 @@
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Configurations>Debug;Release</Configurations>
-		<Platforms>AnyCPU</Platforms>
-	</PropertyGroup>
-<ItemGroup>
-
-		<None Include="..\scrcpy-server-v1.24.jar" Link="scrcpy-server-v1.24.jar">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
+		<Platforms>AnyCPU;x86;x64</Platforms>
+		<Version>1.0.0</Version>
+	</PropertyGroup>	
 	
-	</ItemGroup>
-	<ItemGroup Condition="'$(Configuration)' == 'Debug'">
-		
+	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
 		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.dll" Link="x86\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
@@ -28,32 +22,32 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avcodec-59.dll" Link="x86\avcodec-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avdevice-59.dll" Link="x86\avdevice-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avfilter-8.dll" Link="x86\avfilter-8.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avformat-59.dll" Link="x86\avformat-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\avutil-57.dll" Link="x86\avutil-57.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\postproc-56.dll" Link="x86\postproc-56.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\swresample-4.dll" Link="x86\swresample-4.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\swscale-6.dll" Link="x86\swscale-6.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
 
-
-
+	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
 		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
@@ -61,44 +55,43 @@
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avcodec-59.dll" Link="x64\avcodec-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avdevice-59.dll" Link="x64\avdevice-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avfilter-8.dll" Link="x64\avfilter-8.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avformat-59.dll" Link="x64\avformat-59.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\avutil-57.dll" Link="x64\avutil-57.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\postproc-56.dll" Link="x64\postproc-56.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\swresample-4.dll" Link="x64\swresample-4.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Include="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\swscale-6.dll" Link="x64\swscale-6.dll">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Folder Include="x86\" />
-		<Folder Include="x64\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="scrcpy-server-v1.24.jar">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' != 'net7.0-windows7.0'">
+		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+	</ItemGroup>
+	
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0-windows7.0'">
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\scrcpy-server-v1.24.jar" Link="scrcpy-server-v1.24.jar">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	
 </Project>

@@ -6,7 +6,7 @@
 		<LangVersion>10.0</LangVersion>
 		<UseWPF>true</UseWPF>
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
-		<Platforms>x64;x86</Platforms>
+		<Platforms>x64;x86;AnyCPU</Platforms>
 	</PropertyGroup>
 
 	<ItemGroup>

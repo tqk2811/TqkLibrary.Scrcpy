@@ -2,9 +2,9 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
 	<!--https://docs.microsoft.com/en-us/nuget/reference/nuspec-->
 	<metadata>
-		<id>$id$</id>
+		<id>TqkLibrary.Scrcpy</id>
 		<version>1.0.0</version>
-		<description>my private lib</description>
+		<description>Stream screen and control android devices</description>
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
@@ -12,22 +12,33 @@
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="System.Drawing.Common" version="6.0.0" />
-				<dependency id="TqkLibrary.ScrcpyNative-x64" version="1.0.0" />
 			</group>
 			<group targetFramework="net5.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="6.0.0" />
-				<dependency id="TqkLibrary.ScrcpyNative-x64" version="1.0.0" />
 			</group>
 			<group targetFramework="net6.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="6.0.0" />
-				<dependency id="TqkLibrary.ScrcpyNative-x64" version="1.0.0" />
+			</group>
+			<group targetFramework="net7.0-windows7.0">
+				<dependency id="System.Drawing.Common" version="7.0.0" />
 			</group>
 		</dependencies>
+		<contentFiles>
+			<files include="**/*.*" copyToOutput="true" buildAction="None"/>
+		</contentFiles>
 	</metadata>
 
 	<files>
-		<file src="bin\Release\**\$id$.dll" target="lib\" />
-		<file src="bin\Release\**\$id$.pdb" target="lib\" />
-		<file src="bin\Release\**\$id$.xml" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.dll" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.pdb" target="lib\" />
+		<file src="bin\Release\**\TqkLibrary.Scrcpy.xml" target="lib\" />
+
+		<file src="..\x64\Release\TqkLibrary.ScrcpyNative.dll" target="runtimes\win-x64\native\" />
+		<file src="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\bin\*.dll" target="runtimes\win-x64\native\" />
+
+		<file src="..\x86\Release\TqkLibrary.ScrcpyNative.dll" target="runtimes\win-x86\native\" />
+		<file src="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\*.dll" target="runtimes\win-x86\native\" />
+
+		<file src="..\scrcpy-server-v1.24.jar" target="contentFiles\any\any\" />
 	</files>
 </package>

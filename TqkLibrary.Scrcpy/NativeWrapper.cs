@@ -11,6 +11,7 @@ namespace TqkLibrary.Scrcpy
 {
     internal static class NativeWrapper
     {
+#if DEBUG
         static NativeWrapper()
         {
             string path = Path.Combine(
@@ -24,7 +25,7 @@ namespace TqkLibrary.Scrcpy
 
         [DllImport("Kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool SetDllDirectory(string PathName);
-
+#endif
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern byte FFmpegHWSupport(byte bHWSupport);
