@@ -675,9 +675,21 @@
         AKEYCODE_TV_TIMER_PROGRAMMING = 258,
         /** Help key. */
         AKEYCODE_HELP = 259,
+        /// <summary>
+        /// 
+        /// </summary>
         AKEYCODE_NAVIGATE_PREVIOUS = 260,
+        /// <summary>
+        /// 
+        /// </summary>
         AKEYCODE_NAVIGATE_NEXT = 261,
+        /// <summary>
+        /// 
+        /// </summary>
         AKEYCODE_NAVIGATE_IN = 262,
+        /// <summary>
+        /// 
+        /// </summary>
         AKEYCODE_NAVIGATE_OUT = 263,
         /** Primary stem key for Wear
          * Main power/reset button on watch. */

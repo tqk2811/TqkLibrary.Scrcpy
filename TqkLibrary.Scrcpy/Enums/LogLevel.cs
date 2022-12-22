@@ -1,5 +1,6 @@
 ﻿namespace TqkLibrary.Scrcpy
 {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     public enum LogLevel
     {
         Verbose,
@@ -8,4 +9,5 @@
         Warn,
         Error
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
