@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Control;
 
 namespace TqkLibrary.Scrcpy
 {
@@ -60,7 +61,10 @@ namespace TqkLibrary.Scrcpy
         /// 
         /// </summary>
         /// <param name="action"></param>
-        /// <param name="pointerId"></param>
+        /// <param name="pointerId">
+        /// <see cref="ScrcpyMousePointerId.POINTER_ID_MOUSE"/> or <see cref="ScrcpyMousePointerId.POINTER_ID_VIRTUAL_MOUSE"/> for use Mouse<br>
+        /// </br>Otherwise use finger
+        /// </param>
         /// <param name="position"></param>
         /// <param name="pressure"></param>
         /// <param name="buttons"></param>
