@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TqkLibrary.Scrcpy;
+using TqkLibrary.Scrcpy.Control;
 
 namespace TqkLibrary.Scrcpy.Wpf
 {
@@ -188,7 +189,6 @@ namespace TqkLibrary.Scrcpy.Wpf
 
 
         #region Control
-        const long ponterid = 0xffffffff;
         bool isdown = false;
         private void img_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -223,7 +223,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                 if (isdown)
                     control.InjectTouchEvent(
                         AndroidMotionEventAction.ACTION_MOVE,
-                        ponterid,
+                        ScrcpyMousePointerId.POINTER_ID_MOUSE,
                         p,
                         1.0f,
                         HandleMouseButton(e));
@@ -328,7 +328,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                         else img.ReleaseMouseCapture();
                         control.InjectTouchEvent(
                             action,
-                            ponterid,
+                            ScrcpyMousePointerId.POINTER_ID_MOUSE,
                             point,
                             action == AndroidMotionEventAction.ACTION_DOWN ? 1.0f : 0.0f);
                         break;
