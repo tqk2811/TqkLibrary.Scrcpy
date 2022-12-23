@@ -3,7 +3,7 @@
 	<!--https://docs.microsoft.com/en-us/nuget/reference/nuspec-->
 	<metadata>
 		<id>TqkLibrary.Scrcpy</id>
-		<version>1.0.0</version>
+		<version>1.25.0</version>
 		<description>Stream screen and control android devices</description>
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
@@ -39,6 +39,6 @@
 		<file src="..\x86\Release\TqkLibrary.ScrcpyNative.dll" target="runtimes\win-x86\native\" />
 		<file src="..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\bin\*.dll" target="runtimes\win-x86\native\" />
 
-		<file src="..\scrcpy-server-v1.24.jar" target="contentFiles\any\any\" />
+		<file src="..\scrcpy-server-v1.25.jar" target="contentFiles\any\any\" />
 	</files>
 </package>
