@@ -81,8 +81,8 @@ namespace TqkLibrary.Scrcpy.Control
             float hScroll,
             AndroidMotionEventButton button)
         {
-            if (vScroll > 1.0f || vScroll < 0.0f) throw new InvalidRangeException($"{nameof(vScroll)} must be in range 0.0f <= {nameof(vScroll)} <= 1.0f");
-            if (hScroll > 1.0f || hScroll < 0.0f) throw new InvalidRangeException($"{nameof(hScroll)} must be in range 0.0f <= {nameof(hScroll)} <= 1.0f");
+            if (vScroll > 1.0f || vScroll < -1.0f) throw new InvalidRangeException($"{nameof(vScroll)} must be in range -1.0f <= {nameof(vScroll)} <= 1.0f");
+            if (hScroll > 1.0f || hScroll < -1.0f) throw new InvalidRangeException($"{nameof(hScroll)} must be in range -1.0f <= {nameof(hScroll)} <= 1.0f");
             return new ScrcpyControlMessage
             {
                 ControlType = ScrcpyControlType.TYPE_INJECT_SCROLL_EVENT,
@@ -156,6 +156,9 @@ namespace TqkLibrary.Scrcpy.Control
                 return (ushort)u;
             }
         }
+        /// <summary>
+        /// Convert a float between -1 and 1 to a signed 16-bit fixed-point value
+        /// </summary>
         short ToSignedFixedPoint16(float f)
         {
             unchecked
