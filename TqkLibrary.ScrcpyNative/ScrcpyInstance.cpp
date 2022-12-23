@@ -7,7 +7,7 @@
 #include <chrono>
 
 #define IPV4_LOCALHOST 0x7F000001
-#define ScrcpyVersion L"1.24"
+#define ScrcpyVersion L"1.25"
 const wchar_t* adbPath = L"adb.exe";
 const int portMin = 5000;
 const int portMax = 65535;

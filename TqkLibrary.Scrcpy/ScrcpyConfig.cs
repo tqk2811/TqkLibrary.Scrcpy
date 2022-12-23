@@ -106,7 +106,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
-        public string ScrcpyServerPath { get; set; } = "scrcpy-server-v1.24.jar";
+        public string ScrcpyServerPath { get; set; } = "scrcpy-server-v1.25.jar";
 
         /// <summary>
         /// if true: Use Adb Forward instead of Adb Reverse<br></br>
