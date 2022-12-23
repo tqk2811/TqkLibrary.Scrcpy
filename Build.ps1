@@ -1,6 +1,7 @@
 Remove-Item -Recurse -Force .\x64\Release\** -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force .\x86\Release\** -ErrorAction SilentlyContinue
 Remove-Item -Recurse -Force .\TqkLibrary.Scrcpy\bin\Release\** -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force .\TqkLibrary.Scrcpy.Wpf\bin\Release\** -ErrorAction SilentlyContinue
 
 $env:PATH="$($env:PATH);C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE"
 devenv .\TqkLibrary.Scrcpy.sln /Rebuild 'Release|x64' /Project TqkLibrary.ScrcpyNative
