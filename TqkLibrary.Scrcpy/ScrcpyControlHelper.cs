@@ -186,7 +186,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="y"></param>
         /// <param name="vScroll"></param>
         /// <param name="hScroll"></param>
-        public static bool Scroll(this IControl control, int x, int y, int vScroll, int hScroll = 0)
+        public static bool Scroll(this IControl control, int x, int y, float vScroll, float hScroll = 0)
             => control.InjectScrollEvent(new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height), vScroll, hScroll);
 
 
@@ -198,7 +198,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="hScroll"></param>
         /// <param name="vScroll"></param>
         /// <returns></returns>
-        public static bool Scroll(this IControl control, Point point, int hScroll, int vScroll)
+        public static bool Scroll(this IControl control, Point point, float hScroll, float vScroll)
             => control.Scroll(point.X, point.Y, hScroll, vScroll);
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="y"></param>
         /// <param name="hScroll"></param>
         /// <param name="vScroll"></param>
-        public static bool ScrollPercent(this IControl control, double x, double y, int hScroll, int vScroll)
+        public static bool ScrollPercent(this IControl control, double x, double y, float hScroll, float vScroll)
              => control.Scroll(
                  (int)(x * control.Scrcpy.ScreenSize.Width),
                  (int)(y * control.Scrcpy.ScreenSize.Height),
