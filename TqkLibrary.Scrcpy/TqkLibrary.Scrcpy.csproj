@@ -11,7 +11,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Configurations>Debug;Release</Configurations>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<Version>1.25.1</Version>
+		<Version>1.25.2</Version>
 	</PropertyGroup>	
 	
 	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
