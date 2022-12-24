@@ -35,7 +35,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="vScroll"></param>
         /// <param name="hScroll"></param>
         /// <returns></returns>
-        public static bool InjectScrollEvent(this IControl control, Point point, int vScroll, int hScroll = 0)
+        public static bool InjectScrollEvent(this IControl control, Point point, float vScroll, float hScroll = 0)
             => control.InjectScrollEvent(new Rectangle(point, control.Scrcpy.ScreenSize), vScroll, hScroll);
 
 
