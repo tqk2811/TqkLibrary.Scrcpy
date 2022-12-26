@@ -108,7 +108,7 @@ namespace TqkLibrary.Scrcpy
         {
             ThreadPool.QueueUserWorkItem(o =>
             {
-                Stop();//clean data
+                Stop();
                 OnDisconnect?.Invoke();
             });
         }
@@ -123,7 +123,7 @@ namespace TqkLibrary.Scrcpy
         {
             bool result = false;
 
-            if (countdownEvent.SafeTryAddCount())
+            if (countdownEvent.TryAddCount())
             {
                 byte[] command = scrcpyControlMessage.GetCommand();
                 result = NativeWrapper.ScrcpyControlCommand(_handle, command, command.Length);
@@ -153,7 +153,7 @@ namespace TqkLibrary.Scrcpy
         public bool Connect(ScrcpyConfig config = null)
         {
             bool result = false;
-            if (countdownEvent.SafeTryAddCount())
+            if (countdownEvent.TryAddCount())
             {
                 if (config == null) config = new ScrcpyConfig();
                 string config_str = config.ToString();
@@ -184,7 +184,7 @@ namespace TqkLibrary.Scrcpy
         /// <exception cref="ObjectDisposedException"></exception>
         public Bitmap GetScreenShot()
         {
-            if (countdownEvent.SafeTryAddCount())
+            if (countdownEvent.TryAddCount())
             {
                 try
                 {
@@ -227,7 +227,7 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        /// Work only when enable <see cref="ScrcpyConfig.IsUseD3D11Shader"/>
         /// </summary>
         /// <returns></returns>
         public ScrcpyUiView InitScrcpyUiView()
@@ -238,7 +238,7 @@ namespace TqkLibrary.Scrcpy
         internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface, ref bool isNewtargetView)
         {
             bool result = false;
-            if (countdownEvent.SafeTryAddCount())
+            if (countdownEvent.SafeTryAddCount())//must safe because this is call from ui thread
             {
                 result = NativeWrapper.D3DImageViewRender(d3dView, this._handle, surface, isNewSurface, ref isNewtargetView);
                 countdownEvent.Signal();
@@ -250,7 +250,7 @@ namespace TqkLibrary.Scrcpy
         {
             int w = 0;
             int h = 0;
-            if (countdownEvent.SafeTryAddCount())
+            if (countdownEvent.TryAddCount())
             {
                 NativeWrapper.ScrcpyGetScreenSize(_handle, ref w, ref h);
                 countdownEvent.Signal();
