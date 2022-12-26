@@ -66,6 +66,16 @@ namespace TqkLibrary.Scrcpy.Wpf
           typeof(bool),
           typeof(ScrcpyControl),
           new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
+
+        public static readonly DependencyProperty MousePointerIdProperty = DependencyProperty.Register(
+          nameof(MousePointerId),
+          typeof(long),
+          typeof(ScrcpyControl),
+          new FrameworkPropertyMetadata(ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER, FrameworkPropertyMetadataOptions.None));
+
+
+
+
         public ScrcpyUiView ScrcpyUiView
         {
             get { return (ScrcpyUiView)GetValue(ScrcpyUiViewProperty); }
@@ -97,6 +107,15 @@ namespace TqkLibrary.Scrcpy.Wpf
             get { return (bool)GetValue(IsKeyHandlerProperty); }
             set { SetValue(IsKeyHandlerProperty, value); }
         }
+        /// <summary>
+        /// Default <see cref="ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER"/>
+        /// </summary>
+        public long MousePointerId
+        {
+            get { return (long)GetValue(MousePointerIdProperty); }
+            set { SetValue(MousePointerIdProperty, value); }
+        }
+
 
         public event OnUiChanged<System.Drawing.Size> OnResize;
 
@@ -251,7 +270,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                 if (isdown)
                     control.InjectTouchEvent(
                         AndroidMotionEventAction.ACTION_MOVE,
-                        ScrcpyMousePointerId.POINTER_ID_MOUSE,
+                        MousePointerId,
                         p,
                         1.0f,
                         HandleMouseButton(e));
@@ -356,7 +375,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                         else img.ReleaseMouseCapture();
                         control.InjectTouchEvent(
                             action,
-                            ScrcpyMousePointerId.POINTER_ID_MOUSE,
+                            MousePointerId,
                             point,
                             action == AndroidMotionEventAction.ACTION_DOWN ? 1.0f : 0.0f);
                         break;
