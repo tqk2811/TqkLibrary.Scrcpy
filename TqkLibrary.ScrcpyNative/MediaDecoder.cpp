@@ -32,14 +32,14 @@ MediaDecoder::~MediaDecoder() {
 bool MediaDecoder::Init() {
 	this->_codec_ctx = avcodec_alloc_context3(this->_codec);
 	if (this->_codec_ctx == NULL)
-		return false;
+		return FALSE;
 
 	this->_decoding_frame = av_frame_alloc();
 	if (this->_decoding_frame == NULL)
-		return false;
+		return FALSE;
 
 	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
-		return false;
+		return FALSE;
 	}
 
 
@@ -51,37 +51,55 @@ bool MediaDecoder::Init() {
 			nullptr,
 			nullptr,
 			0)))
-			return false;
+			return FALSE;
+	}
 
+	if (this->_nativeConfig.IsUseD3D11Shader)
+	{
 		switch (this->_hwType)
 		{
 		case AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA:
 		{
-			if (this->_nativeConfig.IsUseD3D11Shader) {
-				AVHWDeviceContext* hw_device_ctx = reinterpret_cast<AVHWDeviceContext*>(this->_codec_ctx->hw_device_ctx->data);
-				AVD3D11VADeviceContext* d3d11va_device_ctx = reinterpret_cast<AVD3D11VADeviceContext*>(hw_device_ctx->hwctx);
+			AVHWDeviceContext* hw_device_ctx = reinterpret_cast<AVHWDeviceContext*>(this->_codec_ctx->hw_device_ctx->data);
+			AVD3D11VADeviceContext* d3d11va_device_ctx = reinterpret_cast<AVD3D11VADeviceContext*>(hw_device_ctx->hwctx);
 
-				this->m_d3d11 = new D3DClass();
-				if (!this->m_d3d11->Initialize(d3d11va_device_ctx))
-					return false;
+			this->m_d3d11 = new D3DClass();
+			if (!this->m_d3d11->Initialize(d3d11va_device_ctx))
+				return false;
 
-				this->m_vertex = new VertexShaderClass();
-				if (!this->m_vertex->Initialize(this->m_d3d11->GetDevice()))
-					return false;
+			this->m_vertex = new VertexShaderClass();
+			if (!this->m_vertex->Initialize(this->m_d3d11->GetDevice()))
+				return false;
 
-				m_d3d11_inputNv12 = new InputTextureNv12Class();
-				m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
-				m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
-				m_d3d11_renderTexture = new RenderTextureClass();
+			m_d3d11_inputNv12 = new InputTextureNv12Class();
+			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
+			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
+			m_d3d11_renderTexture = new RenderTextureClass();
 
-			}
+			break;
+		}
+		case AVHWDeviceType::AV_HWDEVICE_TYPE_NONE:
+		{
+			this->m_d3d11 = new D3DClass();
+			if (!this->m_d3d11->Initialize())
+				return false;
+
+			this->m_vertex = new VertexShaderClass();
+			if (!this->m_vertex->Initialize(this->m_d3d11->GetDevice()))
+				return false;
+
+			m_d3d11_inputNv12 = new InputTextureNv12Class();
+			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
+			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
+			m_d3d11_renderTexture = new RenderTextureClass();
 			break;
 		}
 		default:
-			break;
+			return FALSE;
 		}
 	}
-	return true;
+
+	return TRUE;
 }
 
 bool MediaDecoder::Decode(const AVPacket* packet) {
@@ -102,7 +120,7 @@ bool MediaDecoder::Decode(const AVPacket* packet) {
 			auto start(std::chrono::high_resolution_clock::now());
 #endif
 			if ((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
-				_decoding_frame->format == AV_PIX_FMT_YUV420P)
+				_decoding_frame->format == AV_PIX_FMT_YUV420P)//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
 				if (this->m_d3d11_inputNv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
 				{
