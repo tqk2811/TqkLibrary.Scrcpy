@@ -94,7 +94,7 @@ namespace TqkLibrary.Scrcpy
 
         /// <summary>
         /// Use directx 11 for convert image.<br>
-        /// </br>Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/>
+        /// </br>Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/> or <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/>
         /// </summary>
         public bool IsUseD3D11Shader { get; set; } = false;
 
