@@ -45,8 +45,8 @@ namespace TestRenderWpf
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
             scrcpy.Connect(new ScrcpyConfig()
             {
-                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
+                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
                 IsUseD3D11Shader = true,
                 IsControl = true,
                 MaxFps = 24,
@@ -60,8 +60,8 @@ namespace TestRenderWpf
             await adb.WaitFor(WaitForType.Device).ExecuteAsync();
             scrcpy.Connect(new ScrcpyConfig()
             {
-                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
+                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
                 IsUseD3D11Shader = true,
                 IsControl = true,
                 MaxFps = 24,

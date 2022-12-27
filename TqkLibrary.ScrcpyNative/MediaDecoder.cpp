@@ -312,6 +312,7 @@ bool MediaDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
+				device_ctx->Flush();
 
 #if _DEBUG
 				auto finish(std::chrono::high_resolution_clock::now());
