@@ -227,6 +227,7 @@ bool MediaDecoder::Nv12Convert(AVFrame* frame) {
 		this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 		device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
 
+		device_ctx->Flush();
 		return this->m_d3d11_renderTexture->GetImage(device_ctx.Get(), _decoding_frame, frame);
 	}
 	return false;
