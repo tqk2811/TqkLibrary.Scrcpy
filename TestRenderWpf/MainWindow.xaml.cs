@@ -43,15 +43,18 @@ namespace TestRenderWpf
             scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
             mainWindowVM.Control = new ControlChain(scrcpy.Control);
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
-            scrcpy.Connect(new ScrcpyConfig()
+            if (!scrcpy.Connect(new ScrcpyConfig()
             {
                 HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
                 //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
                 IsUseD3D11Shader = true,
                 IsControl = true,
                 MaxFps = 24,
-                ConnectionTimeout = 3000
-            });
+                ConnectionTimeout = 10000
+            }))
+            {
+                MessageBox.Show("Connect Failed");
+            }
         }
 
         private async void Scrcpy_OnDisconnect()
