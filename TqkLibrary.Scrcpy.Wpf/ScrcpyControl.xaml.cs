@@ -38,40 +38,40 @@ namespace TqkLibrary.Scrcpy.Wpf
         /// 
         /// </summary>
         public static readonly DependencyProperty ScrcpyUiViewProperty = DependencyProperty.Register(
-          nameof(ScrcpyUiView),
-          typeof(ScrcpyUiView),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
+            nameof(ScrcpyUiView),
+            typeof(ScrcpyUiView),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty ControlProperty = DependencyProperty.Register(
-          nameof(Control),
-          typeof(IControl),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
+            nameof(Control),
+            typeof(IControl),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty IsControlProperty = DependencyProperty.Register(
-          nameof(IsControl),
-          typeof(bool),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.None));
+            nameof(IsControl),
+            typeof(bool),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(true, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty IsMouseHandlerProperty = DependencyProperty.Register(
-          nameof(IsMouseHandler),
-          typeof(bool),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
+            nameof(IsMouseHandler),
+            typeof(bool),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty IsKeyHandlerProperty = DependencyProperty.Register(
-          nameof(IsKeyHandler),
-          typeof(bool),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
+            nameof(IsKeyHandler),
+            typeof(bool),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
 
         public static readonly DependencyProperty MousePointerIdProperty = DependencyProperty.Register(
-          nameof(MousePointerId),
-          typeof(long),
-          typeof(ScrcpyControl),
-          new FrameworkPropertyMetadata(ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER, FrameworkPropertyMetadataOptions.None));
+            nameof(MousePointerId),
+            typeof(long),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER, FrameworkPropertyMetadataOptions.None));
 
 
 
