@@ -156,7 +156,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="repeat"></param>
         /// <param name="releaseDelay"></param>
         /// <param name="cancellationToken"></param>
-        public static void Key(this IControl control, AndroidKeyCode androidKeyCode, uint repeat = 1, int releaseDelay = 100, CancellationToken cancellationToken = default)
+        public static void Key(this IControl control, AndroidKeyCode androidKeyCode, uint repeat = 0, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
             control.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, androidKeyCode, repeat, AndroidKeyEventMeta.META_NONE);
             Task.Delay(releaseDelay, cancellationToken).Wait();
@@ -171,7 +171,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="releaseDelay"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public static async Task KeyAsync(this IControl control, AndroidKeyCode androidKeyCode, uint repeat = 1, int releaseDelay = 100, CancellationToken cancellationToken = default)
+        public static async Task KeyAsync(this IControl control, AndroidKeyCode androidKeyCode, uint repeat = 0, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
             control.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, androidKeyCode, repeat, AndroidKeyEventMeta.META_NONE);
             await Task.Delay(releaseDelay, cancellationToken);

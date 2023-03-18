@@ -47,7 +47,7 @@ namespace TqkLibrary.Scrcpy
         bool InjectKeycode(
                                     AndroidKeyEventAction action,
                                     AndroidKeyCode keycode,
-                                    uint repeat = 1,
+                                    uint repeat = 0,
                                     AndroidKeyEventMeta metaState = AndroidKeyEventMeta.META_NONE);
 
         /// <summary>
