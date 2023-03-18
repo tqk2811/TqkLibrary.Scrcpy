@@ -71,7 +71,7 @@ namespace TqkLibrary.Scrcpy.Wpf
         public bool GetClipboard(CopyKey copyKey = CopyKey.None)
             => this.First().GetClipboard(copyKey);
 
-        public bool InjectKeycode(AndroidKeyEventAction action, AndroidKeyCode keycode, uint repeat = 1, AndroidKeyEventMeta metaState = AndroidKeyEventMeta.META_NONE)
+        public bool InjectKeycode(AndroidKeyEventAction action, AndroidKeyCode keycode, uint repeat = 0, AndroidKeyEventMeta metaState = AndroidKeyEventMeta.META_NONE)
             => this.FixAll(x => x.InjectKeycode(action, keycode, repeat, metaState));
 
         public bool InjectScrollEvent(Rectangle position, float vScroll, float hScroll = 0, AndroidMotionEventButton button = AndroidMotionEventButton.BUTTON_PRIMARY)
