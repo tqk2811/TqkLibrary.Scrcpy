@@ -207,7 +207,7 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 			result = true;
 		}
 		else if (
-			sourceFrame->linesize[0] < map.RowPitch &&
+			(UINT)sourceFrame->linesize[0] < map.RowPitch &&
 			map.DepthPitch == map.RowPitch * 3 * sourceFrame->height / 2)
 		{
 			for (int row = 0; row < sourceFrame->height; row++)
