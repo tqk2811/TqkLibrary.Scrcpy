@@ -95,7 +95,7 @@ namespace TqkLibrary.Scrcpy
             //scrcpy
             if (!ServerConfig.IsControl) args.Add($"control=false"); // By default, control is true
             args.Add($"log_level={ServerConfig.LogLevel.ToString().ToLower()}");
-            args.Add($"scid={ServerConfig.SCID:X4}");
+            if (ServerConfig.SCID != -1) args.Add($"scid={(ServerConfig.SCID & 0x7FFFFFFF):X4}");
             if (!ServerConfig.ClipboardAutosync) args.Add($"clipboard_autosync=false");// By default, clipboard_autosync is true
             if (!ServerConfig.Cleanup) args.Add($"cleanup=false");// By default, cleanup is true
 
