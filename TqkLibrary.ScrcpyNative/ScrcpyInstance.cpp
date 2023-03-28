@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Scrcpy_pch.h"
 #include <chrono>
+#include <sstream>
+#include <iomanip>
 
 #define IPV4_LOCALHOST 0x7F000001
 const int portMin = 5000;
@@ -138,20 +140,34 @@ bool ScrcpyInstance::Start() {
 	}
 	this->_wsa_isStartUp = true;
 
-	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
-	std::wstring push(L"push ");
-	push.append(this->_nativeConfig.ScrcpyServerPath);
-	push.append(L" " SCRCPY_INSTALL_PATH);
+	std::wstringstream scid_prefix;
+	scid_prefix << L"localabstract:scrcpy";
+	if (this->_nativeConfig.SCID != -1)
+	{
+		scid_prefix << L"_" << std::hex << (this->_nativeConfig.SCID && 0x7FFFFFFF);
+	}
+	auto scid_prefix_str = scid_prefix.str();
 
-	exitCode = RunAdbProcess(push.c_str());
+
+	std::wstring arg(L"reverse --remove ");
+	arg.append(scid_prefix_str);
+	DWORD exitCode = RunAdbProcess(arg.c_str());
+
+
+	arg = L"push ";
+	arg.append(this->_nativeConfig.ScrcpyServerPath);
+	arg.append(L" " SCRCPY_INSTALL_PATH);
+	exitCode = RunAdbProcess(arg.c_str());
 	if (exitCode != 0) {
 		return false;
 	}
+
 
 	int backlog = 1;
 	if (this->_nativeConfig.IsAudio) backlog += 1;
 	if (this->_nativeConfig.IsControl) backlog += 1;
 	const timeval timeout{ 2 , 0 };
+
 
 	int port = -1;
 	this->_listenSock = FindPort(port, backlog, timeout);
@@ -159,13 +175,16 @@ bool ScrcpyInstance::Start() {
 		return false;
 	}
 
-	//port += 5;//test on failed connect
-	std::wstring arg(L"reverse localabstract:scrcpy tcp:");
+
+	arg = L"reverse ";
+	arg.append(scid_prefix_str);
+	arg.append(L" tcp:");
 	arg.append(std::to_wstring(port));
 	exitCode = RunAdbProcess(arg.c_str());
 	if (exitCode != 0) {
 		return false;
 	}
+
 
 	//run main process
 	LPCWSTR cmds[5]
@@ -176,13 +195,14 @@ bool ScrcpyInstance::Start() {
 		L"app_process / com.genymobile.scrcpy.Server",
 		this->_nativeConfig.ConfigureArguments,
 	};
-	std::wstring args(this->_nativeConfig.AdbPath);
+	arg = this->_nativeConfig.AdbPath;
 	for (int i = 0; i < 5; i++)
 	{
-		args.append(L" ");
-		args.append(cmds[i]);
+		arg.append(L" ");
+		arg.append(cmds[i]);
 	}
-	this->_process = new ProcessWrapper((LPWSTR)args.c_str());
+	this->_process = new ProcessWrapper((LPWSTR)arg.c_str());
+
 
 
 	SOCKET video_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
@@ -194,6 +214,7 @@ bool ScrcpyInstance::Start() {
 		return false;
 	}
 
+
 	SOCKET audio_sock = INVALID_SOCKET;
 	if (this->_nativeConfig.IsAudio)
 	{
@@ -204,6 +225,7 @@ bool ScrcpyInstance::Start() {
 		this->_audio = new Audio(this->_scrcpy, audio_sock, this->_nativeConfig);
 	}
 
+
 	SOCKET control_sock = INVALID_SOCKET;
 	if (this->_nativeConfig.IsControl) {
 		control_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
@@ -213,11 +235,13 @@ bool ScrcpyInstance::Start() {
 		this->_control = new Control(this->_scrcpy, control_sock);
 	}
 
+
 	this->_video->Start();//start video thread
 	if (this->_nativeConfig.IsAudio)
-		this->_audio->Start();//start control thread
+		this->_audio->Start();//start audio thread
 	if (this->_nativeConfig.IsControl)
 		this->_control->Start();//start control thread
+
 
 	//close listen sock
 	closesocket(this->_listenSock);
