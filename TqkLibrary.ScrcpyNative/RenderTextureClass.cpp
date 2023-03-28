@@ -118,7 +118,7 @@ bool RenderTextureClass::GetImage(ID3D11DeviceContext* deviceContext, const AVFr
 		return false;
 
 	int size = av_image_get_buffer_size(AVPixelFormat::AV_PIX_FMT_BGRA, source->width, source->height, 1);
-	if ((size <= ms.DepthPitch) && (ms.RowPitch * source->height == ms.DepthPitch))
+	if ((size > 0) && ((UINT)size <= ms.DepthPitch) && (ms.RowPitch * source->height == ms.DepthPitch))
 	{
 		av_frame_unref(received);
 		AVBufferRef* dataref = av_buffer_alloc(size);
@@ -143,7 +143,7 @@ bool RenderTextureClass::GetImage(ID3D11DeviceContext* deviceContext, const AVFr
 				memcpy(dataref->data, ms.pData, ms.DepthPitch);
 				result = true;
 			}
-			else if (received->linesize[0] < ms.RowPitch)
+			else if ((UINT)received->linesize[0] < ms.RowPitch)
 			{
 				for (UINT64 i = 0; i < source->height; i++)
 				{

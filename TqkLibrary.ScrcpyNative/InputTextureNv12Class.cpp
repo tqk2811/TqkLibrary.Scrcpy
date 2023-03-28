@@ -148,7 +148,7 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 	if (sourceFrame->format == AV_PIX_FMT_D3D11 && sourceFrame->hw_frames_ctx != nullptr)
 	{
 		ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)sourceFrame->data[0];
-		const int texture_index = (int)sourceFrame->data[1];
+		const UINT64 texture_index = (UINT64)sourceFrame->data[1];
 
 		D3D11_TEXTURE2D_DESC desc{ 0 };
 		texture->GetDesc(&desc);
@@ -163,7 +163,7 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 
 		device_ctx->CopySubresourceRegion(
 			this->m_texture_nv12.Get(), 0, 0, 0, 0,
-			texture.Get(), texture_index, &box
+			texture.Get(), (UINT32)texture_index, &box
 		);
 		return true;
 	}
@@ -203,11 +203,11 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 			(map.DepthPitch == 0 || map.DepthPitch == totalSize))
 		{
 			memcpy(map.pData, sourceFrame->data[0], y_size);
-			planar_to_interleave(uv_size, (uint8_t*)((UINT64)map.pData + y_size), sourceFrame->data[1], sourceFrame->data[2]);
+			planar_to_interleave((UINT32)uv_size, (uint8_t*)((UINT64)map.pData + y_size), sourceFrame->data[1], sourceFrame->data[2]);
 			result = true;
 		}
 		else if (
-			sourceFrame->linesize[0] < map.RowPitch &&
+			(UINT)sourceFrame->linesize[0] < map.RowPitch &&
 			map.DepthPitch == map.RowPitch * 3 * sourceFrame->height / 2)
 		{
 			for (int row = 0; row < sourceFrame->height; row++)

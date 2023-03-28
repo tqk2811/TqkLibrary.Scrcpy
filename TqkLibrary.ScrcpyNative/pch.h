@@ -11,19 +11,18 @@
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 
-typedef struct ScrcpyNativeConfig;
+typedef struct ScrcpyNativeConfig ScrcpyNativeConfig;
 #ifdef TQKLIBRARYSCRCPYNATIVE_EXPORTS
-typedef class Scrcpy;
-typedef class ScrcpyInstance;
-typedef struct ScrcpyNativeConfig;
+typedef class Scrcpy Scrcpy;
+typedef class ScrcpyInstance ScrcpyInstance;
 
-typedef class SocketWrapper;
-typedef class ProcessWrapper;
+typedef class SocketWrapper SocketWrapper;
+typedef class ProcessWrapper ProcessWrapper;
 
-typedef class Control;
-typedef class Video;
-typedef class ParsePacket;
-typedef class MediaDecoder;
+typedef class Control Control;
+typedef class Video Video;
+typedef class ParsePacket ParsePacket;
+typedef class MediaDecoder MediaDecoder;
 #include <windows.h>
 #include <string>
 #include <winsock2.h>

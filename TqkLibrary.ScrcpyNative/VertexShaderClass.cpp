@@ -33,7 +33,7 @@ bool VertexShaderClass::Initialize(ID3D11Device* d3d11_device) {
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	} };
 
-	hr = d3d11_device->CreateInputLayout(Layout.data(), Layout.size(), g_VS, Size, this->m_d3d11_inputLayout.GetAddressOf());
+	hr = d3d11_device->CreateInputLayout(Layout.data(), (UINT)Layout.size(), g_VS, Size, this->m_d3d11_inputLayout.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 

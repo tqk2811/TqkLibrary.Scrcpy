@@ -34,7 +34,7 @@ void PixelShaderNv12ToRgbaClass::Set(ID3D11DeviceContext* d3d11_deviceCtx, ID3D1
 	d3d11_deviceCtx->PSSetSamplers(0, 1, this->m_d3d11_samplerState.GetAddressOf());
 
 	std::array<ID3D11ShaderResourceView*, 2> const textureViews = { luminance, chrominance };
-	d3d11_deviceCtx->PSSetShaderResources(0, textureViews.size(), textureViews.data());
+	d3d11_deviceCtx->PSSetShaderResources(0, (UINT)textureViews.size(), textureViews.data());
 
 }
 void PixelShaderNv12ToRgbaClass::Shutdown() {

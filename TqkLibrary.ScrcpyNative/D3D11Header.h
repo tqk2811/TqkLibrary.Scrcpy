@@ -9,17 +9,17 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-typedef class D3DClass;
+typedef class D3DClass D3DClass;
 
-typedef class InputTextureNv12Class;
+typedef class InputTextureNv12Class InputTextureNv12Class;
 
-typedef class PixelShaderNv12ToBgraClass;
-typedef class PixelShaderNv12ToRgbaClass;
+typedef class PixelShaderNv12ToBgraClass PixelShaderNv12ToBgraClass;
+typedef class PixelShaderNv12ToRgbaClass PixelShaderNv12ToRgbaClass;
 
-typedef class RenderTextureClass;
-typedef class RenderTextureSurfaceClass;
+typedef class RenderTextureClass RenderTextureClass;
+typedef class RenderTextureSurfaceClass RenderTextureSurfaceClass;
 
-typedef class VertexShaderClass;
+typedef class VertexShaderClass VertexShaderClass;
 
 #include "D3DClass.h"
 
