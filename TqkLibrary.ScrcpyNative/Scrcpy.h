@@ -4,7 +4,7 @@ class Scrcpy
 {
 	friend ScrcpyInstance;
 	friend Video;
-	friend Audio;
+	//friend Audio;
 	friend Control;
 public:
 	Scrcpy(LPCWSTR deviceId);
