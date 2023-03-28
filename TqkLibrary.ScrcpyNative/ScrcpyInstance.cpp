@@ -6,6 +6,7 @@
 const int portMin = 5000;
 const int portMax = 65535;
 const int sockTimeoutSecond = 5;
+#define SCRCPY_INSTALL_PATH L"/sdcard/scrcpy-server-tqk.jar"
 
 SOCKET CreateListenSock(int port, int backlog, const timeval timeout) {
 	SOCKET sock = socket(AF_INET, SOCK_STREAM, NULL);
@@ -140,7 +141,7 @@ bool ScrcpyInstance::Start() {
 	DWORD exitCode = RunAdbProcess(L"reverse --remove localabstract:scrcpy");
 	std::wstring push(L"push ");
 	push.append(this->_nativeConfig.ScrcpyServerPath);
-	push.append(L" /sdcard/scrcpy-server-tqk.jar");
+	push.append(L" " SCRCPY_INSTALL_PATH);
 
 	exitCode = RunAdbProcess(push.c_str());
 	if (exitCode != 0) {
@@ -170,7 +171,7 @@ bool ScrcpyInstance::Start() {
 	{
 		L"-s",
 		this->_scrcpy->_deviceId.c_str(),
-		L"shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar",
+		L"shell CLASSPATH=" SCRCPY_INSTALL_PATH,
 		L"app_process / com.genymobile.scrcpy.Server",
 		this->_nativeConfig.ConfigureArguments,
 	};
