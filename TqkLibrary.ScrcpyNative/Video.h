@@ -25,7 +25,6 @@ private:
 	ParsePacket* _parsePacket{ nullptr };
 	VideoDecoder* _videoDecoder{ nullptr };
 	SocketWrapper* _videoSock{ nullptr };
-	BYTE* _videoBuffer{ nullptr };
 
 	HANDLE _mtx_waitFirstFrame{ INVALID_HANDLE_VALUE };
 

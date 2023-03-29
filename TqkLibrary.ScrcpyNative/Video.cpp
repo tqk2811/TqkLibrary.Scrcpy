@@ -1,18 +1,11 @@
 #include "pch.h"
 #include "Utils.h"
 #include "Scrcpy_pch.h"
-#define PACKET_BUFFER_SIZE 1 << 18//256k
-#define HEADER_SIZE 12
-#define NO_PTS UINT64_MAX
 
-#define SC_PACKET_FLAG_CONFIG    (UINT64_C(1) << 63)
-#define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 62)
-#define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
 
 Video::Video(Scrcpy* scrcpy, SOCKET sock, const ScrcpyNativeConfig& nativeConfig) {
 	this->_scrcpy = scrcpy;
 	this->_videoSock = new SocketWrapper(sock);
-	this->_videoBuffer = new BYTE[HEADER_SIZE];
 	this->_nativeConfig = nativeConfig;
 }
 
@@ -23,8 +16,6 @@ Video::~Video() {
 		delete this->_videoDecoder;
 	if (this->_videoSock)
 		delete this->_videoSock;
-	if (this->_videoBuffer)
-		delete this->_videoBuffer;
 	CloseHandle(this->_threadHandle);
 	CloseHandle(this->_mtx_waitFirstFrame);
 }
@@ -71,15 +62,15 @@ bool Video::WaitForFirstFrame(DWORD timeout) {
 }
 
 void Video::threadStart() {
-	this->_videoSock->ChangeBufferSize(PACKET_BUFFER_SIZE);
-
-	if (this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) != HEADER_SIZE)
+	this->_videoSock->ChangeBufferSize();
+	BYTE header_buffer[HEADER_SIZE];
+	if (this->_videoSock->ReadAll(header_buffer, HEADER_SIZE) != HEADER_SIZE)
 		return;
-	uint32_t raw_codec_id = sc_read32be(this->_videoBuffer);
+	uint32_t raw_codec_id = sc_read32be(header_buffer);
 
 #if _DEBUG
-	uint32_t width = sc_read32be(this->_videoBuffer + 4);
-	uint32_t height = sc_read32be(this->_videoBuffer + 8);
+	uint32_t width = sc_read32be(header_buffer + 4);
+	uint32_t height = sc_read32be(header_buffer + 8);
 	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
 	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
 #endif
