@@ -2,7 +2,6 @@
 #define _H_Scrcpy_H_
 class Scrcpy
 {
-	friend ScrcpyInstance;
 public:
 	Scrcpy(LPCWSTR deviceId);
 	~Scrcpy();
@@ -21,6 +20,7 @@ public:
 	void VideoDisconnectCallback();
 	void ControlClipboardCallback(BYTE* buffer, int length);
 	void ControlClipboardAcknowledgementCallback(UINT64 sequence);
+	LPCWSTR GetDeviceId();
 private:
 	//const
 	std::wstring _deviceId;

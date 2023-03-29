@@ -119,7 +119,7 @@ DWORD ScrcpyInstance::RunAdbProcess(LPCWSTR argument)
 	LPCWSTR cmds[]
 	{
 		L"-s",
-		this->_scrcpy->_deviceId.c_str(),
+		this->_scrcpy->GetDeviceId(),
 		argument
 	};
 	std::wstring args(this->_nativeConfig.AdbPath);
@@ -191,7 +191,7 @@ bool ScrcpyInstance::Start() {
 	LPCWSTR cmds[5]
 	{
 		L"-s",
-		this->_scrcpy->_deviceId.c_str(),
+		this->_scrcpy->GetDeviceId(),
 		L"shell CLASSPATH=" SCRCPY_INSTALL_PATH,
 		L"app_process / com.genymobile.scrcpy.Server",
 		this->_nativeConfig.ConfigureArguments,

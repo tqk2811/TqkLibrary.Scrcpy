@@ -152,3 +152,7 @@ void Scrcpy::ControlClipboardCallback(BYTE* buffer, int length) {
 void Scrcpy::ControlClipboardAcknowledgementCallback(UINT64 sequence) {
 	if (this->clipboardAcknowledgementCallback) this->clipboardAcknowledgementCallback(sequence);
 }
+
+LPCWSTR Scrcpy::GetDeviceId() {
+	return this->_deviceId.c_str();
+}
