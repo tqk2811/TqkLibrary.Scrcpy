@@ -13,6 +13,7 @@ public:
 	bool ChangeBlockMode(bool isBlock);
 	bool ChangeBufferSize(int sizeInByte = PACKET_BUFFER_SIZE);
 	bool ReadPackage(AVPacket* packet);
+	AVCodecID ReadCodecId();
 private:
 	SOCKET _sock;
 };

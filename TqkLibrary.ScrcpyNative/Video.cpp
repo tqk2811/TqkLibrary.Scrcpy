@@ -63,26 +63,27 @@ bool Video::WaitForFirstFrame(DWORD timeout) {
 
 void Video::threadStart() {
 	this->_videoSock->ChangeBufferSize();
-	BYTE header_buffer[HEADER_SIZE];
-	if (this->_videoSock->ReadAll(header_buffer, HEADER_SIZE) != HEADER_SIZE)
+
+	AVCodecID codecId = this->_videoSock->ReadCodecId();
+	const AVCodec* codec_decoder = avcodec_find_decoder(codecId);
+	if (!codec_decoder)
 		return;
-	uint32_t raw_codec_id = sc_read32be(header_buffer);
+
+
+
+	BYTE screenSize_buffer[8];
+	if (this->_videoSock->ReadAll(screenSize_buffer, HEADER_SIZE) != HEADER_SIZE)
+		return;
+	uint32_t raw_codec_id = sc_read32be(screenSize_buffer);
 
 #if _DEBUG
-	uint32_t width = sc_read32be(header_buffer + 4);
-	uint32_t height = sc_read32be(header_buffer + 8);
+	uint32_t width = sc_read32be(screenSize_buffer);
+	uint32_t height = sc_read32be(screenSize_buffer + 4);
 	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
 	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
 #endif
 
-	if (raw_codec_id == 0 ||	//stream explicitly disabled by the device
-		raw_codec_id == 1)		//stream configuration error on the device
-		return;
 
-	AVCodecID codecId = sc_demuxer_to_avcodec_id(raw_codec_id);
-	const AVCodec* codec_decoder = avcodec_find_decoder(codecId);
-	if (!codec_decoder)
-		return;
 
 	this->_parsePacket = new ParsePacket(codec_decoder);
 	if (!this->_parsePacket->Init())

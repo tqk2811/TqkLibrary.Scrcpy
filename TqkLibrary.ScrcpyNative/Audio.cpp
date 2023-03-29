@@ -39,17 +39,7 @@ DWORD Audio::MyThreadFunction(LPVOID lpParam) {
 void Audio::threadStart() {
 	this->_audioSock->ChangeBufferSize();
 
-	BYTE codec_buffer[4];
-
-	if (this->_audioSock->ReadAll(codec_buffer, 4) != 4)
-		return;
-	uint32_t raw_codec_id = sc_read32be(codec_buffer);
-
-	if (raw_codec_id == 0 ||	//stream explicitly disabled by the device
-		raw_codec_id == 1)		//stream configuration error on the device
-		return;
-
-	AVCodecID codecId = sc_demuxer_to_avcodec_id(raw_codec_id);
+	AVCodecID codecId = this->_audioSock->ReadCodecId();
 	const AVCodec* codec_decoder = avcodec_find_decoder(codecId);
 	if (!codec_decoder)
 		return;

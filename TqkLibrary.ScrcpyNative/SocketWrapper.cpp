@@ -40,7 +40,7 @@ bool SocketWrapper::ReadPackage(AVPacket* packet) {
 #define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 62)
 #define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
 
-	if (!packet) 
+	if (!packet)
 		return false;
 
 	BYTE header_buffer[HEADER_SIZE];
@@ -72,4 +72,17 @@ bool SocketWrapper::ReadPackage(AVPacket* packet) {
 
 	packet->dts = packet->pts;
 	return true;
+}
+AVCodecID SocketWrapper::ReadCodecId() {
+	BYTE codec_buffer[4];
+	if (this->ReadAll(codec_buffer, 4) != 4)
+		return;
+
+	uint32_t raw_codec_id = sc_read32be(codec_buffer);
+
+	if (raw_codec_id == 0 ||	//stream explicitly disabled by the device
+		raw_codec_id == 1)		//stream configuration error on the device
+		return AVCodecID::AV_CODEC_ID_NONE;
+
+	return sc_demuxer_to_avcodec_id(raw_codec_id);
 }
