@@ -27,7 +27,7 @@ void Audio::Stop() {
 		WaitForSingleObject(this->_threadHandle, INFINITE);
 }
 bool Audio::Init() {
-	return true;
+	return this->_audioSock->ChangeBlockMode(true);
 }
 
 DWORD Audio::MyThreadFunction(LPVOID lpParam) {
