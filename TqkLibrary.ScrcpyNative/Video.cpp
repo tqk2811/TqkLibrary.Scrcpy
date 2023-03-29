@@ -153,6 +153,7 @@ void Video::threadStart() {
 			}
 			else
 			{
+				av_packet_unref(&packet);
 				return;
 			}
 		}
