@@ -20,6 +20,7 @@ bool ParsePacket::Init() {
 	if (this->_codec_ctx == nullptr)
 		return false;
 
+	this->_codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
 
 	this->_parser = av_parser_init(this->_codec_decoder->id);
 	if (this->_parser == nullptr)
