@@ -158,9 +158,9 @@ namespace TqkLibrary.Scrcpy
 
 
         /// <summary>
-        /// 1.25
+        /// 2.0
         /// </summary>
-        public string ScrcpyServerVersion { get; } = "1.25";
+        public string ScrcpyServerVersion { get; } = "2.0";
 
 
 
