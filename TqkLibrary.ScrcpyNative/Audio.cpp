@@ -1,19 +1,11 @@
 #include "pch.h"
 #include "Scrcpy_pch.h"
-#define PACKET_BUFFER_SIZE 1 << 18//256k
-#define HEADER_SIZE 12
-
-#define SC_PACKET_FLAG_CONFIG    (UINT64_C(1) << 63)
-#define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 62)
-#define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
 
 Audio::Audio(Scrcpy* scrcpy, SOCKET sock, const ScrcpyNativeConfig& nativeConfig) {
 	this->_scrcpy = scrcpy;
 	this->_audioSock = new SocketWrapper(sock);
-	this->_audioBuffer = new BYTE[HEADER_SIZE];
 }
 Audio::~Audio() {
-	delete this->_audioBuffer;
 	delete this->_audioSock;
 	CloseHandle(this->_threadHandle);
 }
@@ -45,11 +37,13 @@ DWORD Audio::MyThreadFunction(LPVOID lpParam) {
 	return 0;
 }
 void Audio::threadStart() {
-	this->_audioSock->ChangeBufferSize(PACKET_BUFFER_SIZE);
+	this->_audioSock->ChangeBufferSize();
 
-	if (this->_audioSock->ReadAll(this->_audioBuffer, 4) != 4)
+	BYTE codec_buffer[4];
+
+	if (this->_audioSock->ReadAll(codec_buffer, 4) != 4)
 		return;
-	uint32_t raw_codec_id = sc_read32be(this->_audioBuffer);
+	uint32_t raw_codec_id = sc_read32be(codec_buffer);
 
 	if (raw_codec_id == 0 ||	//stream explicitly disabled by the device
 		raw_codec_id == 1)		//stream configuration error on the device

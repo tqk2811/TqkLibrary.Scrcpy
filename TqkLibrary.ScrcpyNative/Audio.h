@@ -17,7 +17,6 @@ private:
 
 
 	ParsePacket* _parsePacket{ nullptr };
-	BYTE* _audioBuffer{ nullptr };
 	SocketWrapper* _audioSock{ nullptr };
 
 
