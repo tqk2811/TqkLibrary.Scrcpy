@@ -142,3 +142,6 @@ bool Scrcpy::RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate) 
 	this->disconnectCallback = onDisconnectDelegate;
 	return true;
 }
+void Scrcpy::VideoDisconnectCallback() {
+	if (this->disconnectCallback) this->disconnectCallback();
+}

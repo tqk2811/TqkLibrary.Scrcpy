@@ -61,7 +61,7 @@ DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
 	Video* video = (Video*)lpParam;
 	video->threadStart();
 	video->_isStopped = true;
-	video->_scrcpy->disconnectCallback();
+	video->_scrcpy->VideoDisconnectCallback();
 	return 0;
 }
 

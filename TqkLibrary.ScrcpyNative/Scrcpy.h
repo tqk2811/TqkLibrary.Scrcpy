@@ -19,6 +19,7 @@ public:
 	bool RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate);
 
 	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
+	void VideoDisconnectCallback();
 private:
 	//const
 	std::wstring _deviceId;
