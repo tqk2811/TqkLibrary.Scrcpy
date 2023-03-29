@@ -12,7 +12,7 @@ public:
 	bool ControlCommand(const BYTE* command, const int sizeInByte);
 private:
 	//no need delete
-	const Scrcpy* scrcpy{ nullptr };
+	Scrcpy* scrcpy{ nullptr };
 
 	//need delete
 	SocketWrapper* _sockControl{ nullptr };

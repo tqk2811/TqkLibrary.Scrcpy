@@ -3,7 +3,6 @@
 class Scrcpy
 {
 	friend ScrcpyInstance;
-	friend Control;
 public:
 	Scrcpy(LPCWSTR deviceId);
 	~Scrcpy();
@@ -20,6 +19,8 @@ public:
 
 	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
 	void VideoDisconnectCallback();
+	void ControlClipboardCallback(BYTE* buffer, int length);
+	void ControlClipboardAcknowledgementCallback(UINT64 sequence);
 private:
 	//const
 	std::wstring _deviceId;

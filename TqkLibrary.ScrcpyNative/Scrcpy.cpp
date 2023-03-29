@@ -145,3 +145,10 @@ bool Scrcpy::RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate) 
 void Scrcpy::VideoDisconnectCallback() {
 	if (this->disconnectCallback) this->disconnectCallback();
 }
+
+void Scrcpy::ControlClipboardCallback(BYTE* buffer, int length) {
+	if (this->clipboardCallback) this->clipboardCallback(buffer, length);
+}
+void Scrcpy::ControlClipboardAcknowledgementCallback(UINT64 sequence) {
+	if (this->clipboardAcknowledgementCallback) this->clipboardAcknowledgementCallback(sequence);
+}

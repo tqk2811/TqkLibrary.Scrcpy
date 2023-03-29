@@ -7,7 +7,7 @@ enum ScrcpyControlReceivedType : BYTE
 	DEVICE_MSG_TYPE_CLIPBOARD = 0,
 	DEVICE_MSG_TYPE_ACK_CLIPBOARD = 1,
 };
-Control::Control(const Scrcpy* scrcpy, SOCKET sock) {
+Control::Control(Scrcpy* scrcpy, SOCKET sock) {
 	this->scrcpy = scrcpy;
 	this->_sockControl = new SocketWrapper(sock);
 	this->_buffer = new BYTE[CONTROL_MSG_MAX_SIZE];
@@ -70,16 +70,9 @@ void Control::threadStart() {
 
 				if (this->_sockControl->ReadAll(this->_buffer, len) != len)
 					return;
+			}
+			this->scrcpy->ControlClipboardCallback(this->_buffer, len);
 
-				//send to c#
-				if (this->scrcpy->clipboardCallback != nullptr)
-					this->scrcpy->clipboardCallback(this->_buffer, len);
-			}
-			else
-			{
-				if (this->scrcpy->clipboardCallback != nullptr)//string.Empty
-					this->scrcpy->clipboardCallback(this->_buffer, len);
-			}
 			break;
 		}
 		case DEVICE_MSG_TYPE_ACK_CLIPBOARD:
@@ -87,8 +80,7 @@ void Control::threadStart() {
 			if (this->_sockControl->ReadAll(this->_buffer, 8) != 8)
 				return;
 			UINT64 sequence = sc_read64be(this->_buffer);
-			if (this->scrcpy->clipboardAcknowledgementCallback != nullptr)//string.Empty
-				this->scrcpy->clipboardAcknowledgementCallback(sequence);
+			this->scrcpy->ControlClipboardAcknowledgementCallback(sequence);
 			break;
 		}
 		default:
