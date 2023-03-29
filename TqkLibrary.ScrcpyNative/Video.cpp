@@ -103,37 +103,15 @@ void Video::threadStart() {
 
 	while (!this->_isStopMainLoop)
 	{
-		if (this->_videoSock->ReadAll(this->_videoBuffer, HEADER_SIZE) != HEADER_SIZE)
-			return;
-
-		UINT64 pts_flags = sc_read64be(this->_videoBuffer);
-		INT32 len = sc_read32be(&this->_videoBuffer[8]);
-
 		AVPacket packet;
-		if (!avcheck(av_new_packet(&packet, len))) {
-			return;
-		}
-
-		if (this->_videoSock->ReadAll(packet.data, len) != len)
+		if (!this->_videoSock->ReadPackage(&packet))
 		{
 			av_packet_unref(&packet);
 			return;
 		}
-		if (pts_flags & SC_PACKET_FLAG_CONFIG) {
-			packet.pts = AV_NOPTS_VALUE;
-		}
-		else {
-			packet.pts = pts_flags & SC_PACKET_PTS_MASK;
-		}
-
-		if (pts_flags & SC_PACKET_FLAG_KEY_FRAME) {
-			packet.flags |= AV_PKT_FLAG_KEY;
-		}
-
-		packet.dts = packet.pts;
 
 #if _DEBUG
-		printf(std::string("Video pts:").append(std::to_string(packet.pts)).append("  ,len:").append(std::to_string(len)).append("\r\n").c_str());
+		printf(std::string("Video pts:").append(std::to_string(packet.pts)).append("  ,len:").append(std::to_string(packet.size)).append("\r\n").c_str());
 #endif
 
 		if (this->_parsePacket->ParserPushPacket(&packet))

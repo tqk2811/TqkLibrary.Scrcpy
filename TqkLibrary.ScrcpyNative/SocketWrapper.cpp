@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <winsock2.h>
 #include "SocketWrapper.h"
+#include "Utils.h"
 
 SocketWrapper::SocketWrapper(SOCKET sock) {
 	assert(sock != INVALID_SOCKET);
@@ -31,4 +32,44 @@ bool SocketWrapper::ChangeBlockMode(bool isBlock) {
 }
 bool SocketWrapper::ChangeBufferSize(int sizeInByte) {
 	return setsockopt(this->_sock, SOL_SOCKET, SO_RCVBUF, (LPCSTR)&sizeInByte, sizeof(int)) != SOCKET_ERROR;
+}
+
+bool SocketWrapper::ReadPackage(AVPacket* packet) {
+
+#define SC_PACKET_FLAG_CONFIG    (UINT64_C(1) << 63)
+#define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 62)
+#define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
+
+	if (!packet) 
+		return false;
+
+	BYTE header_buffer[HEADER_SIZE];
+	if (this->ReadAll(header_buffer, HEADER_SIZE) != HEADER_SIZE)
+		return false;
+
+	UINT64 pts_flags = sc_read64be(header_buffer);
+	INT32 len = sc_read32be(header_buffer + 8);
+
+	if (!avcheck(av_new_packet(packet, len))) {
+		return false;
+	}
+
+	if (this->ReadAll(packet->data, len) != len)
+	{
+		return false;
+	}
+
+	if (pts_flags & SC_PACKET_FLAG_CONFIG) {
+		packet->pts = AV_NOPTS_VALUE;
+	}
+	else {
+		packet->pts = pts_flags & SC_PACKET_PTS_MASK;
+	}
+
+	if (pts_flags & SC_PACKET_FLAG_KEY_FRAME) {
+		packet->flags |= AV_PKT_FLAG_KEY;
+	}
+
+	packet->dts = packet->pts;
+	return true;
 }
