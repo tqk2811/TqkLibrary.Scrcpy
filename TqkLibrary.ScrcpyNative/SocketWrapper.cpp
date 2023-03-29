@@ -76,7 +76,7 @@ bool SocketWrapper::ReadPackage(AVPacket* packet) {
 AVCodecID SocketWrapper::ReadCodecId() {
 	BYTE codec_buffer[4];
 	if (this->ReadAll(codec_buffer, 4) != 4)
-		return;
+		return AVCodecID::AV_CODEC_ID_NONE;
 
 	uint32_t raw_codec_id = sc_read32be(codec_buffer);
 
