@@ -14,6 +14,7 @@ VideoDecoder::~VideoDecoder() {
 
 	avcodec_close(_codec_ctx);
 	avcodec_free_context(&_codec_ctx);
+	if (this->_temp_decoding_frame != NULL) av_frame_free(&_temp_decoding_frame);
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
 	DeleteHeap(this->m_vertex);
 	DeleteHeap(this->m_d3d11_inputNv12);
@@ -27,6 +28,10 @@ VideoDecoder::~VideoDecoder() {
 bool VideoDecoder::Init() {
 	this->_codec_ctx = avcodec_alloc_context3(this->_codec);
 	if (this->_codec_ctx == NULL)
+		return FALSE;
+
+	this->_temp_decoding_frame = av_frame_alloc();
+	if (this->_temp_decoding_frame == NULL)
 		return FALSE;
 
 	this->_decoding_frame = av_frame_alloc();
@@ -108,13 +113,28 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 #endif
 	if (avcheck(avcodec_send_packet(_codec_ctx, packet)))
 	{
-		_mtx_frame.lock();//lock read frame
-		av_frame_unref(_decoding_frame);
-		result = avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame));
+		av_frame_unref(_temp_decoding_frame);
 
-		if (result)
+		result = avcheck(avcodec_receive_frame(_codec_ctx, _temp_decoding_frame));
+
+		bool isFrameError = false;
+		if (_temp_decoding_frame->width <= 0 || _temp_decoding_frame->height <= 0)
 		{
-			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender && 
+			//skip this frame
+			isFrameError = true;
+#if _DEBUG
+			printf("Skip frame %I64d\r\n", decode_frame->pts);
+#endif
+		}
+
+		if (result && !isFrameError)
+		{
+			_mtx_frame.lock();//lock read frame
+
+			av_frame_unref(_decoding_frame);
+			av_frame_move_ref(_decoding_frame, _temp_decoding_frame);
+
+			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender &&
 				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
 					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
@@ -123,8 +143,9 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
 				}
 			}
+
+			_mtx_frame.unlock();
 		}
-		_mtx_frame.unlock();
 	}
 #if _DEBUG
 	auto finish(std::chrono::high_resolution_clock::now());
@@ -137,7 +158,7 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 #endif
 
 	return result;
-}
+	}
 
 bool VideoDecoder::Convert(AVFrame* frame) {
 	bool result = false;
@@ -325,7 +346,7 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 		text.append(L"\r");
 		OutputDebugString(text.c_str());
 #endif
-	}
+}
 
 	return result;
 }
