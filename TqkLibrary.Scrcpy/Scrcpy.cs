@@ -212,7 +212,8 @@ namespace TqkLibrary.Scrcpy
                     Size size = GetScreenSize();
                     if (size.Width == 0 || size.Height == 0) return null;
 
-                    Size fix_size = new Size(size.Width + size.Width % 16, size.Height);
+                    int width = size.Width % 16 == 0 ? size.Width : size.Width + 16 - (size.Width % 16);
+                    Size fix_size = new Size(width, size.Height);
 
                     Bitmap bitmap = new Bitmap(fix_size.Width, fix_size.Height, PixelFormat.Format32bppArgb);
                     BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, fix_size.Width, fix_size.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
