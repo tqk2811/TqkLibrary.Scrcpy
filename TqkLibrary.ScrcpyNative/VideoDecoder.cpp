@@ -114,8 +114,9 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 
 		if (result)
 		{
-			if ((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
-				_decoding_frame->format == AV_PIX_FMT_YUV420P && _nativeConfig.IsUseD3D11ForConvertAndUiRender)//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
+			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender && 
+				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
+					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
 				if (this->m_d3d11_inputNv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
 				{
