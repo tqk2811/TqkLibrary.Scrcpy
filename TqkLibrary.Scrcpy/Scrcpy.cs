@@ -210,7 +210,7 @@ namespace TqkLibrary.Scrcpy
                 try
                 {
                     Size size = GetScreenSize();
-                    if (size.Width == 0 || size.Height == 0) return null;
+                    if (size.Width <= 0 || size.Height <= 0) return null;
 
                     int width = size.Width % 16 == 0 ? size.Width : size.Width + 16 - (size.Width % 16);
                     Size fix_size = new Size(width, size.Height);
