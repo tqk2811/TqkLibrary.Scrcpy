@@ -21,7 +21,6 @@ private:
 	bool Nv12Convert(AVFrame* frame);
 
 	ScrcpyNativeConfig _nativeConfig{};
-	AVFrame* _temp_decoding_frame = nullptr;
 	AVFrame* _decoding_frame = nullptr;
 	AVCodecContext* _codec_ctx = nullptr;
 	const AVCodec* _codec = nullptr;
