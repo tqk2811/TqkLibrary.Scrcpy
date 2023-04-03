@@ -2,7 +2,6 @@
 #define _H_VideoDecoder_H_
 class VideoDecoder
 {
-	friend Scrcpy;
 public:
 	VideoDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativeConfig);
 	~VideoDecoder();
