@@ -18,7 +18,7 @@ int SocketWrapper::ReadAll(BYTE* buff, int length) {
 	if (result == SOCKET_ERROR)
 	{
 		int err = WSAGetLastError();
-		printf("SocketWrapper::ReadAll error code %d", err);
+		printf("SocketWrapper::ReadAll error code %d\r\n", err);
 	}
 #endif
 	return result;
@@ -29,7 +29,7 @@ int SocketWrapper::Write(const BYTE* buff, int length) {
 	if (result == SOCKET_ERROR)
 	{
 		int err = WSAGetLastError();
-		printf("SocketWrapper::Write error code %d", err);
+		printf("SocketWrapper::Write error code %d\r\n", err);
 	}
 #endif
 	return result;
