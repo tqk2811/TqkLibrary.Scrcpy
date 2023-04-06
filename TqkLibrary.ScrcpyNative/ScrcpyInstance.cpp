@@ -238,6 +238,9 @@ bool ScrcpyInstance::Start() {
 			return false;
 		}
 		this->_audio = new Audio(this->_scrcpy, audio_sock, this->_nativeConfig);
+		if (!this->_audio->Init()) {
+			return false;
+		}
 	}
 
 
