@@ -129,7 +129,7 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 #if _DEBUG
 	auto finish(std::chrono::high_resolution_clock::now());
 	auto r = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-	std::wstring text(L"Decode: ");
+	std::wstring text(L"VideoDecoder: ");
 	text.append(std::to_wstring(r.count()));
 	text.append(L"us");
 	text.append(L"\r");
