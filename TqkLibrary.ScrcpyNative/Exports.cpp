@@ -26,6 +26,10 @@ void ScrcpyStop(Scrcpy* scrcpy) {
 	if (scrcpy == nullptr) return;
 	scrcpy->Stop();
 }
+bool IsHaveScrcpyInstance(Scrcpy* scrcpy) {
+	if (scrcpy == nullptr) return false;
+	return scrcpy->IsHaveScrcpyInstance();
+}
 bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& h) {
 	if (scrcpy == nullptr) return false;
 	return scrcpy->GetScreenSize(w, h);

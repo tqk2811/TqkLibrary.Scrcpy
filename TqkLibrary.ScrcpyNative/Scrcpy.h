@@ -12,6 +12,7 @@ public:
 	bool GetScreenShot(BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize);
 	bool GetScreenSize(int& w, int& h);
 	bool GetDeviceName(BYTE* buffer, int sizeInByte);
+	bool IsHaveScrcpyInstance();
 
 	bool RegisterClipboardEvent(ClipboardReceivedDelegate callback);
 	bool RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate);

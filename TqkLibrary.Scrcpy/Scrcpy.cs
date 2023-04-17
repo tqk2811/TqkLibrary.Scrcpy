@@ -38,6 +38,23 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
+        public bool IsConnected
+        {
+            get
+            {
+                bool result = false;
+                if (countdownEvent.TryAddCount())
+                {
+                    result = NativeWrapper.IsHaveScrcpyInstance(_handle);
+                    countdownEvent.Signal();
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="deviceId"></param>
         public Scrcpy(string deviceId)
         {
