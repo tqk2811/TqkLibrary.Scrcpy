@@ -23,15 +23,21 @@ bool D3DClass::Initialize() {
 	D3D_DRIVER_TYPE DriverTypes[] =
 	{
 		D3D_DRIVER_TYPE_HARDWARE,
-		D3D_DRIVER_TYPE_WARP,
-		D3D_DRIVER_TYPE_REFERENCE,
+		//D3D_DRIVER_TYPE_WARP,
+		//D3D_DRIVER_TYPE_REFERENCE,
 	};
 	UINT NumDriverTypes = ARRAYSIZE(DriverTypes);
 
 	// Feature levels supported
 	D3D_FEATURE_LEVEL FeatureLevels[] =
 	{
+		D3D_FEATURE_LEVEL_11_1,
 		D3D_FEATURE_LEVEL_11_0,
+		D3D_FEATURE_LEVEL_10_1,
+		D3D_FEATURE_LEVEL_10_0,
+		D3D_FEATURE_LEVEL_9_3,
+		D3D_FEATURE_LEVEL_9_2,
+		D3D_FEATURE_LEVEL_9_1,
 	};
 	UINT NumFeatureLevels = ARRAYSIZE(FeatureLevels);
 	D3D_FEATURE_LEVEL FeatureLevel;
@@ -41,7 +47,8 @@ bool D3DClass::Initialize() {
 		D3D11_CREATE_DEVICE_SINGLETHREADED |
 		D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
-	for (UINT DriverTypeIndex = 0; DriverTypeIndex < NumDriverTypes; ++DriverTypeIndex)
+	UINT DriverTypeIndex = 0;
+	for (; DriverTypeIndex < NumDriverTypes; ++DriverTypeIndex)
 	{
 		hr = D3D11CreateDevice(nullptr, DriverTypes[DriverTypeIndex], nullptr, creationFlags, FeatureLevels, NumFeatureLevels,
 			D3D11_SDK_VERSION, this->m_device.GetAddressOf(), &FeatureLevel, this->m_deviceContext.GetAddressOf());

@@ -114,7 +114,7 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 
 		if (result)
 		{
-			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender && 
+			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender &&
 				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
 					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
@@ -216,10 +216,14 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 		/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 		device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
 
-		UINT x = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Width()) / 8);
-		UINT y = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Height()) / 8);
-		UINT z = 1;
-		device_ctx->Dispatch(x, y, z);
+		D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
+		if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
+		{
+			UINT x = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Width()) / 8);
+			UINT y = (UINT)ceil(static_cast<FLOAT>(this->m_d3d11_inputNv12->Height()) / 8);
+			UINT z = 1;
+			device_ctx->Dispatch(x, y, z);
+		}
 
 		this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 		device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
@@ -303,10 +307,14 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
 				renderSurface->SetViewPort(device_ctx.Get());
 
-				UINT x = (UINT)ceil(static_cast<FLOAT>(renderSurface->Width()) / 8);
-				UINT y = (UINT)ceil(static_cast<FLOAT>(renderSurface->Height()) / 8);
-				UINT z = 1;
-				device_ctx->Dispatch(x, y, z);
+				D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
+				if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
+				{
+					UINT x = (UINT)ceil(static_cast<FLOAT>(renderSurface->Width()) / 8);
+					UINT y = (UINT)ceil(static_cast<FLOAT>(renderSurface->Height()) / 8);
+					UINT z = 1;
+					device_ctx->Dispatch(x, y, z);
+				}
 
 				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
