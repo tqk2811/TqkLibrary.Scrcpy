@@ -4,7 +4,8 @@ struct ScrcpyNativeConfig {
 	BYTE HwType;//AVHWDeviceType
 	bool ForceAdbForward;
 	bool IsControl;
-	bool IsUseD3D11ForConvertAndUiRender;
+	bool IsUseD3D11ForUiRender;
+	bool IsUseD3D11ForConvert;
 	bool IsAudio;
 	LPCWSTR AdbPath;
 	LPCWSTR ScrcpyServerPath;

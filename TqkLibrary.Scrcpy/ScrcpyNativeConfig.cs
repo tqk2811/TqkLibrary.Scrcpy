@@ -16,7 +16,10 @@ namespace TqkLibrary.Scrcpy
         public bool IsControl;
 
         [MarshalAs(UnmanagedType.U1)]
-        public bool IsUseD3D11ForConvertAndUiRender;
+        public bool IsUseD3D11ForUiRender;
+
+        [MarshalAs(UnmanagedType.U1)]
+        public bool IsUseD3D11ForConvert;
 
         [MarshalAs(UnmanagedType.U1)]
         public bool IsAudio;

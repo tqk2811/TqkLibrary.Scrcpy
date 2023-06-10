@@ -45,9 +45,9 @@ namespace TestRenderWpf
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
             if (!scrcpy.Connect(new ScrcpyConfig()
             {
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
-                IsUseD3D11ForConvertAndUiRender = true,
+                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
+                IsUseD3D11ForUiRender = true,
                 ConnectionTimeout = 10000,
                 ServerConfig = new ScrcpyServerConfig()
                 {
@@ -66,9 +66,9 @@ namespace TestRenderWpf
             await adb.WaitFor(WaitForType.Device).ExecuteAsync();
             scrcpy.Connect(new ScrcpyConfig()
             {
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
-                IsUseD3D11ForConvertAndUiRender = true,
+                //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
+                IsUseD3D11ForUiRender = true,
                 ConnectionTimeout = 3000,
                 ServerConfig = new ScrcpyServerConfig()
                 {

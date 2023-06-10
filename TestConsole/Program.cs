@@ -39,7 +39,7 @@ int i = 0;
 ScrcpyConfig config = new ScrcpyConfig()
 {
     HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    IsUseD3D11ForConvertAndUiRender = true,
+    IsUseD3D11ForUiRender = true,
     ServerConfig = new ScrcpyServerConfig()
     {
         IsControl = true,

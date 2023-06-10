@@ -45,7 +45,12 @@ namespace TqkLibrary.Scrcpy
         /// Use directx 11 for convert image.<br>
         /// </br>Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/> or <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/>
         /// </summary>
-        public bool IsUseD3D11ForConvertAndUiRender { get; set; } = false;
+        public bool IsUseD3D11ForUiRender { get; set; } = false;
+
+        /// <summary>
+        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, and <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/>
+        /// </summary>
+        public bool IsUseD3D11ForConvert { get; set; } = false;
 
         /// <summary>
         /// Default: 3000
@@ -135,7 +140,7 @@ namespace TqkLibrary.Scrcpy
                 HwType = this.HwType,
                 ForceAdbForward = this.ServerConfig.TunnelForward,
                 IsControl = this.ServerConfig.IsControl,
-                IsUseD3D11ForConvertAndUiRender = this.IsUseD3D11ForConvertAndUiRender,
+                IsUseD3D11ForUiRender = this.IsUseD3D11ForUiRender,
                 IsAudio = this.ServerConfig.IsAudio,
                 ScrcpyServerPath = this.ScrcpyServerPath,
                 AdbPath = this.AdbPath,

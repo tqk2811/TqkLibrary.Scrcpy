@@ -49,7 +49,7 @@ bool VideoDecoder::Init() {
 			return FALSE;
 	}
 
-	if (this->_nativeConfig.IsUseD3D11ForConvertAndUiRender)
+	if (this->_nativeConfig.IsUseD3D11ForUiRender)
 	{
 		switch (this->_hwType)
 		{
@@ -114,7 +114,7 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 
 		if (result)
 		{
-			if (_nativeConfig.IsUseD3D11ForConvertAndUiRender &&
+			if (_nativeConfig.IsUseD3D11ForUiRender &&
 				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
 					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
@@ -146,9 +146,16 @@ bool VideoDecoder::Convert(AVFrame* frame) {
 
 	if (_decoding_frame->hw_frames_ctx == nullptr)//HW failed
 	{
-		if (_decoding_frame->format == AVPixelFormat::AV_PIX_FMT_YUV420P && _nativeConfig.IsUseD3D11ForConvertAndUiRender)// -> m_d3d11_inputYv12
+		if (_decoding_frame->format == AVPixelFormat::AV_PIX_FMT_YUV420P && _nativeConfig.IsUseD3D11ForUiRender)// -> m_d3d11_inputYv12
 		{
-			result = Nv12Convert(frame);
+			if (_nativeConfig.IsUseD3D11ForConvert)
+			{
+				result = Nv12Convert(frame);
+			}
+			else 
+			{
+				result = this->TransferNoHw(frame);
+			}
 		}
 		else//other hw
 		{
@@ -275,7 +282,7 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 	bool result = false;
 
-	if (this->_nativeConfig.IsUseD3D11ForConvertAndUiRender)
+	if (this->_nativeConfig.IsUseD3D11ForUiRender)
 	{
 #if _DEBUG
 		auto start(std::chrono::high_resolution_clock::now());
