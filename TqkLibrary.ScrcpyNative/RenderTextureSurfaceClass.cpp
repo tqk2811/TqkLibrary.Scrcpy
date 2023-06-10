@@ -68,9 +68,13 @@ bool RenderTextureSurfaceClass::Initialize(ID3D11Device* device, IUnknown* surfa
 
 	return true;
 }
-bool RenderTextureSurfaceClass::IsNewFrame(INT64 pts) {
-	bool isNewFrame = this->m_currentPts < pts;
-	if (isNewFrame) this->m_currentPts = pts;
+bool RenderTextureSurfaceClass::IsNewFrame(const AVFrame* frame) {
+	bool isNewFrame = this->m_currentAVFrameAddress != frame || this->m_currentPts < frame->pts;
+	if (isNewFrame) 
+	{
+		this->m_currentPts = frame->pts;
+		this->m_currentAVFrameAddress = frame;
+	}
 	return isNewFrame;
 }
 void RenderTextureSurfaceClass::Shutdown() {

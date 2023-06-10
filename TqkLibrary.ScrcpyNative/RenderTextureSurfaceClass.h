@@ -18,10 +18,11 @@ public:
 
 	int Width() { return m_Width; }
 	int Height() { return m_Height; }
-	bool IsNewFrame(INT64 pts);
+	bool IsNewFrame(const AVFrame* frame);
 private:
 
 	INT64 m_currentPts{ 0 };
+	const void* m_currentAVFrameAddress{ nullptr };
 	int m_Width{ 0 };
 	int m_Height{ 0 };
 	ComPtr<ID3D11RenderTargetView> m_pRenderTargetView = nullptr;

@@ -289,7 +289,7 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 			this->m_d3d11_pixel_Nv12ToBgra->Initialize(device.Get(), this->_nativeConfig.Filter) &&
 			this->m_vertex->Initialize(device.Get()))
 		{
-			bool isNewFrame = renderSurface->IsNewFrame(_decoding_frame->pts);
+			bool isNewFrame = renderSurface->IsNewFrame(_decoding_frame);
 
 			if (isNewFrame || isNewSurface)
 			{
