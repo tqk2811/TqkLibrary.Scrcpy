@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using TqkLibrary.Scrcpy.Enums;
 
 namespace TqkLibrary.Scrcpy
 {

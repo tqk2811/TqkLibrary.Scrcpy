@@ -1,4 +1,4 @@
-﻿namespace TqkLibrary.Scrcpy
+﻿namespace TqkLibrary.Scrcpy.Enums
 {
     /// <summary>
     /// https://developer.android.com/reference/android/view/KeyEvent#ACTION_DOWN

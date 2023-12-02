@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using TqkLibrary.Scrcpy.Enums;
 
 namespace TqkLibrary.Scrcpy
 {

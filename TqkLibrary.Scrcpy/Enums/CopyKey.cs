@@ -1,4 +1,4 @@
-﻿namespace TqkLibrary.Scrcpy
+﻿namespace TqkLibrary.Scrcpy.Enums
 {
     /// <summary>
     /// 

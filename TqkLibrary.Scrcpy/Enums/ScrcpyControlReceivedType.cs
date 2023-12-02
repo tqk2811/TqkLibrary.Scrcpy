@@ -1,4 +1,4 @@
-﻿namespace TqkLibrary.Scrcpy
+﻿namespace TqkLibrary.Scrcpy.Enums
 {
     /// <summary>
     /// https://github.com/Genymobile/scrcpy/blob/master/app/src/receiver.c#L25

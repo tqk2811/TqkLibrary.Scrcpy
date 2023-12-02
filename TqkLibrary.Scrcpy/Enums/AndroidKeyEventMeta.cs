@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TqkLibrary.Scrcpy
+namespace TqkLibrary.Scrcpy.Enums
 {
     /// <summary>
     /// https://developer.android.com/reference/android/view/KeyEvent#META_ALT_LEFT_ON

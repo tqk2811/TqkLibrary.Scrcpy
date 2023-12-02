@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Enums;
 
 namespace TqkLibrary.Scrcpy.Control
 {

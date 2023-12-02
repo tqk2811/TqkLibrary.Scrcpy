@@ -1,4 +1,4 @@
-﻿namespace TqkLibrary.Scrcpy
+﻿namespace TqkLibrary.Scrcpy.Enums
 {
     // copied from <https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h>
     // blob 2164d6163e1646c22825e364cad4f3c47638effd

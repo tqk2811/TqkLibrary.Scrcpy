@@ -1,4 +1,4 @@
-﻿namespace TqkLibrary.Scrcpy
+﻿namespace TqkLibrary.Scrcpy.Enums
 {
     /// <summary>
     /// https://github.com/Genymobile/scrcpy/tree/master/server/src/main/java/com/genymobile/scrcpy/ControlMessage.java#L8
