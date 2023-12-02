@@ -109,6 +109,47 @@ namespace TqkLibrary.Scrcpy
         /// default: false
         /// </summary>
         public bool ListDisplays { get; } = false;
+        /// <summary>
+        /// default: <see cref="VideoSource.Display"/>
+        /// </summary>
+        public VideoSource VideoSource { get; set; } = VideoSource.Display;
+        #endregion
+
+
+
+        #region Camera Config
+        /// <summary>
+        /// default: null
+        /// </summary>
+        public string CameraId { get; set; } = null;
+        /// <summary>
+        /// default: null
+        /// </summary>
+        public Rectangle? CameraSize { get; set; }
+        internal string CameraSize_string
+        {
+            get
+            {
+                if (CameraSize == null) return "-";
+                else return $"{CameraSize.Value.Width}:{CameraSize.Value.Height}:{CameraSize.Value.X}:{CameraSize.Value.Y}";
+            }
+        }
+        /// <summary>
+        /// default: <see cref="CameraFacing.Any"/>
+        /// </summary>
+        public CameraFacing CameraFacing { get; set; } = CameraFacing.Any;
+        /// <summary>
+        /// default: null
+        /// </summary>
+        public string CameraAr { get; set; } = null;
+        /// <summary>
+        /// default: 0
+        /// </summary>
+        public int Camerafps { get; set; } = 0;
+        /// <summary>
+        /// default: false
+        /// </summary>
+        public bool CameraHighSpeed { get; set; } = false;
         #endregion
 
 
@@ -140,6 +181,10 @@ namespace TqkLibrary.Scrcpy
         /// Default: null (ignore)
         /// </summary>
         public string AudioEncoder { get; set; }
+        /// <summary>
+        /// default: <see cref="AudioSource.Auto"/>
+        /// </summary>
+        public AudioSource AudioSource { get; set; } = AudioSource.Auto;
         #endregion
 
 

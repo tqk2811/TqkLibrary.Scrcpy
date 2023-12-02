@@ -115,6 +115,32 @@ namespace TqkLibrary.Scrcpy
             if (ServerConfig.Crop != null) args.Add($"crop={ServerConfig.Crop_string}");
             if (!ServerConfig.DownsizeOnError) args.Add($"downsize_on_error=false");// By default, downsize_on_error is true
             if (ServerConfig.ListDisplays) args.Add($"list_displays=true");
+            switch(ServerConfig.VideoSource)
+            {
+                case VideoSource.Camera:
+                    args.Add($"video_source=camera");
+                    break;
+            }
+
+            //camera
+            if(!string.IsNullOrWhiteSpace(ServerConfig.CameraId))
+            {
+                args.Add($"camera_id={ServerConfig.CameraId}");
+                if (ServerConfig.CameraSize.HasValue) args.Add($"camera_size={ServerConfig.CameraSize_string}");
+                switch(ServerConfig.CameraFacing)
+                {
+                    case CameraFacing.Any:
+                        break;
+
+                    default:
+                        args.Add($"camera_facing={ServerConfig.CameraFacing.ToString().ToLower()}");
+                        break;
+                }
+                if(!string.IsNullOrWhiteSpace(ServerConfig.CameraAr)) args.Add($"camera_ar={ServerConfig.CameraAr}");
+                if(ServerConfig.Camerafps > 0) args.Add($"camera_fps={ServerConfig.Camerafps}");
+                if(ServerConfig.CameraHighSpeed) args.Add($"camera_high_speed=true");
+            }
+
 
             //audio
             if (!ServerConfig.IsAudio) args.Add($"audio=false"); // By default, audio is true
@@ -124,6 +150,12 @@ namespace TqkLibrary.Scrcpy
                 if (!string.IsNullOrWhiteSpace(ServerConfig.AudioCodec)) args.Add($"audio_codec={ServerConfig.AudioCodec}");
                 if (!string.IsNullOrWhiteSpace(ServerConfig.AudioCodecOption)) args.Add($"audio_codec_options={ServerConfig.AudioCodecOption}");
                 if (!string.IsNullOrWhiteSpace(ServerConfig.AudioEncoder)) args.Add($"audio_encoder={ServerConfig.AudioEncoder}");
+                switch(ServerConfig.AudioSource)
+                {
+                    case AudioSource.Mic:
+                        args.Add("audio_source=mic");
+                        break;
+                }
             }
 
             if (ServerConfig.TunnelForward) args.Add($"tunnel_forward=true");
