@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy;
+using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.Wpf
 {

@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using TqkLibrary.Scrcpy;
 using TqkLibrary.Scrcpy.Control;
+using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.Wpf
 {

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.WpfUi;
 using TqkLibrary.Scrcpy;
+using TqkLibrary.Scrcpy.Interfaces;
+
 namespace TestRenderWpf
 {
     public class MainWindowVM : BaseViewModel

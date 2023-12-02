@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using TqkLibrary.Scrcpy.Control;
 using TqkLibrary.Scrcpy.Enums;
 
-namespace TqkLibrary.Scrcpy
+namespace TqkLibrary.Scrcpy.Interfaces
 {
     /// <summary>
     /// 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy.Control;
 using System.Threading;
+using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy
 {

@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using TqkLibrary.Scrcpy;
 using TqkLibrary.AdbDotNet;
+using TqkLibrary.Scrcpy.Interfaces;
 
 var env = System.Environment.GetEnvironmentVariables();
 var h = 1080 % 16;
