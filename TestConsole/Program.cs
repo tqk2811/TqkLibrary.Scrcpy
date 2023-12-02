@@ -51,6 +51,10 @@ ScrcpyConfig config = new ScrcpyConfig()
         {
             IsAudio = true,
         },
+        CameraConfig = new CameraConfig()
+        {
+
+        },
         VideoConfig = new VideoConfig()
         {
             MaxFps = 24,
@@ -69,6 +73,8 @@ while (true)
         {
             ListEncoders = true,
             ListDisplays = true,
+            ListCameras = true,
+            ListCameraSizes = true,
         });
 
         scrcpy.Control.OnClipboardReceived += Control_OnClipboardReceived;

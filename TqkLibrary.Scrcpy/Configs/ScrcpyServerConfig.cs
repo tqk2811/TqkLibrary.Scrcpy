@@ -16,6 +16,7 @@ namespace TqkLibrary.Scrcpy.Configs
         /// 
         /// </summary>
         public AndroidConfig AndroidConfig { get; set; } = new AndroidConfig();
+
         /// <summary>
         /// 
         /// </summary>
@@ -26,7 +27,10 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public AudioConfig AudioConfig { get; set; } = new AudioConfig();
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public CameraConfig CameraConfig { get; set; } = new CameraConfig();
 
 
 
@@ -107,6 +111,7 @@ namespace TqkLibrary.Scrcpy.Configs
                 .Concat(AndroidConfig.GetArguments())
                 .Concat(VideoConfig.GetArguments())
                 .Concat(AudioConfig.GetArguments())
+                .Concat(CameraConfig.GetArguments())
                 .Where(x => !string.IsNullOrWhiteSpace(x));
         }
     }
