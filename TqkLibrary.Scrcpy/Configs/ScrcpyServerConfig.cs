@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using TqkLibrary.Scrcpy.Enums;
 
-namespace TqkLibrary.Scrcpy
+namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
     /// 

@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using TqkLibrary.Scrcpy.Enums;
 
-namespace TqkLibrary.Scrcpy
+namespace TqkLibrary.Scrcpy.Configs
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct ScrcpyNativeConfig

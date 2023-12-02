@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy.Enums;
 
-namespace TqkLibrary.Scrcpy
+namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
     /// 
@@ -31,7 +31,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// Use Hardware Accelerator for decode image<br>
         /// </br>Default: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
-        /// </br>Use <see cref="ScrcpyConfig.GetHwSupports"/> for get support list.
+        /// </br>Use <see cref="GetHwSupports"/> for get support list.
         /// </summary>
         public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
@@ -101,7 +101,7 @@ namespace TqkLibrary.Scrcpy
             //scrcpy
             if (!ServerConfig.IsControl) args.Add($"control=false"); // By default, control is true
             args.Add($"log_level={ServerConfig.LogLevel.ToString().ToLower()}");
-            if (ServerConfig.SCID != -1) args.Add($"scid={(ServerConfig.SCID & 0x7FFFFFFF):X4}".ToLower());
+            if (ServerConfig.SCID != -1) args.Add($"scid={ServerConfig.SCID & 0x7FFFFFFF:X4}".ToLower());
             if (!ServerConfig.ClipboardAutosync) args.Add($"clipboard_autosync=false");// By default, clipboard_autosync is true
             if (!ServerConfig.Cleanup) args.Add($"cleanup=false");// By default, cleanup is true
 
@@ -138,17 +138,17 @@ namespace TqkLibrary.Scrcpy
         {
             return new ScrcpyNativeConfig
             {
-                HwType = this.HwType,
-                ForceAdbForward = this.ServerConfig.TunnelForward,
-                IsControl = this.ServerConfig.IsControl,
-                IsUseD3D11ForUiRender = this.IsUseD3D11ForUiRender,
-                IsAudio = this.ServerConfig.IsAudio,
-                ScrcpyServerPath = this.ScrcpyServerPath,
-                AdbPath = this.AdbPath,
-                ConfigureArguments = this.ToString(),
-                ConnectionTimeout = this.ConnectionTimeout,
-                Filter = this.Filter,
-                SCID = this.ServerConfig.SCID
+                HwType = HwType,
+                ForceAdbForward = ServerConfig.TunnelForward,
+                IsControl = ServerConfig.IsControl,
+                IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
+                IsAudio = ServerConfig.IsAudio,
+                ScrcpyServerPath = ScrcpyServerPath,
+                AdbPath = AdbPath,
+                ConfigureArguments = ToString(),
+                ConnectionTimeout = ConnectionTimeout,
+                Filter = Filter,
+                SCID = ServerConfig.SCID
             };
         }
     }
