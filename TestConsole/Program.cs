@@ -51,10 +51,6 @@ ScrcpyConfig config = new ScrcpyConfig()
         {
             IsAudio = true,
         },
-        CameraConfig = new CameraConfig()
-        {
-
-        },
         VideoConfig = new VideoConfig()
         {
             MaxFps = 24,
