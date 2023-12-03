@@ -4,7 +4,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Attributes;
 using TqkLibrary.Scrcpy.Enums;
+using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.Configs
 {
@@ -28,13 +30,6 @@ namespace TqkLibrary.Scrcpy.Configs
             } while (type != FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
         }
 
-        /// <summary>
-        /// Use Hardware Accelerator for decode image<br>
-        /// </br>Default: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
-        /// </br>Use <see cref="GetHwSupports"/> for get support list.
-        /// </summary>
-        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
-
 
 
         /// <summary>
@@ -54,6 +49,19 @@ namespace TqkLibrary.Scrcpy.Configs
         public bool IsUseD3D11ForConvert { get; set; } = false;
 
         /// <summary>
+        /// Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/><br></br>
+        /// Default <see cref="D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT"/>
+        /// </summary>
+        public D3D11Filter Filter { get; set; } = D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+
+        /// <summary>
+        /// Use Hardware Accelerator for decode image<br>
+        /// </br>Default: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
+        /// </br>Use <see cref="GetHwSupports"/> for get support list.
+        /// </summary>
+        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
+
+        /// <summary>
         /// Default: 3000
         /// </summary>
         public int ConnectionTimeout { get; set; } = 3000;
@@ -68,19 +76,6 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public string ScrcpyServerPath { get; set; } = "scrcpy-server.jar";
 
-
-
-        /// <summary>
-        /// Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/><br></br>
-        /// Default <see cref="D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT"/>
-        /// </summary>
-        public D3D11Filter Filter { get; set; } = D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-
-        internal bool TunnelForward { get; } = false;
-
-
-
-
         /// <summary>
         /// 
         /// </summary>
@@ -88,68 +83,27 @@ namespace TqkLibrary.Scrcpy.Configs
         public override string ToString()
         {
             if (ServerConfig is null) ServerConfig = new ScrcpyServerConfig();
-
-            List<string> args = new List<string>();
-            args.Add(ServerConfig.ScrcpyServerVersion);
-
-            //android
-            if (ServerConfig.ShowTouches) args.Add($"show_touches=true");
-            if (ServerConfig.StayAwake) args.Add($"stay_awake=true");
-            if (ServerConfig.PowerOffOnClose) args.Add($"power_off_on_close=true");
-            if (!ServerConfig.PowerOn) args.Add($"power_on=false");// By default, power_on is true
-
-            //scrcpy
-            if (!ServerConfig.IsControl) args.Add($"control=false"); // By default, control is true
-            args.Add($"log_level={ServerConfig.LogLevel.ToString().ToLower()}");
-            if (ServerConfig.SCID != -1) args.Add($"scid={ServerConfig.SCID & 0x7FFFFFFF:X4}".ToLower());
-            if (!ServerConfig.ClipboardAutosync) args.Add($"clipboard_autosync=false");// By default, clipboard_autosync is true
-            if (!ServerConfig.Cleanup) args.Add($"cleanup=false");// By default, cleanup is true
-
-            //video
-            if (ServerConfig.DisplayId.HasValue) args.Add($"display_id={ServerConfig.DisplayId}");
-            if (ServerConfig.Orientation != Orientations.Auto) args.Add($"lock_video_orientation={(int)ServerConfig.Orientation}");
-            if (ServerConfig.MaxFps > 0) args.Add($"max_fps={ServerConfig.MaxFps}");
-            if (ServerConfig.VideoBitrate > 0) args.Add($"video_bit_rate={ServerConfig.VideoBitrate}");
-            if (!string.IsNullOrWhiteSpace(ServerConfig.VideoCodec)) args.Add($"video_codec={ServerConfig.VideoCodec}");
-            if (!string.IsNullOrWhiteSpace(ServerConfig.VideoCodecOption)) args.Add($"video_codec_options={ServerConfig.VideoCodecOption}");
-            if (!string.IsNullOrWhiteSpace(ServerConfig.VideoEncoder)) args.Add($"video_encoder={ServerConfig.VideoEncoder}");
-            if (ServerConfig.Crop != null) args.Add($"crop={ServerConfig.Crop_string}");
-            if (!ServerConfig.DownsizeOnError) args.Add($"downsize_on_error=false");// By default, downsize_on_error is true
-            if (ServerConfig.ListDisplays) args.Add($"list_displays=true");
-
-            //audio
-            if (!ServerConfig.IsAudio) args.Add($"audio=false"); // By default, audio is true
-            if (ServerConfig.IsAudio)
-            {
-                if (ServerConfig.AudioBitrate > 0) args.Add($"audio_bit_rate={ServerConfig.AudioBitrate}");
-                if (!string.IsNullOrWhiteSpace(ServerConfig.AudioCodec)) args.Add($"audio_codec={ServerConfig.AudioCodec}");
-                if (!string.IsNullOrWhiteSpace(ServerConfig.AudioCodecOption)) args.Add($"audio_codec_options={ServerConfig.AudioCodecOption}");
-                if (!string.IsNullOrWhiteSpace(ServerConfig.AudioEncoder)) args.Add($"audio_encoder={ServerConfig.AudioEncoder}");
-            }
-
-            if (ServerConfig.TunnelForward) args.Add($"tunnel_forward=true");
-            if (ServerConfig.MaxSize > 0) args.Add($"max_size={ServerConfig.MaxSize}");
-            if (ServerConfig.ListEncoders) args.Add($"list_encoders=true");
-
-            return string.Join(" ", args);
+            return string.Join(" ", ServerConfig.GetArguments());
         }
 
         internal ScrcpyNativeConfig NativeConfig()
         {
+            var ConfigureArguments = ToString();
             return new ScrcpyNativeConfig
             {
                 HwType = HwType,
                 ForceAdbForward = ServerConfig.TunnelForward,
                 IsControl = ServerConfig.IsControl,
                 IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
-                IsAudio = ServerConfig.IsAudio,
+                IsAudio = ServerConfig.AudioConfig.IsAudio,
                 ScrcpyServerPath = ScrcpyServerPath,
                 AdbPath = AdbPath,
-                ConfigureArguments = ToString(),
+                ConfigureArguments = ConfigureArguments,
                 ConnectionTimeout = ConnectionTimeout,
                 Filter = Filter,
                 SCID = ServerConfig.SCID
             };
         }
+
     }
 }
