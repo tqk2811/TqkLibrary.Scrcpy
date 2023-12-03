@@ -17,6 +17,8 @@ using TqkLibrary.AdbDotNet;
 using System.Windows.Interop;
 using System.Timers;
 using TqkLibrary.Scrcpy.Wpf;
+using TqkLibrary.Scrcpy.Enums;
+using TqkLibrary.Scrcpy.Configs;
 
 namespace TestRenderWpf
 {
@@ -52,7 +54,10 @@ namespace TestRenderWpf
                 ServerConfig = new ScrcpyServerConfig()
                 {
                     IsControl = true,
-                    MaxFps = 24,
+                    VideoConfig = new VideoConfig()
+                    {
+                        MaxFps = 24
+                    }
                 },
             }))
             {
@@ -73,7 +78,10 @@ namespace TestRenderWpf
                 ServerConfig = new ScrcpyServerConfig()
                 {
                     IsControl = true,
-                    MaxFps = 24,
+                    VideoConfig = new VideoConfig()
+                    {
+                        MaxFps = 24
+                    }
                 },
             });
         }

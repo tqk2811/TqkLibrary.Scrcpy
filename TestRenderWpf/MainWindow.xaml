@@ -16,6 +16,12 @@
             <ColumnDefinition/>
             <ColumnDefinition Width="50"/>
         </Grid.ColumnDefinitions>
-        <scrcpy:ScrcpyControl Grid.Column="1" IsControl="{Binding IsControl}" Control="{Binding Control}" ScrcpyUiView="{Binding ScrcpyUiView}"/>
+        <scrcpy:ScrcpyControl Grid.Column="1" 
+                              IsControl="{Binding IsControl}" 
+                              Control="{Binding Control}" 
+                              ScrcpyUiView="{Binding ScrcpyUiView}"
+                              IsMouseHandler="True"
+                              IsKeyHandler="True"
+                              />
     </Grid>
 </Window>

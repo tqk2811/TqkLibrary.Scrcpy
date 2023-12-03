@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy;
+using TqkLibrary.Scrcpy.Enums;
 using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.Wpf
@@ -101,7 +102,6 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
             => this.FixAll(x => x.SetScreenPowerMode(powerMode));
-
         #endregion
     }
 
