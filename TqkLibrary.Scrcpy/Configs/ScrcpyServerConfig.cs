@@ -88,7 +88,7 @@ namespace TqkLibrary.Scrcpy.Configs
         /// <summary>
         /// 2.0
         /// </summary>
-        public string ScrcpyServerVersion { get; } = "2.0";
+        public string ScrcpyServerVersion { get; } = Constant.ScrcpyServerVersion;
 
         IEnumerable<string> _GetArguments()
         {
