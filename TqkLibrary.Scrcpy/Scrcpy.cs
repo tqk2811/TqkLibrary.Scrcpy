@@ -301,14 +301,17 @@ namespace TqkLibrary.Scrcpy
             await AdbHelper.PushServerAsync(listSupportQuery.AdbPath, DeviceId, listSupportQuery.ScrcpyPath, cancellationToken);
 
             string q = string.Join(" ", listSupportQuery.GetArguments().Where(x => !string.IsNullOrWhiteSpace(x)));
-            string result = await AdbHelper.RunServerWithAdbAsync(
+            var result = await AdbHelper.RunServerWithAdbAsync(
                 listSupportQuery.AdbPath,
                 DeviceId,
                 $"shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar app_process / com.genymobile.scrcpy.Server {q}",
                 cancellationToken
                 );
 
-            return ScrcpyServerListSupport.Parse(result);
+            if (!string.IsNullOrWhiteSpace(result.StdErr))
+                throw new Exception(result.StdErr);
+
+            return ScrcpyServerListSupport.Parse(result.StdOut);
         }
 
         internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface, ref bool isNewtargetView)

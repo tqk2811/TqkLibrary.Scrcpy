@@ -19,11 +19,12 @@ namespace TqkLibrary.Scrcpy.Helpers
         {
             using Process process = CreateProcess(adbPath, $"-s {deviceId} push {scrcpyPath} /sdcard/scrcpy-server-tqk.jar");
             string stdout = await process.StandardOutput.ReadToEndAsync();
+            string stderr = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync(cancellationToken);
         }
 
 
-        public static async Task<string> RunServerWithAdbAsync(
+        public static async Task<ProcessStd> RunServerWithAdbAsync(
             string adbPath,
             string deviceId,
             string argument,
@@ -31,8 +32,9 @@ namespace TqkLibrary.Scrcpy.Helpers
         {
             using Process process = CreateProcess(adbPath, $"-s {deviceId} {argument}");
             string stdout = await process.StandardOutput.ReadToEndAsync();
+            string stderr = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync(cancellationToken);
-            return stdout;
+            return new ProcessStd(stdout, stderr);
         }
 
 
@@ -45,6 +47,7 @@ namespace TqkLibrary.Scrcpy.Helpers
             processStartInfo.UseShellExecute = false;
             processStartInfo.Arguments = query;
             processStartInfo.RedirectStandardOutput = true;
+            processStartInfo.RedirectStandardError = true;
             processStartInfo.CreateNoWindow = true;
             processStartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             return Process.Start(processStartInfo);
@@ -61,5 +64,15 @@ namespace TqkLibrary.Scrcpy.Helpers
             await tcs.Task;
         }
 #endif
+        public class ProcessStd
+        {
+            public ProcessStd(string stdOut, string stdErr)
+            {
+                this.StdOut = stdOut;
+                this.StdErr = stdErr;
+            }
+            public string StdOut { get; set; }
+            public string StdErr { get; set; }
+        }
     }
 }
