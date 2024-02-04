@@ -40,7 +40,7 @@
 		<file src="..\x64\Release\TqkLibrary.ScrcpyNative.dll" target="runtimes\win-x64\native\" />
 		<file src="..\x86\Release\TqkLibrary.ScrcpyNative.dll" target="runtimes\win-x86\native\" />
 
-		<file src="..\scrcpy-server-v2.3.jar" target="contentFiles\any\any\scrcpy-server.jar" />
+		<file src="..\scrcpy-server-v2.3.1.jar" target="contentFiles\any\any\scrcpy-server.jar" />
 		<file src="TqkLibrary.Scrcpy.props" target="build\" />
 	</files>
 </package>

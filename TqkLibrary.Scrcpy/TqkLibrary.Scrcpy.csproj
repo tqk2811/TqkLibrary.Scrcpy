@@ -41,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\scrcpy-server-v2.3.jar" Link="scrcpy-server.jar">
+		<None Include="..\scrcpy-server-v2.3.1.jar" Link="scrcpy-server.jar">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
