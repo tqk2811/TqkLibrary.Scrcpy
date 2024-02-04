@@ -8,6 +8,6 @@ namespace TqkLibrary.Scrcpy
 {
     internal static class Constant
     {
-        public const string ScrcpyServerVersion = "v2.3";
+        public const string ScrcpyServerVersion = "2.3";
     }
 }
