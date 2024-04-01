@@ -25,8 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAutoConsole", "TestAutoConsole\TestAutoConsole.csproj", "{4075353F-BE73-415E-B6C5-081B8958147C}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestRenderWpf", "TestRenderWpf\TestRenderWpf.csproj", "{447A817D-93FE-49FC-B8C3-44751EE1FD7B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TqkLibrary.Scrcpy.Wpf", "TqkLibrary.Scrcpy.Wpf\TqkLibrary.Scrcpy.Wpf.csproj", "{B992530F-04E2-4FCB-9913-C88D8883CA11}"
@@ -74,17 +72,6 @@ Global
 		{64C66D02-73F0-4BA9-BDD8-1AAA6E016F64}.ReleaseNoScreenShot|x64.ActiveCfg = Release|x64
 		{64C66D02-73F0-4BA9-BDD8-1AAA6E016F64}.ReleaseNoScreenShot|x64.Build.0 = Release|x64
 		{64C66D02-73F0-4BA9-BDD8-1AAA6E016F64}.ReleaseNoScreenShot|x86.ActiveCfg = Release|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Debug|x64.ActiveCfg = Debug|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Debug|x64.Build.0 = Debug|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Debug|x86.ActiveCfg = Debug|x86
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Debug|x86.Build.0 = Debug|x86
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Release|x64.ActiveCfg = Release|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Release|x64.Build.0 = Release|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Release|x86.ActiveCfg = Release|x86
-		{4075353F-BE73-415E-B6C5-081B8958147C}.Release|x86.Build.0 = Release|x86
-		{4075353F-BE73-415E-B6C5-081B8958147C}.ReleaseNoScreenShot|x64.ActiveCfg = Debug|x64
-		{4075353F-BE73-415E-B6C5-081B8958147C}.ReleaseNoScreenShot|x86.ActiveCfg = Release|x86
-		{4075353F-BE73-415E-B6C5-081B8958147C}.ReleaseNoScreenShot|x86.Build.0 = Release|x86
 		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Debug|x64.ActiveCfg = Debug|x64
 		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Debug|x64.Build.0 = Debug|x64
 		{447A817D-93FE-49FC-B8C3-44751EE1FD7B}.Debug|x86.ActiveCfg = Debug|x86
