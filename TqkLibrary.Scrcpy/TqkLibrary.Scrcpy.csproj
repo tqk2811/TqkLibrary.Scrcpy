@@ -11,7 +11,7 @@
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<Configurations>Debug;Release</Configurations>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<Version>2.0.6</Version>
+		<Version>2.1.0</Version>
 	</PropertyGroup>	
 	
 	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
@@ -41,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\scrcpy-server-v2.0.jar" Link="scrcpy-server.jar">
+		<None Include="..\scrcpy-server-v2.1.1.jar" Link="scrcpy-server.jar">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
