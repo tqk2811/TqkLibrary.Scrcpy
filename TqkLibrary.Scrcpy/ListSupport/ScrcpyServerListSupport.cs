@@ -20,7 +20,7 @@ namespace TqkLibrary.Scrcpy.ListSupport
         static readonly Regex regex_video = new Regex("--video-codec=(\\S+) --video-encoder='(\\S+)'");
         static readonly Regex regex_audio = new Regex("--audio-codec=(\\S+) --audio-encoder='(\\S+)'");
         static readonly Regex regex_display = new Regex("--display-id=(\\d+) +\\((\\d+)x(\\d+)\\)");
-        static readonly Regex regex_camera = new Regex("--video-source=camera --camera-id=(\\d+) +\\((\\S+), (\\d+)x(\\d+), fps=\\[([0-9 ,]+)\\]\\)");
+        static readonly Regex regex_camera = new Regex("--camera-id=(\\d+) +\\((\\S+), (\\d+)x(\\d+), fps=\\[([0-9 ,]+)\\]\\)");
         static readonly Regex regex_camera_size = new Regex("- (\\d+)x(\\d+)");
         static readonly Regex regex_camera_fps = new Regex("\\(fps=\\[([0-9 ,]+)\\]\\)");
         internal static ScrcpyServerListSupport Parse(string data)
