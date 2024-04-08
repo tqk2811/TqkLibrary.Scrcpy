@@ -78,6 +78,8 @@ void Video::threadStart() {
 	if (!codec_decoder)
 		return;
 
+	bool must_merge_config_packet = codecId == AVCodecID::AV_CODEC_ID_H264
+		|| codecId == AV_CODEC_ID_H265;
 
 
 	BYTE screenSize_buffer[8];
@@ -91,11 +93,12 @@ void Video::threadStart() {
 	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
 #endif
 
-
-
-	this->_parsePacket = new ParsePacket(codec_decoder);
-	if (!this->_parsePacket->Init())
-		return;
+	if (must_merge_config_packet)
+	{
+		this->_parsePacket = new ParsePacket(codec_decoder);
+		if (!this->_parsePacket->Init())
+			return;
+	}
 
 	this->_videoDecoder = new VideoDecoder(codec_decoder, this->_nativeConfig);
 	if (!this->_videoDecoder->Init())
@@ -114,7 +117,13 @@ void Video::threadStart() {
 		printf(std::string("Video pts:").append(std::to_string(packet.pts)).append("  ,len:").append(std::to_string(packet.size)).append("\r\n").c_str());
 #endif
 
-		if (this->_parsePacket->ParserPushPacket(&packet))
+		if (must_merge_config_packet)
+		{
+			this->_parsePacket->ParserPushPacket(&packet);
+		}
+
+		bool is_config = packet.pts == AV_NOPTS_VALUE;
+		if (!is_config)
 		{
 			if (this->_videoDecoder->Decode(&packet))
 			{
@@ -130,6 +139,7 @@ void Video::threadStart() {
 				return;
 			}
 		}
+
 		av_packet_unref(&packet);
 	}
 }
