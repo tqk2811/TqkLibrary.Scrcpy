@@ -19,7 +19,6 @@ private:
 	bool _isStopped = false;
 
 	//need delete
-	ParsePacket* _parsePacket{ nullptr };
 	AudioDecoder* _audioDecoder{ nullptr };
 	SocketWrapper* _audioSock{ nullptr };
 
