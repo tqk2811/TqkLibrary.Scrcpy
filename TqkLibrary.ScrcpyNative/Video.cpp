@@ -83,7 +83,6 @@ void Video::threadStart() {
 	BYTE screenSize_buffer[8];
 	if (this->_videoSock->ReadAll(screenSize_buffer, 8) != 8)
 		return;
-	uint32_t raw_codec_id = sc_read32be(screenSize_buffer);
 
 #if _DEBUG
 	uint32_t width = sc_read32be(screenSize_buffer);
