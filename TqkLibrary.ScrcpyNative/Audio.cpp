@@ -7,6 +7,10 @@ Audio::Audio(Scrcpy* scrcpy, SOCKET sock, const ScrcpyNativeConfig& nativeConfig
 	this->_nativeConfig = nativeConfig;
 }
 Audio::~Audio() {
+	if (this->_parsePacket)
+		delete this->_parsePacket;
+	if (this->_audioDecoder)
+		delete this->_audioDecoder;
 	delete this->_audioSock;
 	CloseHandle(this->_threadHandle);
 }
@@ -45,6 +49,16 @@ void Audio::threadStart() {
 	if (!codec_decoder)
 		return;
 
+	bool must_merge_config_packet = codecId == AVCodecID::AV_CODEC_ID_H264
+		|| codecId == AV_CODEC_ID_H265;
+
+	if (must_merge_config_packet)
+	{
+		this->_parsePacket = new ParsePacket(codec_decoder);
+		if (!this->_parsePacket->Init())
+			return;
+	}
+
 	this->_audioDecoder = new AudioDecoder(codec_decoder, this->_nativeConfig);
 	if (!this->_audioDecoder->Init())
 		return;
@@ -58,19 +72,21 @@ void Audio::threadStart() {
 			return;
 		}
 
+		if (must_merge_config_packet)
+		{
+			this->_parsePacket->ParserPushPacket(&packet);
+		}
+
 		//https://github.com/Genymobile/scrcpy/blob/21df2c240e544b1c1eba7775e1474c1c772be04b/app/src/decoder.c#L40
-		if (packet.pts != AV_NOPTS_VALUE)
+		bool is_config = packet.pts == AV_NOPTS_VALUE;
+		if (!is_config)
 		{
 #if _DEBUG
 			printf(std::string("Audio pts:").append(std::to_string(packet.pts)).append("  ,len:").append(std::to_string(packet.size)).append("\r\n").c_str());
 #endif
 			if (this->_audioDecoder->Decode(&packet))
 			{
-				//	if (!this->_ishaveFrame)
-				//	{
-				//		SetEvent(this->_mtx_waitFirstFrame);
-				//		this->_ishaveFrame = true;
-				//	}
+
 			}
 			else
 			{
