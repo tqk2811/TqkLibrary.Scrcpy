@@ -12,8 +12,8 @@ namespace TestRenderWpf
     public class MainWindowVM : BaseViewModel
     {
 
-        IControl _control;
-        public IControl Control
+        IControl? _control;
+        public IControl? Control
         {
             get { return _control; }
             set { _control = value; NotifyPropertyChange(); }
@@ -25,8 +25,8 @@ namespace TestRenderWpf
             set { _isControl = value; NotifyPropertyChange(); }
         }
 
-        ScrcpyUiView _ScrcpyUiView;
-        public ScrcpyUiView ScrcpyUiView
+        ScrcpyUiView? _ScrcpyUiView;
+        public ScrcpyUiView? ScrcpyUiView
         {
             get { return _ScrcpyUiView; }
             set { _ScrcpyUiView = value; NotifyPropertyChange(); }

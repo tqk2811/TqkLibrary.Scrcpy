@@ -5,6 +5,7 @@
 		<TargetFrameworks>net462;net6.0-windows7.0</TargetFrameworks>
 		<LangVersion>10.0</LangVersion>
 		<UseWPF>true</UseWPF>
+		<Nullable>enable</Nullable>
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 		<Platforms>x64;x86;AnyCPU</Platforms>
 	</PropertyGroup>

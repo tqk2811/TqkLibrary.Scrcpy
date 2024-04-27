@@ -28,9 +28,9 @@ namespace TestRenderWpf
     /// </summary>
     public partial class MainWindow : Window
     {
-        Scrcpy scrcpy;
-        Adb adb;
-        string deviceId;
+        Scrcpy? scrcpy;
+        Adb? adb;
+        string? deviceId;
         readonly MainWindowVM mainWindowVM;
         readonly ScrcpyConfig scrcpyConfig = new ScrcpyConfig()
         {
@@ -49,7 +49,7 @@ namespace TestRenderWpf
         public MainWindow()
         {
             InitializeComponent();
-            mainWindowVM = this.DataContext as MainWindowVM;
+            mainWindowVM = this.DataContext as MainWindowVM ?? throw new InvalidOperationException();
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
@@ -96,8 +96,8 @@ namespace TestRenderWpf
         private async void Scrcpy_OnDisconnect()
         {
             if (windowClosed) return;
-            await adb.WaitFor(WaitForType.Device).ExecuteAsync();
-            scrcpy.Connect(scrcpyConfig);
+            await adb!.WaitFor(WaitForType.Device).ExecuteAsync();
+            scrcpy!.Connect(scrcpyConfig);
         }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
@@ -109,11 +109,11 @@ namespace TestRenderWpf
         private void Window_Closed(object sender, EventArgs e)
         {
             windowClosed = true;
-            scrcpy.Stop();
-            mainWindowVM.ScrcpyUiView.Dispose();
+            scrcpy?.Stop();
+            mainWindowVM.ScrcpyUiView?.Dispose();
             mainWindowVM.ScrcpyUiView = null;
             mainWindowVM.Control = null;
-            scrcpy.Dispose();
+            scrcpy?.Dispose();
         }
     }
 }
