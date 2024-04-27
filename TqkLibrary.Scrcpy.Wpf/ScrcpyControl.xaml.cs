@@ -437,7 +437,7 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         #region Key
 
-        static readonly Dictionary<Key, AndroidKeyCode> special_keys = new Dictionary<Key, AndroidKeyCode>() {
+        static readonly IReadOnlyDictionary<Key, AndroidKeyCode> special_keys = new Dictionary<Key, AndroidKeyCode>() {
             // Navigation keys and ENTER.
             // Used in all modes.
             { Key.Enter, AndroidKeyCode.AKEYCODE_ENTER },
@@ -459,7 +459,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             { Key.RightShift, AndroidKeyCode.AKEYCODE_SHIFT_RIGHT },
         };
 
-        static readonly Dictionary<Key, AndroidKeyCode> alphaspace_keys = new Dictionary<Key, AndroidKeyCode>()
+        static readonly IReadOnlyDictionary<Key, AndroidKeyCode> alphaspace_keys = new Dictionary<Key, AndroidKeyCode>()
         {
             { Key.A, AndroidKeyCode.AKEYCODE_A },
             { Key.B, AndroidKeyCode.AKEYCODE_B },
@@ -491,7 +491,7 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         };
 
-        static readonly Dictionary<Key, AndroidKeyCode> numbers_punct_keys = new Dictionary<Key, AndroidKeyCode>()
+        static readonly IReadOnlyDictionary<Key, AndroidKeyCode> numbers_punct_keys = new Dictionary<Key, AndroidKeyCode>()
         {
             //{SC_KEYCODE_HASH,           AndroidKeyCode.AKEYCODE_POUND},
             //{SC_KEYCODE_PERCENT,        AndroidKeyCode.AKEYCODE_PERIOD},            
