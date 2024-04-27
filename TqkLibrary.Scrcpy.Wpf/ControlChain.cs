@@ -25,6 +25,18 @@ namespace TqkLibrary.Scrcpy.Wpf
             foreach (var item in controls) this.Add(item);
         }
 
+        protected override void InsertItem(int index, IControl item)
+        {
+            if (item is null) throw new ArgumentNullException(nameof(item));
+            base.InsertItem(index, item);
+        }
+
+        protected override void SetItem(int index, IControl item)
+        {
+            if (item is null) throw new ArgumentNullException(nameof(item));
+            base.SetItem(index, item);
+        }
+
         protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
             if (e?.NewItems != null)
