@@ -311,7 +311,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             {
                 if (e.SystemKey == Key.None)
                 {
-                    AndroidKeyCode keyCode = await ResolveKey(e);
+                    AndroidKeyCode keyCode = await ResolveKeyAsync(e);
                     if (keyCode != AndroidKeyCode.AKEYCODE_UNKNOWN)
                     {
                         control.InjectKeycode(AndroidKeyEventAction.ACTION_DOWN, keyCode, 0, ResolveMetaKey(e));
@@ -335,7 +335,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             {
                 if (e.SystemKey == Key.None)
                 {
-                    AndroidKeyCode keyCode = await ResolveKey(e);
+                    AndroidKeyCode keyCode = await ResolveKeyAsync(e);
                     if (keyCode != AndroidKeyCode.AKEYCODE_UNKNOWN)
                     {
                         control.InjectKeycode(AndroidKeyEventAction.ACTION_UP, keyCode, 0, ResolveMetaKey(e));
@@ -546,7 +546,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             //{Key.D0,  AndroidKeyCode.AKEYCODE_NUMPAD_RIGHT_PAREN},
         };
 
-        async Task<AndroidKeyCode> ResolveKey(KeyEventArgs e)
+        async Task<AndroidKeyCode> ResolveKeyAsync(KeyEventArgs e)
         {
             Key key = e.Key;
 #if DEBUG
