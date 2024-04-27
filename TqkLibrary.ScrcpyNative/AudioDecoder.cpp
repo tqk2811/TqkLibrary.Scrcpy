@@ -74,6 +74,8 @@ INT64 AudioDecoder::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
 	if (this->_decoding_frame == nullptr || pFrame == nullptr)
 		return -1;
 
+	av_frame_unref(pFrame);
+	
 	INT64 result = -1;
 	_mtx_frame.lock();//lock read frame
 	if (_decoding_frame->pts > last_pts)
