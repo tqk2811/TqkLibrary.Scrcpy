@@ -55,7 +55,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                     item.OnSetClipboardAcknowledgement -= Item_OnSetClipboardAcknowledgement;
                 }
             }
-            base.OnCollectionChanged(e);
+            base.OnCollectionChanged(e!);
         }
 
         private void Item_OnSetClipboardAcknowledgement(IControl control, long data)
@@ -66,10 +66,12 @@ namespace TqkLibrary.Scrcpy.Wpf
 
 
         #region IControl
-        public Scrcpy Scrcpy => this.FirstOrDefault()?.Scrcpy;
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
+        public Scrcpy? Scrcpy => this.FirstOrDefault()?.Scrcpy;
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
 
-        public event OnDataReceived<string> OnClipboardReceived;
-        public event OnDataReceived<long> OnSetClipboardAcknowledgement;
+        public event OnDataReceived<string>? OnClipboardReceived;
+        public event OnDataReceived<long>? OnSetClipboardAcknowledgement;
 
         public bool BackOrScreenOn(AndroidKeyEventAction KeyEventAction)
             => this.ForEach(x => x.BackOrScreenOn(KeyEventAction));

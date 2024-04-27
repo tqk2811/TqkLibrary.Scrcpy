@@ -119,7 +119,7 @@ namespace TqkLibrary.Scrcpy.Wpf
         }
 
 
-        public event OnUiChanged<System.Drawing.Size> OnResize;
+        public event OnUiChanged<System.Drawing.Size>? OnResize;
 
         public System.Drawing.Size VideoSize { get { return videoSize; } }
         public System.Drawing.Size RenderVideoSize { get { return drawRect.Size; } }
@@ -146,7 +146,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             InteropImage.RequestRender();
         }
 
-        private void host_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void host_SizeChanged(object? sender, SizeChangedEventArgs? e)
         {
             double dpiScale = 1.0; // default value for 96 dpi
 
@@ -217,13 +217,13 @@ namespace TqkLibrary.Scrcpy.Wpf
             }
         }
 
-        private void CompositionTarget_Rendering(object sender, EventArgs e)
+        private void CompositionTarget_Rendering(object? sender, EventArgs e)
         {
-            RenderingEventArgs args = (RenderingEventArgs)e;
+            RenderingEventArgs? args = e as RenderingEventArgs;
 
             // It's possible for Rendering to call back twice in the same frame 
             // so only render when we haven't already rendered in this frame.
-            if (this.lastRender != args.RenderingTime)
+            if (args is not null && this.lastRender != args.RenderingTime)
             {
                 var videoSize = ScrcpyUiView?.Scrcpy.ScreenSize;
                 if (videoSize != this.videoSize && host != null)

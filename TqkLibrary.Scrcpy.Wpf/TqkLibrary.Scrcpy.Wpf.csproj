@@ -5,6 +5,7 @@
 		<LangVersion>10.0</LangVersion>
 		<PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
 		<UseWPF>true</UseWPF>
+		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64</Platforms>
 		<Version>2.3.0</Version>
 	</PropertyGroup>
