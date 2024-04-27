@@ -20,7 +20,8 @@ using TqkLibrary.Scrcpy.Wpf;
 using TqkLibrary.Scrcpy.Enums;
 using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.ListSupport;
-
+using TqkLibrary.AudioPlayer.Sdl2;
+using TqkLibrary.AudioPlayer.XAudio2;
 namespace TestRenderWpf
 {
     /// <summary>
@@ -43,9 +44,18 @@ namespace TestRenderWpf
                 VideoConfig = new VideoConfig()
                 {
                     MaxFps = 24
-                }
-            }
+                },
+                AudioConfig = new AudioConfig()
+                {
+                    IsAudio = true,
+                },
+            },
         };
+        SdlDevice? _sdlDevice;
+        XAudio2Engine? _audio2Engine;
+        XAudio2MasterVoice? _audio2MasterVoice;
+        XAudio2SourceVoice? _audio2SourceVoice;
+        AVFrame? _aVFrame;
         public MainWindow()
         {
             InitializeComponent();
@@ -60,7 +70,6 @@ namespace TestRenderWpf
             scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
             mainWindowVM.Control = new ControlChain(scrcpy.Control);
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
-
             var s = await scrcpy.ListSupportAsync(new ListSupportQuery()
             {
                 ListEncoders = true,
@@ -91,6 +100,12 @@ namespace TestRenderWpf
             {
                 MessageBox.Show("Connect Failed");
             }
+
+            if (scrcpyConfig?.ServerConfig?.AudioConfig?.IsAudio == true)
+            {
+                _aVFrame = new AVFrame();
+                _ = Task.Run(RunReadAudio);
+            }
         }
 
         private async void Scrcpy_OnDisconnect()
@@ -114,6 +129,35 @@ namespace TestRenderWpf
             mainWindowVM.ScrcpyUiView = null;
             mainWindowVM.Control = null;
             scrcpy?.Dispose();
+            _aVFrame?.Dispose();
+        }
+
+        async void RunReadAudio()
+        {
+            long last_pts = 0;
+            while (scrcpy!.IsConnected)
+            {
+                last_pts = scrcpy!.ReadAudioFrame(_aVFrame!, last_pts);
+                if (last_pts > 0) break;
+                await Task.Delay(10);
+            }
+
+            _sdlDevice = new SdlDevice(_aVFrame!.Handle);
+            _sdlDevice.QueueAudio(_aVFrame.Handle);
+            while (scrcpy.IsConnected)
+            {
+                long current_pts = scrcpy!.ReadAudioFrame(_aVFrame!, last_pts);
+                if (current_pts > 0)
+                {
+                    last_pts = current_pts;
+                    _sdlDevice.QueueAudio(_aVFrame.Handle);
+                }
+
+                if (_sdlDevice.GetQueuedAudioSize() > 320 * 1024)
+                {
+                    _sdlDevice.ClearQueuedAudio();
+                }
+            }
         }
     }
 }

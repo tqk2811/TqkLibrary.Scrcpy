@@ -12,6 +12,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="TqkLibrary.AdbDotNet" Version="1.0.0-build2022070800" />
+		<PackageReference Include="TqkLibrary.AudioPlayer.Sdl2" Version="1.0.1" />
+		<PackageReference Include="TqkLibrary.AudioPlayer.XAudio2" Version="1.0.1" />
 		<PackageReference Include="TqkLibrary.WpfUi" Version="1.0.0-build2022050602" />
 	</ItemGroup>
 
