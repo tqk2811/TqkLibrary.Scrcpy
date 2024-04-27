@@ -22,10 +22,9 @@ namespace TqkLibrary.Scrcpy
     public class Scrcpy : IDisposable
     {
         private readonly CountdownEvent countdownEvent = new CountdownEvent(1);
-
-
-
         private IntPtr _handle = IntPtr.Zero;
+
+
         /// <summary>
         /// 
         /// </summary>
@@ -59,6 +58,34 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
+        public Size ScreenSize
+        {
+            get
+            {
+                return GetScreenSize();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IControl Control { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string LastClipboard { get; private set; } = string.Empty;
+        /// <summary>
+        /// 
+        /// </summary>
+
+        public event Action? OnDisconnect;
+
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="deviceId"></param>
         public Scrcpy(string deviceId)
         {
@@ -79,7 +106,6 @@ namespace TqkLibrary.Scrcpy
             else
                 AppDomain.CurrentDomain.DomainUnload += TerminationHandler;//DomainUnload not fire on DefaultAppDomain
         }
-
 
         /// <summary>
         /// 
@@ -126,76 +152,6 @@ namespace TqkLibrary.Scrcpy
             }
             countdownEvent.Dispose();//TryAddCount will throw ObjectDisposeException
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public Size ScreenSize
-        {
-            get
-            {
-                return GetScreenSize();
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public IControl Control { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string LastClipboard { get; private set; } = string.Empty;
-        /// <summary>
-        /// 
-        /// </summary>
-
-        public event Action? OnDisconnect;
-
-
-        readonly NativeOnDisconnectDelegate NativeOnDisconnectDelegate;
-        void onDisconnect()
-        {
-            ThreadPool.QueueUserWorkItem(o =>
-            {
-                Stop();
-                OnDisconnect?.Invoke();
-            });
-        }
-
-        private void Control_OnClipboardReceived(IControl control, string data)
-        {
-            this.LastClipboard = data;
-        }
-
-        #region Function Control
-        internal bool SendControl(ScrcpyControlMessage scrcpyControlMessage)
-        {
-            bool result = false;
-
-            if (countdownEvent.TryAddCount())
-            {
-                byte[] command = scrcpyControlMessage.GetCommand();
-                result = NativeWrapper.ScrcpyControlCommand(_handle, command, command.Length);
-                countdownEvent.Signal();
-            }
-
-            return result;
-        }
-
-        //init, dont lock
-        internal bool RegisterClipboardEvent(NativeOnClipboardReceivedDelegate clipboardReceivedDelegate)
-        {
-            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardReceivedDelegate);
-            return NativeWrapper.RegisterClipboardEvent(_handle, pointer);
-        }
-        internal bool RegisterClipboardAcknowledgementEvent(NativeOnClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate)
-        {
-            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardAcknowledgementDelegate);
-            return NativeWrapper.RegisterClipboardAcknowledgementEvent(_handle, pointer);
-        }
-        #endregion
 
         /// <summary>
         /// 
@@ -313,6 +269,55 @@ namespace TqkLibrary.Scrcpy
 
             return ScrcpyServerListSupport.Parse(result.StdOut);
         }
+
+
+
+
+
+        readonly NativeOnDisconnectDelegate NativeOnDisconnectDelegate;
+        void onDisconnect()
+        {
+            ThreadPool.QueueUserWorkItem(o =>
+            {
+                Stop();
+                OnDisconnect?.Invoke();
+            });
+        }
+
+        private void Control_OnClipboardReceived(IControl control, string data)
+        {
+            this.LastClipboard = data;
+        }
+
+
+        #region Function Control
+        internal bool SendControl(ScrcpyControlMessage scrcpyControlMessage)
+        {
+            bool result = false;
+
+            if (countdownEvent.TryAddCount())
+            {
+                byte[] command = scrcpyControlMessage.GetCommand();
+                result = NativeWrapper.ScrcpyControlCommand(_handle, command, command.Length);
+                countdownEvent.Signal();
+            }
+
+            return result;
+        }
+
+        //init, dont lock
+        internal bool RegisterClipboardEvent(NativeOnClipboardReceivedDelegate clipboardReceivedDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardReceivedDelegate);
+            return NativeWrapper.RegisterClipboardEvent(_handle, pointer);
+        }
+        internal bool RegisterClipboardAcknowledgementEvent(NativeOnClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardAcknowledgementDelegate);
+            return NativeWrapper.RegisterClipboardAcknowledgementEvent(_handle, pointer);
+        }
+        #endregion
+
 
         internal bool D3DImageViewRender(IntPtr d3dView, IntPtr surface, bool isNewSurface, ref bool isNewtargetView)
         {
