@@ -14,10 +14,6 @@
 				<dependency id="TqkLibrary.Scrcpy" version="2.3.0" />
 				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
 			</group>
-			<group targetFramework="net5.0-windows7.0">
-				<dependency id="TqkLibrary.Scrcpy" version="2.3.0" />
-				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
-			</group>
 			<group targetFramework="net6.0-windows7.0">
 				<dependency id="TqkLibrary.Scrcpy" version="2.3.0" />
 				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
