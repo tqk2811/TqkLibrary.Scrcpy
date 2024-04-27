@@ -15,19 +15,19 @@
 	</PropertyGroup>	
 	
 	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.dll" Link="x86\TqkLibrary.ScrcpyNative.dll">
+		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.dll" Link="runtimes\win-x86\native\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.pdb" Link="x86\TqkLibrary.ScrcpyNative.pdb">
+		<None Include="..\x86\Debug\TqkLibrary.ScrcpyNative.pdb" Link="runtimes\win-x86\native\TqkLibrary.ScrcpyNative.pdb">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="x64\TqkLibrary.ScrcpyNative.dll">
+		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.dll" Link="runtimes\win-x64\native\TqkLibrary.ScrcpyNative.dll">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
-		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.pdb" Link="x64\TqkLibrary.ScrcpyNative.pdb">
+		<None Include="..\x64\Debug\TqkLibrary.ScrcpyNative.pdb" Link="runtimes\win-x64\native\TqkLibrary.ScrcpyNative.pdb">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

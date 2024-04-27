@@ -13,11 +13,15 @@ namespace TqkLibrary.Scrcpy
     internal static class NativeWrapper
     {
 #if DEBUG
+#if NETFRAMEWORK
         static NativeWrapper()
         {
             string path = Path.Combine(
-                Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location!)!,
-                Environment.Is64BitProcess ? "x64" : "x86");
+                Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!,
+                "runtimes",
+                Environment.Is64BitProcess ? "win-x64" : "win-x86",
+                "native"
+                );
 
             bool r = SetDllDirectory(path);
             if (!r)
@@ -26,6 +30,7 @@ namespace TqkLibrary.Scrcpy
 
         [DllImport("Kernel32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Winapi)]
         internal static extern bool SetDllDirectory(string PathName);
+#endif
 #endif
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
