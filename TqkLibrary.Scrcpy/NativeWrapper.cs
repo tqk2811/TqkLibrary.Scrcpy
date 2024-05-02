@@ -10,6 +10,10 @@ using TqkLibrary.Scrcpy.Configs;
 
 namespace TqkLibrary.Scrcpy
 {
+    internal delegate void NativeOnDisconnectDelegate();
+    internal delegate void NativeOnClipboardReceivedDelegate(IntPtr intPtr, int length);
+    internal delegate void NativeOnClipboardAcknowledgementDelegate(long length);
+    internal delegate void NativeUhdiOutputDelegate(UInt16 id, UInt16 size, IntPtr buff);
     internal static class NativeWrapper
     {
 #if DEBUG

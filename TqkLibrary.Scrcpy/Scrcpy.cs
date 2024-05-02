@@ -15,7 +15,6 @@ using TqkLibrary.Scrcpy.Helpers;
 
 namespace TqkLibrary.Scrcpy
 {
-    internal delegate void NativeOnDisconnectDelegate();
     /// <summary>
     /// 
     /// </summary>

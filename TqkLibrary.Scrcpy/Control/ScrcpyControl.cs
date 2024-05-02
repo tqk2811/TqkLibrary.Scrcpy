@@ -11,8 +11,6 @@ using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.Control
 {
-    internal delegate void NativeOnClipboardReceivedDelegate(IntPtr intPtr, int length);
-    internal delegate void NativeOnClipboardAcknowledgementDelegate(long length);
     internal class ScrcpyControl : IControl
     {
         static readonly Random random = new Random();
