@@ -22,7 +22,7 @@ namespace TqkLibrary.Scrcpy
     {
         private readonly CountdownEvent countdownEvent = new CountdownEvent(1);
         private IntPtr _handle = IntPtr.Zero;
-
+        internal IntPtr Handle { get { return _handle; } }
 
         /// <summary>
         /// 
@@ -97,8 +97,8 @@ namespace TqkLibrary.Scrcpy
             Control.OnClipboardReceived += Control_OnClipboardReceived;
 
             this.NativeOnDisconnectDelegate = onDisconnect;
-            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(this.NativeOnDisconnectDelegate);
-            NativeWrapper.RegisterDisconnectEvent(_handle, pointer);
+            if (!this.RegisterDisconnectEvent(this.NativeOnDisconnectDelegate))
+                throw new InvalidOperationException();
 
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
                 AppDomain.CurrentDomain.ProcessExit += TerminationHandler;
@@ -328,18 +328,6 @@ namespace TqkLibrary.Scrcpy
             }
 
             return result;
-        }
-
-        //init, dont lock
-        internal bool RegisterClipboardEvent(NativeOnClipboardReceivedDelegate clipboardReceivedDelegate)
-        {
-            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardReceivedDelegate);
-            return NativeWrapper.RegisterClipboardEvent(_handle, pointer);
-        }
-        internal bool RegisterClipboardAcknowledgementEvent(NativeOnClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate)
-        {
-            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardAcknowledgementDelegate);
-            return NativeWrapper.RegisterClipboardAcknowledgementEvent(_handle, pointer);
         }
         #endregion
 

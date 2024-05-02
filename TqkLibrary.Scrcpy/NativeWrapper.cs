@@ -77,15 +77,29 @@ namespace TqkLibrary.Scrcpy
 
         #region Callback
 
+        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool RegisterClipboardEvent(IntPtr scrcpy, IntPtr nativeOnClipboardReceivedDelegate);
+        internal static bool RegisterClipboardEvent(this Scrcpy scrcpy, NativeOnClipboardReceivedDelegate onClipboardReceivedDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(onClipboardReceivedDelegate);
+            return RegisterClipboardEvent(scrcpy.Handle, pointer);
+        }
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool RegisterClipboardEvent(IntPtr scrcpy, IntPtr delegateHandle);
+        private static extern bool RegisterClipboardAcknowledgementEvent(IntPtr scrcpy, IntPtr clipboardAcknowledgementDelegate);
+        internal static bool RegisterClipboardAcknowledgementEvent(this Scrcpy scrcpy, NativeOnClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(clipboardAcknowledgementDelegate);
+            return RegisterClipboardAcknowledgementEvent(scrcpy.Handle, pointer);
+        }
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool RegisterClipboardAcknowledgementEvent(IntPtr scrcpy, IntPtr delegateHandle);
-
-        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool RegisterDisconnectEvent(IntPtr scrcpy, IntPtr delegateHandle);
+        private static extern bool RegisterDisconnectEvent(IntPtr scrcpy, IntPtr delegateHandle);
+        internal static bool RegisterDisconnectEvent(this Scrcpy scrcpy, NativeOnDisconnectDelegate onDisconnectDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(onDisconnectDelegate);
+            return RegisterDisconnectEvent(scrcpy.Handle, pointer);
+        }
         #endregion
 
 
