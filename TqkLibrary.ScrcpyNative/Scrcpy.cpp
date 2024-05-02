@@ -163,6 +163,10 @@ bool Scrcpy::RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate) 
 	this->disconnectCallback = onDisconnectDelegate;
 	return true;
 }
+bool Scrcpy::RegisterUhdiOutputEvent(UhdiOutputDelegate uhdiOutputDelegate) {
+	this->_uhdiOutputDelegate = uhdiOutputDelegate;
+	return true;
+}
 void Scrcpy::VideoDisconnectCallback() {
 	if (this->disconnectCallback) this->disconnectCallback();
 }
@@ -172,6 +176,9 @@ void Scrcpy::ControlClipboardCallback(BYTE* buffer, int length) {
 }
 void Scrcpy::ControlClipboardAcknowledgementCallback(UINT64 sequence) {
 	if (this->clipboardAcknowledgementCallback) this->clipboardAcknowledgementCallback(sequence);
+}
+void Scrcpy::UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff) {
+	if (this->_uhdiOutputDelegate) this->_uhdiOutputDelegate(id, size, buff);
 }
 
 LPCWSTR Scrcpy::GetDeviceId() {

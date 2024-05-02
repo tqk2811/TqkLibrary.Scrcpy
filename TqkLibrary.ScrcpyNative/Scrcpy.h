@@ -17,11 +17,14 @@ public:
 	bool RegisterClipboardEvent(ClipboardReceivedDelegate callback);
 	bool RegisterClipboardAcknowledgementEvent(ClipboardAcknowledgementDelegate clipboardAcknowledgementDelegate);
 	bool RegisterDisconnectEvent(OnDisconnectDelegate onDisconnectDelegate);
+	bool RegisterUhdiOutputEvent(UhdiOutputDelegate uhdiOutputDelegate);
 
 	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
 	void VideoDisconnectCallback();
 	void ControlClipboardCallback(BYTE* buffer, int length);
 	void ControlClipboardAcknowledgementCallback(UINT64 sequence);
+	void UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff);
+
 	LPCWSTR GetDeviceId();
 	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts);
 private:
@@ -35,7 +38,7 @@ private:
 	ScrcpyInstance* _scrcpyInstance{ nullptr };
 	ClipboardReceivedDelegate clipboardCallback{ nullptr };
 	ClipboardAcknowledgementDelegate clipboardAcknowledgementCallback{ nullptr };
-
+	UhdiOutputDelegate _uhdiOutputDelegate{ nullptr };
 	OnDisconnectDelegate disconnectCallback{ nullptr };
 };
 

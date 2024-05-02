@@ -100,6 +100,10 @@ namespace TqkLibrary.Scrcpy
             if (!this.RegisterDisconnectEvent(this.NativeOnDisconnectDelegate))
                 throw new InvalidOperationException();
 
+            this._uhdiOutputDelegate = UhdiOutputCallback;
+            if (!this.RegisterUhdiOutputEvent(this._uhdiOutputDelegate))
+                throw new InvalidOperationException();
+
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
                 AppDomain.CurrentDomain.ProcessExit += TerminationHandler;
             else
@@ -365,5 +369,18 @@ namespace TqkLibrary.Scrcpy
             }
             return Encoding.ASCII.GetString(buffer);
         }
+
+
+        readonly NativeUhdiOutputDelegate _uhdiOutputDelegate;
+        void UhdiOutputCallback(UInt16 id, UInt16 size, IntPtr buff)
+        {
+            byte[] clone_buff = new byte[size];
+            Marshal.Copy(buff, clone_buff, 0, size);
+            ThreadPool.QueueUserWorkItem((o) =>
+            {
+
+            }, null);
+        }
+
     }
 }

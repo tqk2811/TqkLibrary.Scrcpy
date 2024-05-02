@@ -100,6 +100,14 @@ namespace TqkLibrary.Scrcpy
             IntPtr pointer = Marshal.GetFunctionPointerForDelegate(onDisconnectDelegate);
             return RegisterDisconnectEvent(scrcpy.Handle, pointer);
         }
+
+        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        private static extern bool RegisterUhdiOutputEvent(IntPtr scrcpy, IntPtr uhdiOutputDelegate);
+        internal static bool RegisterUhdiOutputEvent(this Scrcpy scrcpy, NativeUhdiOutputDelegate uhdiOutputDelegate)
+        {
+            IntPtr pointer = Marshal.GetFunctionPointerForDelegate(uhdiOutputDelegate);
+            return RegisterUhdiOutputEvent(scrcpy.Handle, pointer);
+        }
         #endregion
 
 

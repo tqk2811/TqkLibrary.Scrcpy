@@ -6,6 +6,7 @@ enum ScrcpyControlReceivedType : BYTE
 {
 	DEVICE_MSG_TYPE_CLIPBOARD = 0,
 	DEVICE_MSG_TYPE_ACK_CLIPBOARD = 1,
+	DEVICE_MSG_TYPE_UHID_OUTPUT = 2,
 };
 Control::Control(Scrcpy* scrcpy, SOCKET sock) {
 	this->scrcpy = scrcpy;
@@ -81,6 +82,16 @@ void Control::threadStart() {
 				return;
 			UINT64 sequence = sc_read64be(this->_buffer);
 			this->scrcpy->ControlClipboardAcknowledgementCallback(sequence);
+			break;
+		}
+
+		case DEVICE_MSG_TYPE_UHID_OUTPUT:
+		{
+			if (this->_sockControl->ReadAll(this->_buffer, 4) != 4)
+				return;
+			UINT16 id = sc_read16be(&_buffer[1]);
+			UINT16 size = sc_read16be(&_buffer[3]);
+			this->scrcpy->UhdiOutputCallback(id, size, &this->_buffer[5]);
 			break;
 		}
 		default:

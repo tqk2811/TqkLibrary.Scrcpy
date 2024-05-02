@@ -83,3 +83,7 @@ bool RegisterDisconnectEvent(Scrcpy* scrcpy, OnDisconnectDelegate onDisconnectDe
 	if (scrcpy == nullptr || onDisconnectDelegate == nullptr) return false;
 	return scrcpy->RegisterDisconnectEvent(onDisconnectDelegate);
 }
+bool RegisterUhdiOutputEvent(Scrcpy* scrcpy, UhdiOutputDelegate uhdiOutputDelegate) {
+	if (scrcpy == nullptr || uhdiOutputDelegate == nullptr) return false;
+	return scrcpy->RegisterUhdiOutputEvent(uhdiOutputDelegate);
+}
