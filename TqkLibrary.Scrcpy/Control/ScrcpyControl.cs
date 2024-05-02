@@ -19,10 +19,12 @@ namespace TqkLibrary.Scrcpy.Control
             this.Scrcpy = scrcpy;
 
             this.NativeOnClipboardReceivedDelegate = NativeOnClipboardReceived;
-            this.Scrcpy.RegisterClipboardEvent(NativeOnClipboardReceivedDelegate);
+            if (!this.Scrcpy.RegisterClipboardEvent(NativeOnClipboardReceivedDelegate))
+                throw new InvalidOperationException();
 
             this.NativeOnClipboardAcknowledgementDelegate = NativeClipboardAcknowledgementReceived;
-            this.Scrcpy.RegisterClipboardAcknowledgementEvent(NativeOnClipboardAcknowledgementDelegate);
+            if (!this.Scrcpy.RegisterClipboardAcknowledgementEvent(NativeOnClipboardAcknowledgementDelegate))
+                throw new InvalidOperationException();
         }
         public Scrcpy Scrcpy { get; }
 
