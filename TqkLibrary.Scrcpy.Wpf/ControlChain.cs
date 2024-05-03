@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -116,6 +117,9 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
             => this.ForEach(x => x.SetScreenPowerMode(powerMode));
+
+        public bool OpenHardKeyboardSetting()
+            => this.ForEach(x => x.OpenHardKeyboardSetting());
         #endregion
     }
 
