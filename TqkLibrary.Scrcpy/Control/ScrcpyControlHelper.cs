@@ -17,7 +17,7 @@ namespace TqkLibrary.Scrcpy.Control
     /// </summary>
     internal static class ScrcpyControlHelper
     {
-        internal static byte[] CreateInjectKeycode(
+        internal static byte[] InjectKeycode(
                 AndroidKeyEventAction action,
                 AndroidKeyCode keycode,
                 uint repeat = 1,
@@ -29,7 +29,7 @@ namespace TqkLibrary.Scrcpy.Control
         }
 
 
-        internal static byte[] CreateInjectText(string text)
+        internal static byte[] InjectText(string text)
         {
             if (string.IsNullOrEmpty(text)) throw new ArgumentNullException(nameof(text));
 
@@ -39,7 +39,7 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
-        internal static byte[] CreateInjectTouchEvent(
+        internal static byte[] InjectTouchEvent(
                 AndroidMotionEventAction action,
                 long pointerId,
                 Rectangle position,
@@ -62,7 +62,7 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
-        internal static byte[] CreateInjectScrollEvent(
+        internal static byte[] InjectScrollEvent(
             Rectangle position,
             float vScroll,
             float hScroll,
@@ -82,7 +82,7 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
-        internal static byte[] CreateSetClipboard(string text, bool paste, long sequence)
+        internal static byte[] SetClipboard(string text, bool paste, long sequence)
         {
             if (string.IsNullOrEmpty(text)) throw new ArgumentNullException(nameof(text));
 
@@ -97,7 +97,7 @@ namespace TqkLibrary.Scrcpy.Control
                 );
             return stream.ToArray();
         }
-        internal static byte[] CreateGetClipboard(CopyKey copyKey)
+        internal static byte[] GetClipboard(CopyKey copyKey)
         {
             using MemoryStream stream = new MemoryStream();
             stream.WriteHostToNetworkOrder(
@@ -107,7 +107,7 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
-        internal static byte[] CreateSetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
+        internal static byte[] SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
         {
             using MemoryStream memoryStream = new MemoryStream();
             memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_SCREEN_POWER_MODE, powerMode);

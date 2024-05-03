@@ -40,27 +40,27 @@ namespace TqkLibrary.Scrcpy.Control
         public bool ExpandSettingsPanel()
             => SendControl(ScrcpyControlHelper.ExpandSettingsPanel());
         public bool GetClipboard(CopyKey copyKey)
-            => SendControl(ScrcpyControlHelper.CreateGetClipboard(copyKey));
+            => SendControl(ScrcpyControlHelper.GetClipboard(copyKey));
         public bool InjectKeycode(
             AndroidKeyEventAction action,
             AndroidKeyCode keycode,
             uint repeat = 1,
             AndroidKeyEventMeta metaState = AndroidKeyEventMeta.META_NONE)
-            => SendControl(ScrcpyControlHelper.CreateInjectKeycode(action, keycode, repeat, metaState));
+            => SendControl(ScrcpyControlHelper.InjectKeycode(action, keycode, repeat, metaState));
         public bool InjectScrollEvent(Rectangle position, float vScroll, float hScroll = 0, AndroidMotionEventButton button = AndroidMotionEventButton.BUTTON_PRIMARY)
-            => SendControl(ScrcpyControlHelper.CreateInjectScrollEvent(position, vScroll, hScroll, button));
+            => SendControl(ScrcpyControlHelper.InjectScrollEvent(position, vScroll, hScroll, button));
         public bool InjectText(string text)
-            => SendControl(ScrcpyControlHelper.CreateInjectText(text));
+            => SendControl(ScrcpyControlHelper.InjectText(text));
         public bool InjectTouchEvent(AndroidMotionEventAction action, long pointerId, Rectangle position, float pressure, AndroidMotionEventButton buttons, AndroidMotionEventButton actionButton)
-            => SendControl(ScrcpyControlHelper.CreateInjectTouchEvent(action, pointerId, position, pressure, buttons, actionButton));
+            => SendControl(ScrcpyControlHelper.InjectTouchEvent(action, pointerId, position, pressure, buttons, actionButton));
         public bool RotateDevice()
             => SendControl(ScrcpyControlHelper.RotateDevice());
         public bool SetClipboard(string text, bool paste)
-            => SendControl(ScrcpyControlHelper.CreateSetClipboard(text, paste, random.Next()));
+            => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, random.Next()));
         public bool SetClipboard(string text, bool paste, long sequence)
-            => SendControl(ScrcpyControlHelper.CreateSetClipboard(text, paste, sequence));
+            => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, sequence));
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
-            => SendControl(ScrcpyControlHelper.CreateSetScreenPowerMode(powerMode));
+            => SendControl(ScrcpyControlHelper.SetScreenPowerMode(powerMode));
         #endregion
 
         #region Event
