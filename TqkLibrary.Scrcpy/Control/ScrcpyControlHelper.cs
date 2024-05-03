@@ -35,7 +35,7 @@ namespace TqkLibrary.Scrcpy.Control
 
             byte[] utf8_text = Encoding.UTF8.GetBytes(text);
             using MemoryStream stream = new MemoryStream();
-            stream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_INJECT_TEXT, utf8_text.Length, utf8_text);
+            stream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_INJECT_TEXT, (UInt32)utf8_text.Length, utf8_text);
             return stream.ToArray();
         }
 
@@ -92,7 +92,7 @@ namespace TqkLibrary.Scrcpy.Control
                 ScrcpyControlType.TYPE_SET_CLIPBOARD,
                 sequence,
                 paste,
-                utf8_text.Length,
+                (UInt32)utf8_text.Length,
                 utf8_text
                 );
             return stream.ToArray();
@@ -142,6 +142,11 @@ namespace TqkLibrary.Scrcpy.Control
             memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_UHID_INPUT, id, (UInt16)data.Length, data);
             return memoryStream.ToArray();
         }
+
+        internal static byte[] OpenHardKeyboardSetting() => CreateEmpty(ScrcpyControlType.OPEN_HARD_KEYBOARD_SETTINGS);
+
+
+
         static byte[] CreateEmpty(ScrcpyControlType type)
         {
             using MemoryStream memoryStream = new MemoryStream();
