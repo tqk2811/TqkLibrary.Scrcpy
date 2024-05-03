@@ -269,6 +269,7 @@
     <ClInclude Include="FrameConventer.h" />
     <ClInclude Include="InputTextureNv12Class.h" />
     <ClInclude Include="libav.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="VideoDecoder.h" />
     <ClInclude Include="opengl.h" />
     <ClInclude Include="ParsePacket.h" />
@@ -409,6 +410,9 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ReleaseNoScreenShot|x64'">4.0_level_9_1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ReleaseNoScreenShot|Win32'">4.0_level_9_1</ShaderModel>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
