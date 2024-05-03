@@ -72,7 +72,7 @@ namespace TqkLibrary.Scrcpy
         internal static extern bool ScrcpyGetScreenShot(IntPtr scrcpy, IntPtr buffer, int sizeInByte, int w, int h, int lineSize);
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long ScrcpyReadAudioFrame(IntPtr scrcpy, IntPtr pFrame, long last_pts);//return current pts if > 0
+        internal static extern long ScrcpyReadAudioFrame(IntPtr scrcpy, IntPtr pFrame, long last_pts, UInt32 waitFrameTime);//return current pts if > 0
 
 
         #region Callback

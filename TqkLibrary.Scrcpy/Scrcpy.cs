@@ -278,11 +278,12 @@ namespace TqkLibrary.Scrcpy
         /// </summary>
         /// <param name="aVFrame"></param>
         /// <param name="last_pts"></param>
-        /// <returns></returns>
-        public long ReadAudioFrame(AVFrame aVFrame, long last_pts)
+        /// <param name="waitFrameTime">in mili second</param>
+        /// <returns>return current pts</returns>
+        public long ReadAudioFrame(AVFrame aVFrame, long last_pts, UInt32 waitFrameTime = 0)
         {
             if (aVFrame is null) throw new ArgumentNullException(nameof(aVFrame));
-            return ReadAudioFrame(aVFrame.Handle, last_pts);
+            return ReadAudioFrame(aVFrame.Handle, last_pts, waitFrameTime);
         }
 
         /// <summary>
@@ -290,13 +291,14 @@ namespace TqkLibrary.Scrcpy
         /// </summary>
         /// <param name="pAVFrame"></param>
         /// <param name="last_pts"></param>
-        /// <returns></returns>
-        public long ReadAudioFrame(IntPtr pAVFrame, long last_pts)
+        /// <param name="waitFrameTime">in mili second</param>
+        /// <returns>return current pts</returns>
+        public long ReadAudioFrame(IntPtr pAVFrame, long last_pts, UInt32 waitFrameTime = 0)
         {
             long result = -1;
             if (countdownEvent.SafeTryAddCount())
             {
-                result = NativeWrapper.ScrcpyReadAudioFrame(this._handle, pAVFrame, last_pts);
+                result = NativeWrapper.ScrcpyReadAudioFrame(this._handle, pAVFrame, last_pts, waitFrameTime);
                 countdownEvent.Signal();
             }
             return result;

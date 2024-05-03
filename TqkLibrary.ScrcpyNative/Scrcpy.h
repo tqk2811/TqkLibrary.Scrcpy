@@ -26,7 +26,7 @@ public:
 	void UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff);
 
 	LPCWSTR GetDeviceId();
-	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts);
+	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
 private:
 	//const
 	std::wstring _deviceId;

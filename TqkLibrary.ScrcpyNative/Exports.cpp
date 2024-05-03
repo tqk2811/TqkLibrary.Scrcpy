@@ -50,9 +50,9 @@ bool ScrcpyGetDeviceName(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte) {
 	if (scrcpy == nullptr || buffer == nullptr) return false;
 	return scrcpy->GetDeviceName(buffer, sizeInByte);
 }
-INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts) {
+INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime) {
 	if (scrcpy == nullptr || pFrame == nullptr) return -1;
-	return scrcpy->ReadAudioFrame(pFrame, last_pts);
+	return scrcpy->ReadAudioFrame(pFrame, last_pts, waitFrameTime);
 }
 
 RenderTextureSurfaceClass* D3DImageViewAlloc() {

@@ -13,7 +13,7 @@ ScrcpyNativeExport bool ScrcpyGetScreenSize(Scrcpy* scrcpy, int& w, int& h);
 ScrcpyNativeExport bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command, const int sizeInByte);
 ScrcpyNativeExport bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize);
 ScrcpyNativeExport bool ScrcpyGetDeviceName(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte);
-ScrcpyNativeExport INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts);
+ScrcpyNativeExport INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
 
 ScrcpyNativeExport RenderTextureSurfaceClass* D3DImageViewAlloc();
 ScrcpyNativeExport void D3DImageViewFree(RenderTextureSurfaceClass* renderSurface);

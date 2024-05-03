@@ -184,16 +184,18 @@ void Scrcpy::UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff) {
 LPCWSTR Scrcpy::GetDeviceId() {
 	return this->_deviceId.c_str();
 }
-INT64 Scrcpy::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
+INT64 Scrcpy::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime)
 {
 	INT64 result = -1;
 
-	_mutex.lock();
-	if (this->_scrcpyInstance != nullptr)
+	//_mutex.lock();
+	if (this->_scrcpyInstance != nullptr &&
+		this->_scrcpyInstance->_audio != nullptr
+		)
 	{
-		result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts);
+		result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts, waitFrameTime);
 	}
-	_mutex.unlock();
+	//_mutex.unlock();
 
 	return result;
 }

@@ -11,6 +11,7 @@ Audio::~Audio() {
 		delete this->_audioDecoder;
 	delete this->_audioSock;
 	CloseHandle(this->_threadHandle);
+	CloseHandle(this->_mtx_waitNextFrame);
 }
 void Audio::Start() {
 	//
@@ -30,12 +31,26 @@ void Audio::Stop() {
 		WaitForSingleObject(this->_threadHandle, INFINITE);
 }
 bool Audio::Init() {
+	this->_mtx_waitNextFrame = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (this->_mtx_waitNextFrame == INVALID_HANDLE_VALUE)
+		return false;
+
 	return this->_audioSock->ChangeBlockMode(true);
 }
-INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
+INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime)
 {
 	if (this->_audioDecoder == nullptr) return -1;
-	return this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
+	ResetEvent(this->_mtx_waitNextFrame);
+	INT64 result = this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
+	if (result < 0 && waitFrameTime > 0)
+	{
+		auto ret = WaitForSingleObject(this->_mtx_waitNextFrame, waitFrameTime);
+		if (ret == WAIT_OBJECT_0)
+		{
+			result = this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
+		}
+	}
+	return result;
 }
 
 DWORD Audio::MyThreadFunction(LPVOID lpParam) {
@@ -73,11 +88,7 @@ void Audio::threadStart() {
 #endif
 			if (this->_audioDecoder->Decode(&packet))
 			{
-				//	if (!this->_ishaveFrame)
-				//	{
-				//		SetEvent(this->_mtx_waitFirstFrame);
-				//		this->_ishaveFrame = true;
-				//	}
+				SetEvent(this->_mtx_waitNextFrame);
 			}
 			else
 			{
