@@ -22,6 +22,7 @@ using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.ListSupport;
 using TqkLibrary.AudioPlayer.Sdl2;
 using TqkLibrary.AudioPlayer.XAudio2;
+using System.Threading;
 namespace TestRenderWpf
 {
     /// <summary>
@@ -152,6 +153,7 @@ namespace TestRenderWpf
                     last_pts = current_pts;
                     _sdlDevice.QueueAudio(_aVFrame.Handle);
                 }
+                Thread.Sleep(0);
 
                 if (_sdlDevice.GetQueuedAudioSize() > 320 * 1024)
                 {
