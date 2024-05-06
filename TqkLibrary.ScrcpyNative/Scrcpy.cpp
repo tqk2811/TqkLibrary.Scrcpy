@@ -207,7 +207,12 @@ INT64 Scrcpy::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTim
 		if (ret == WAIT_OBJECT_0)
 		{
 			_mutex.lock();
-			result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts);
+			if (this->_scrcpyInstance != nullptr &&
+				this->_scrcpyInstance->_audio != nullptr
+				)
+			{
+				result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts);
+			}
 			_mutex.unlock();
 		}
 	}
