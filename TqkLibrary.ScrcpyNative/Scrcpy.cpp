@@ -187,15 +187,30 @@ LPCWSTR Scrcpy::GetDeviceId() {
 INT64 Scrcpy::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime)
 {
 	INT64 result = -1;
+	HANDLE waitHandle = INVALID_HANDLE_VALUE;
 
-	//_mutex.lock();
+	_mutex.lock();
 	if (this->_scrcpyInstance != nullptr &&
 		this->_scrcpyInstance->_audio != nullptr
 		)
 	{
-		result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts, waitFrameTime);
+		waitHandle = this->_scrcpyInstance->_audio->GetWaitHanlde();
+		ResetEvent(waitHandle);
+		result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts);
 	}
-	//_mutex.unlock();
+	_mutex.unlock();
+
+
+	if (result < 0 && waitFrameTime > 0 && waitHandle != INVALID_HANDLE_VALUE)
+	{
+		auto ret = WaitForSingleObject(waitHandle, waitFrameTime);
+		if (ret == WAIT_OBJECT_0)
+		{
+			_mutex.lock();
+			result = this->_scrcpyInstance->_audio->ReadAudioFrame(pFrame, last_pts);
+			_mutex.unlock();
+		}
+	}
 
 	return result;
 }

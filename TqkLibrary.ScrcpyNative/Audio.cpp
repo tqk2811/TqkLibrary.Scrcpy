@@ -37,20 +37,13 @@ bool Audio::Init() {
 
 	return this->_audioSock->ChangeBlockMode(true);
 }
-INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime)
+INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
 {
 	if (this->_audioDecoder == nullptr) return -1;
-	ResetEvent(this->_mtx_waitNextFrame);
-	INT64 result = this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
-	if (result < 0 && waitFrameTime > 0)
-	{
-		auto ret = WaitForSingleObject(this->_mtx_waitNextFrame, waitFrameTime);
-		if (ret == WAIT_OBJECT_0)
-		{
-			result = this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
-		}
-	}
-	return result;
+	return this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
+}
+HANDLE Audio::GetWaitHanlde() {
+	return this->_mtx_waitNextFrame;
 }
 
 DWORD Audio::MyThreadFunction(LPVOID lpParam) {

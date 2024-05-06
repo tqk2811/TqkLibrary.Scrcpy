@@ -9,7 +9,8 @@ public:
 	void Stop();
 	bool Init();
 
-	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
+	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts);
+	HANDLE GetWaitHanlde();
 
 private:
 	ScrcpyNativeConfig _nativeConfig{};
@@ -23,7 +24,7 @@ private:
 	//need delete
 	AudioDecoder* _audioDecoder{ nullptr };
 	SocketWrapper* _audioSock{ nullptr };
-	HANDLE _mtx_waitNextFrame{ 0 };
+	HANDLE _mtx_waitNextFrame{ INVALID_HANDLE_VALUE };
 
 
 
