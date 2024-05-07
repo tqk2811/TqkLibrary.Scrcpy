@@ -48,7 +48,9 @@ namespace TestRenderWpf
                 },
                 AudioConfig = new AudioConfig()
                 {
+#if AudioTest
                     IsAudio = true,
+#endif
                 },
             },
         };
@@ -65,7 +67,12 @@ namespace TestRenderWpf
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault().DeviceId;
+            deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault()?.DeviceId;
+            if(string.IsNullOrWhiteSpace(deviceId))
+            {
+                MessageBox.Show("No device");
+                return;
+            }
             adb = new Adb(deviceId);
             scrcpy = new Scrcpy(deviceId);
             scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
@@ -83,7 +90,7 @@ namespace TestRenderWpf
             scrcpyConfig.ServerConfig.VideoSource = VideoSource.Camera;
             var cam = s.CameraInfos
                 .First(x => 
-                    x.IsHighSpeed && 
+                    !x.IsHighSpeed && 
                     x.Size.Width < 1600 && 
                     x.CameraFacing == CameraFacing.Back
                     );

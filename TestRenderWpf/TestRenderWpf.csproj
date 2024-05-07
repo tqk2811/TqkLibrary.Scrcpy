@@ -10,6 +10,10 @@
 		<Platforms>x64;x86;AnyCPU</Platforms>
 	</PropertyGroup>
 
+	<PropertyGroup>
+	  <DefineConstants>$(DefineConstants);AudioTest</DefineConstants>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="TqkLibrary.AdbDotNet" Version="1.0.0-build2022070800" />
 		<PackageReference Include="TqkLibrary.AudioPlayer.Sdl2" Version="1.0.1" />
