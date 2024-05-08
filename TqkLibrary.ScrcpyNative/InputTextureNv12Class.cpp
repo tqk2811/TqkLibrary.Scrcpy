@@ -10,13 +10,13 @@ extern "C" {
 	)
 	{
 		assert(uv_size % 2 == 0);
-		int size = uv_size / 2;
+		int u_size = uv_size / 2;
 		int i;
 
 #ifdef __AVX2__
 		if (uv_size % 32 == 0)
 		{
-			for (i = 0; i < size; i += 16)//16 byte step
+			for (i = 0; i < u_size; i += 16)//16 byte step
 			{
 				__m128i s0 = _mm_loadu_epi8(&u[i]);//load 16 byte vào thanh ghi 128 bit
 				__m128i s1 = _mm_loadu_epi8(&v[i]);
@@ -29,7 +29,7 @@ extern "C" {
 		}
 #endif // __AVX2__
 
-		for (i = 0; i < size; i++)
+		for (i = 0; i < u_size; i++)
 		{
 			uint8_t u_data = u[i];  // fetch u data
 			uint8_t v_data = v[i];  // fetch v data
