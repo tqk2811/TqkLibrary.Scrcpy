@@ -1,50 +1,34 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "InputTextureNv12Class.h"
-//
-//  420ToNv12.c
-//  420ToNv12
-//
-//  Created by Hank Lee on 5/31/15.
-//  Copyright (c) 2015 Hank Lee. All rights reserved.
-//
 extern "C" {
-	//#define SSE
-#ifdef SSE
-#include <stdint.h>
-	typedef char __attribute__((vector_size(8)))    v8qi;
-	int planar_to_interleave(
-		uint32_t		uv_size,
-		uint64_t* u_et_v,
-		const uint64_t* u,
-		const uint64_t* v
-	)
-	{
-		int i;
-		v8qi* res;
-
-		res = (v8qi*)u_et_v;
-
-		for (i = 0; i < wxh / 32; i++)
-		{
-			res[0] = __builtin_ia32_punpcklbw((v8qi)u[i], (v8qi)v[i]);
-			res[1] = __builtin_ia32_punpckhbw((v8qi)u[i], (v8qi)v[i]);
-
-			res += 2;
-		}
-
-		return 0;
-	}
-#else
-	int planar_to_interleave
+	void planar_to_interleave
 	(
-		uint32_t		uv_size,
+		uint32_t uv_size,
 		uint8_t* u_et_v,
 		const uint8_t* u,
 		const uint8_t* v
 	)
 	{
-		int i;
+		assert(uv_size % 2 == 0);
 		int size = uv_size / 2;
+		int i;
+
+#ifdef __AVX2__
+		if (uv_size % 32 == 0)
+		{
+			for (i = 0; i < size; i += 16)//16 byte step
+			{
+				__m128i s0 = _mm_loadu_epi8(&u[i]);//load 16 byte vào thanh ghi 128 bit
+				__m128i s1 = _mm_loadu_epi8(&v[i]);
+				__m128i s2 = _mm_unpacklo_epi8(s0, s1);//xen kẽ lo
+				__m128i s3 = _mm_unpackhi_epi8(s0, s1);//xen kẽ hi
+				*(__m128i*)(&u_et_v[2 * i]) = s2;//byte 0-15, 32-47,....
+				*(__m128i*)(&u_et_v[2 * i + 16]) = s3;//byte 16-31, 48-63,.....
+			}
+			return;
+		}
+#endif // __AVX2__
+
 		for (i = 0; i < size; i++)
 		{
 			uint8_t u_data = u[i];  // fetch u data
@@ -53,10 +37,7 @@ extern "C" {
 			u_et_v[2 * i] = u_data;   // write u data
 			u_et_v[2 * i + 1] = v_data;   // write v data
 		}
-
-		return 0;
 	}
-#endif
 }
 
 InputTextureNv12Class::InputTextureNv12Class() {
@@ -209,6 +190,7 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 				uint8_t* start_uv = (uint8_t*)map.pData + map.RowPitch * sourceFrame->height;
 				int uv_rowSizeCopy = sourceFrame->width;//sourceFrame->linesize[1] + sourceFrame->linesize[2];
 				int uv_height = sourceFrame->height / 2;
+
 				for (int row = 0; row < uv_height; row++)
 				{
 					planar_to_interleave(
