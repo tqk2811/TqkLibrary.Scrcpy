@@ -1,5 +1,5 @@
 #pragma warning(disable: 26812)
-
+extern bool HW_AVX2;
 #ifndef _H_ScrcpyNativePCH_H_
 #define _H_ScrcpyNativePCH_H_
 

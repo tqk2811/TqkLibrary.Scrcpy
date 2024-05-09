@@ -14,7 +14,7 @@ extern "C" {
 		int i;
 
 #ifdef __AVX2__
-		if (uv_size % 32 == 0)
+		if (HW_AVX2 && uv_size % 32 == 0)
 		{
 			for (i = 0; i < u_size; i += 16)//16 byte step
 			{
