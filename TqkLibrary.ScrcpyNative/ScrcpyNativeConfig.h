@@ -15,6 +15,7 @@ struct ScrcpyNativeConfig {
 	INT32 SCID;
 	UINT32 GpuThreadX;
 	UINT32 GpuThreadY;
+	BOOL IsForceUiGpuFlush;
 };
 #endif // !ScrcpyNativeConfig_H
 

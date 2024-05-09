@@ -152,7 +152,7 @@ bool VideoDecoder::Convert(AVFrame* frame) {
 			{
 				result = Nv12Convert(frame);
 			}
-			else 
+			else
 			{
 				result = this->TransferNoHw(frame);
 			}
@@ -319,7 +319,9 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
-				device_ctx->Flush();
+
+				if (this->_nativeConfig.IsForceUiGpuFlush)
+					device_ctx->Flush();
 			}
 			result = true;
 		}

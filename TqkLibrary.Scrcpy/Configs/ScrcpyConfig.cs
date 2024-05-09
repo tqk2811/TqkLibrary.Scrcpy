@@ -73,6 +73,11 @@ namespace TqkLibrary.Scrcpy.Configs
         public uint GpuThreadY { get; set; } = 4;
 
         /// <summary>
+        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true
+        /// </summary>
+        public bool IsForceUiGpuFlush { get; set; } = false;
+
+        /// <summary>
         /// Default: 3000
         /// </summary>
         public int ConnectionTimeout { get; set; } = 3000;
@@ -119,6 +124,7 @@ namespace TqkLibrary.Scrcpy.Configs
                 SCID = ServerConfig.SCID,
                 GpuThreadX = GpuThreadX,
                 GpuThreadY = GpuThreadY,
+                IsForceUiGpuFlush = IsForceUiGpuFlush,
             };
         }
 

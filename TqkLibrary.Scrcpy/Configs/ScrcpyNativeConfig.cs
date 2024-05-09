@@ -41,5 +41,7 @@ namespace TqkLibrary.Scrcpy.Configs
         public int SCID;
         public uint GpuThreadX;
         public uint GpuThreadY;
+        [MarshalAs(UnmanagedType.U1)]
+        public bool IsForceUiGpuFlush;
     }
 }
