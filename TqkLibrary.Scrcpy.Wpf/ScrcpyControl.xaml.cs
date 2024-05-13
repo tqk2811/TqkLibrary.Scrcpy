@@ -122,6 +122,10 @@ namespace TqkLibrary.Scrcpy.Wpf
         /// 
         /// </summary>
         public event OnUiChanged<System.Drawing.Size>? RenderSizeChanged;
+        /// <summary>
+        /// 
+        /// </summary>
+        public event OnUiChanged<System.Drawing.Size>? VideoSizeChanged;
 
         public System.Drawing.Size VideoSize { get { return videoSize; } }
         public System.Drawing.Size RenderVideoSize { get { return drawRect.Size; } }
@@ -227,6 +231,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                 var videoSize = ScrcpyUiView?.Scrcpy.ScreenSize;
                 if (videoSize != this.videoSize && host != null)
                 {
+                    if (videoSize.HasValue) VideoSizeChanged?.Invoke(this, videoSize.Value);
                     host_SizeChanged(null, null);
                 }
                 InteropImage?.RequestRender();
