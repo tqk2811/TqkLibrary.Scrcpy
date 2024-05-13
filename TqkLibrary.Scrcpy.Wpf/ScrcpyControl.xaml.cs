@@ -118,8 +118,10 @@ namespace TqkLibrary.Scrcpy.Wpf
             set { SetValue(MousePointerIdProperty, value); }
         }
 
-
-        public event OnUiChanged<System.Drawing.Size>? OnResize;
+        /// <summary>
+        /// 
+        /// </summary>
+        public event OnUiChanged<System.Drawing.Size>? RenderSizeChanged;
 
         public System.Drawing.Size VideoSize { get { return videoSize; } }
         public System.Drawing.Size RenderVideoSize { get { return drawRect.Size; } }
@@ -192,10 +194,7 @@ namespace TqkLibrary.Scrcpy.Wpf
                 lastVisible = isVisible;
                 if (lastVisible)
                 {
-                    ThreadPool.QueueUserWorkItem(o =>
-                    {
-                        OnResize?.Invoke(this, this.RenderVideoSize);
-                    });
+                    RenderSizeChanged?.Invoke(this, this.RenderVideoSize);
                     CompositionTarget.Rendering += CompositionTarget_Rendering;
                 }
                 else
