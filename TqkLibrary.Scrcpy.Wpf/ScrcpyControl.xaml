@@ -7,11 +7,8 @@
              xmlns:DXExtensions="clr-namespace:TqkLibrary.Wpf.Interop.DirectX;assembly=TqkLibrary.Wpf.Interop.DirectX"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid x:Name="host" Loaded="host_Loaded" SizeChanged="host_SizeChanged">
-        <Image x:Name="img" Focusable="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-               MouseDown="img_MouseDown" MouseUp="img_MouseUp" MouseMove="img_MouseMove"
-               MouseEnter="img_MouseEnter" MouseLeave="img_MouseLeave" MouseWheel="img_MouseWheel"
-               KeyDown="img_KeyDown" KeyUp="img_KeyUp">
+    <Grid x:Name="host">
+        <Image x:Name="img" Focusable="True" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <Image.Source>
                 <DXExtensions:D3D11Image x:Name="InteropImage"/>
             </Image.Source>

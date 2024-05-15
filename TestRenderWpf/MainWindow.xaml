@@ -6,16 +6,13 @@
         xmlns:local="clr-namespace:TestRenderWpf" WindowStartupLocation="CenterScreen"
         xmlns:scrcpy="clr-namespace:TqkLibrary.Scrcpy.Wpf;assembly=TqkLibrary.Scrcpy.Wpf"
         mc:Ignorable="d" Loaded="Window_Loaded" Unloaded="Window_Unloaded" Closed="Window_Closed"
+        xmlns:st="http://schemas.spicytaco.io/"
         Title="MainWindow" Height="600" Width="1000">
     <Window.DataContext>
         <local:MainWindowVM/>
     </Window.DataContext>
-    <Grid Background="Black">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Column="0" Orientation="Vertical">
+    <st:StackPanel Background="Black" Orientation="Horizontal" MarginBetweenChildren="3">
+        <st:StackPanel Grid.Column="0" Orientation="Vertical" MarginBetweenChildren="3">
             <Button Content="InjectText Clipboard" Command="{Binding InjectTextCommand}"/>
             <StackPanel Grid.Column="0" Orientation="Horizontal">
                 <Button Content="SetScreenPowerMode" Command="{Binding SetScreenPowerModeCommand}"/>
@@ -30,13 +27,27 @@
             <Button Content="CollapsePanel" Command="{Binding CollapsePanelCommand}"/>
             <Button Content="RotateDevice" Command="{Binding RotateDeviceCommand}"/>
             <Button Content="OpenHardKeyboardSetting" Command="{Binding OpenHardKeyboardSettingCommand}"/>
-        </StackPanel>
-        <scrcpy:ScrcpyControl Grid.Column="1"
-                              IsControl="{Binding IsControl}" 
-                              Control="{Binding Control}" 
-                              ScrcpyUiView="{Binding ScrcpyUiView}"
-                              IsMouseHandler="True"
-                              IsKeyHandler="True"
-                              />
-    </Grid>
+        </st:StackPanel>
+
+
+        <st:StackPanel Orientation="{Binding ViewOrientation}" MarginBetweenChildren="3" st:StackPanel.Fill="Fill" VerticalAlignment="Stretch">
+            <!--<scrcpy:ScrcpyControl st:StackPanel.Fill="Fill"
+                VideoSizeChanged="ScrcpyControl_VideoSizeChanged"
+                IsControl="{Binding IsControl}" 
+                Control="{Binding Control}" 
+                ScrcpyUiView="{Binding ScrcpyUiView}"
+                IsMouseHandler="True"
+                IsKeyHandler="True"
+                />-->
+            
+            <Image st:StackPanel.Fill="Fill"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                scrcpy:ScrcpyControlExt.Control="{Binding Control}" 
+                scrcpy:ScrcpyControlExt.ScrcpyUiView="{Binding ScrcpyUiView2}"
+                scrcpy:ScrcpyControlExt.IsMouseHandler="True"
+                scrcpy:ScrcpyControlExt.IsKeyHandler="True"
+            />
+        </st:StackPanel>
+    </st:StackPanel>
 </Window>

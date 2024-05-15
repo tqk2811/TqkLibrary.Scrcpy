@@ -8,6 +8,7 @@ using TqkLibrary.Scrcpy;
 using TqkLibrary.Scrcpy.Interfaces;
 using System.Windows;
 using TqkLibrary.Scrcpy.Enums;
+using System.Windows.Controls;
 
 namespace TestRenderWpf
 {
@@ -30,6 +31,15 @@ namespace TestRenderWpf
             OpenHardKeyboardSettingCommand = new BaseCommand(_OpenHardKeyboardSettingCommand);
         }
 
+        Orientation _ViewViewOrientation = Orientation.Horizontal;
+        public Orientation ViewOrientation
+        {
+            get { return _ViewViewOrientation; }
+            set { _ViewViewOrientation = value; NotifyPropertyChange(); }
+        }
+
+
+
         IControl? _control;
         public IControl? Control
         {
@@ -50,7 +60,12 @@ namespace TestRenderWpf
             set { _ScrcpyUiView = value; NotifyPropertyChange(); }
         }
 
-
+        ScrcpyUiView? _ScrcpyUiView2;
+        public ScrcpyUiView? ScrcpyUiView2
+        {
+            get { return _ScrcpyUiView2; }
+            set { _ScrcpyUiView2 = value; NotifyPropertyChange(); }
+        }
 
         public BaseCommand InjectTextCommand { get; }
         void _InjectTextCommand()

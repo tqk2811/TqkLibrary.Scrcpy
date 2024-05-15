@@ -72,7 +72,7 @@ namespace TestRenderWpf
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault()?.DeviceId;
-            if(string.IsNullOrWhiteSpace(deviceId))
+            if (string.IsNullOrWhiteSpace(deviceId))
             {
                 MessageBox.Show("No device");
                 return;
@@ -82,6 +82,7 @@ namespace TestRenderWpf
             scrcpy.OnDisconnect += Scrcpy_OnDisconnect;
             mainWindowVM.Control = new ControlChain(scrcpy.Control);
             mainWindowVM.ScrcpyUiView = scrcpy.InitScrcpyUiView();
+            mainWindowVM.ScrcpyUiView2 = scrcpy.InitScrcpyUiView();
             var s = await scrcpy.ListSupportAsync(new ListSupportQuery()
             {
                 ListEncoders = true,
@@ -139,6 +140,8 @@ namespace TestRenderWpf
             scrcpy?.Stop();
             mainWindowVM.ScrcpyUiView?.Dispose();
             mainWindowVM.ScrcpyUiView = null;
+            mainWindowVM.ScrcpyUiView2?.Dispose();
+            mainWindowVM.ScrcpyUiView2 = null;
             mainWindowVM.Control = null;
             scrcpy?.Dispose();
             _aVFrame?.Dispose();
@@ -168,6 +171,18 @@ namespace TestRenderWpf
                 {
                     _sdlDevice.ClearQueuedAudio();
                 }
+            }
+        }
+
+        private void ScrcpyControl_VideoSizeChanged(ScrcpyControl scrcpyControl, System.Drawing.Size data)
+        {
+            if(data.Width > data.Height)
+            {
+                mainWindowVM.ViewOrientation = Orientation.Vertical;
+            }
+            else
+            {
+                mainWindowVM.ViewOrientation = Orientation.Horizontal;
             }
         }
     }
