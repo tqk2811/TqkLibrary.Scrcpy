@@ -115,6 +115,7 @@ namespace TqkLibrary.Scrcpy.Configs
                 ForceAdbForward = ServerConfig!.TunnelForward,
                 IsControl = ServerConfig.IsControl,
                 IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
+                IsUseD3D11ForConvert = IsUseD3D11ForConvert,
                 IsAudio = ServerConfig.AudioConfig!.IsAudio,
                 ScrcpyServerPath = ScrcpyServerPath,
                 AdbPath = AdbPath,
