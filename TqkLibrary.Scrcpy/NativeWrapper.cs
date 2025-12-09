@@ -41,12 +41,6 @@ namespace TqkLibrary.Scrcpy
         internal static extern byte FFmpegHWSupport(byte bHWSupport);
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool ClearKey();
-
-        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern bool AddKey(byte[] key, int sizeInByte);
-
-        [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         internal static extern IntPtr ScrcpyAlloc(string deviceId);
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
