@@ -31,6 +31,7 @@ typedef class AudioDecoder AudioDecoder;
 #include <array>
 #include <assert.h>
 #include <stdlib.h>
+#include <chrono>
 
 #include "libav.h"
 #include "D3D11Header.h"
