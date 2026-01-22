@@ -16,8 +16,9 @@ struct PixelShaderInput
 	float2 texCoord    : TEXCOORD0;
 };
 
-Texture2D<float>  luminanceChannel   : t0;
-Texture2D<float2> chrominanceChannel : t1;
+Texture2D<float>  y_Channel   : t0;
+Texture2D<float>  u_Channel   : t1;
+Texture2D<float>  v_Channel   : t2;
 SamplerState      defaultSampler     : s0;
 
 // Derived from https://msdn.microsoft.com/en-us/library/windows/desktop/dd206750(v=vs.85).aspx
@@ -42,10 +43,11 @@ float3 ConvertYUVtoRGB(float3 yuv)
 }
 
 [numthreads(32, 32, 1)]
-float4 PS_interleave(PixelShaderInput input) : SV_TARGET
+float4 PS_planar(PixelShaderInput input) : SV_TARGET
 {
-	float y = luminanceChannel.Sample(defaultSampler, input.texCoord);
-	float2 uv = chrominanceChannel.Sample(defaultSampler, input.texCoord);
+	float y = y_Channel.Sample(defaultSampler, input.texCoord);
+	float u = u_Channel.Sample(defaultSampler, input.texCoord);
+	float v = v_Channel.Sample(defaultSampler, input.texCoord);
 
-	return float4(ConvertYUVtoRGB(float3(y, uv)), 1.f);
+	return float4(ConvertYUVtoRGB(float3(y, u, v)), 1.f);
 }

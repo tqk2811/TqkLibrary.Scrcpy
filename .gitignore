@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /TqkLibrary.ScrcpyNative/VertexShader.h
 /TqkLibrary.ScrcpyNative/PixelShaderNv12_interleaveToBgra.h
 /TqkLibrary.ScrcpyNative/PixelShaderNv12_interleaveToRgba.h
+/TqkLibrary.ScrcpyNative/PixelShaderNv12_planarToBgra.h
+/TqkLibrary.ScrcpyNative/PixelShaderNv12_planarToRgba.h

@@ -42,7 +42,7 @@ float3 ConvertYUVtoRGB(float3 yuv)
 }
 
 [numthreads(32, 32, 1)]
-float4 PS(PixelShaderInput input) : SV_TARGET
+float4 PS_interleave(PixelShaderInput input) : SV_TARGET
 {
 	float y = luminanceChannel.Sample(defaultSampler, input.texCoord);
 	float2 uv = chrominanceChannel.Sample(defaultSampler, input.texCoord);
