@@ -363,5 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /TqkLibrary.ScrcpyNative/PixelShader.h
 /TqkLibrary.ScrcpyNative/VertexShader.h
-/TqkLibrary.ScrcpyNative/PixelShaderNv12ToBgra.h
-/TqkLibrary.ScrcpyNative/PixelShaderNv12ToRgba.h
+/TqkLibrary.ScrcpyNative/PixelShaderNv12_interleaveToBgra.h
+/TqkLibrary.ScrcpyNative/PixelShaderNv12_interleaveToRgba.h
