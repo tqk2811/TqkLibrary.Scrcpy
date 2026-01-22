@@ -104,9 +104,9 @@ void Video::threadStart() {
 	if (!this->_videoDecoder->Init())
 		return;
 
+	AVPacket packet;
 	while (!this->_isStopMainLoop)
 	{
-		AVPacket packet;
 		if (!this->_videoSock->ReadPackage(&packet))
 		{
 			av_packet_unref(&packet);
