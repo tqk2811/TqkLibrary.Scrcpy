@@ -1,45 +1,5 @@
 ﻿#include "pch.h"
 #include "InputTextureNv12Class.h"
-extern "C" {
-	void planar_to_interleave
-	(
-		uint32_t uv_size,
-		uint8_t* u_et_v,
-		const uint8_t* u,
-		const uint8_t* v
-	)
-	{
-		assert(uv_size % 2 == 0);
-		int u_size = uv_size / 2;
-		int i;
-
-#ifdef __AVX2__
-		if (HW_AVX2 && uv_size % 32 == 0)
-		{
-			for (i = 0; i < u_size; i += 16)//16 byte step
-			{
-				//https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
-				__m128i s0 = _mm_loadu_epi8(&u[i]);//load 16 byte vào thanh ghi 128 bit
-				__m128i s1 = _mm_loadu_epi8(&v[i]);
-				__m128i s2 = _mm_unpacklo_epi8(s0, s1);//xen kẽ lo
-				__m128i s3 = _mm_unpackhi_epi8(s0, s1);//xen kẽ hi
-				*(__m128i*)(&u_et_v[2 * i]) = s2;//byte 0-15, 32-47,....
-				*(__m128i*)(&u_et_v[2 * i + 16]) = s3;//byte 16-31, 48-63,.....
-			}
-			return;
-		}
-#endif // __AVX2__
-
-		for (i = 0; i < u_size; i++)
-		{
-			uint8_t u_data = u[i];  // fetch u data
-			uint8_t v_data = v[i];  // fetch v data
-
-			u_et_v[2 * i] = u_data;   // write u data
-			u_et_v[2 * i + 1] = v_data;   // write v data
-		}
-	}
-}
 
 InputTextureNv12Class::InputTextureNv12Class() {
 
@@ -52,13 +12,10 @@ InputTextureNv12Class::~InputTextureNv12Class() {
 bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int height) {
 	assert(device != nullptr);
 
-	if (width != this->m_width || height != this->m_height) {
-		this->Shutdown();
-	}
-	else
-	{
+	if (width == this->m_width && height == this->m_height)
 		return true;
-	}
+
+	this->Shutdown();
 
 	D3D11_TEXTURE2D_DESC texDesc_nv12;
 	ZeroMemory(&texDesc_nv12, sizeof(texDesc_nv12));
@@ -77,25 +34,70 @@ bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int heig
 	if (FAILED(hr))
 		return false;
 
-	texDesc_nv12.Usage = D3D11_USAGE_DYNAMIC;
-	texDesc_nv12.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	hr = device->CreateTexture2D(&texDesc_nv12, nullptr, this->m_texture_nv12_cache.GetAddressOf());
-	if (FAILED(hr))
-		return false;
-
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC const luminancePlaneDesc
 		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_nv12.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
-	hr = device->CreateShaderResourceView(this->m_texture_nv12.Get(), &luminancePlaneDesc, this->m_luminanceView.GetAddressOf());
+	hr = device->CreateShaderResourceView(this->m_texture_nv12.Get(), &luminancePlaneDesc, this->m_y_View_nv12.GetAddressOf());
 	if (FAILED(hr))
 		return false;
 
 	//
 	D3D11_SHADER_RESOURCE_VIEW_DESC const chrominancePlaneDesc
 		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_nv12.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8_UNORM);
-	hr = device->CreateShaderResourceView(this->m_texture_nv12.Get(), &chrominancePlaneDesc, this->m_chrominanceView.GetAddressOf());
+	hr = device->CreateShaderResourceView(this->m_texture_nv12.Get(), &chrominancePlaneDesc, this->m_uv_View.GetAddressOf());
 	if (FAILED(hr))
 		return false;
+
+
+
+
+
+	D3D11_TEXTURE2D_DESC lumiDesc = { 0 };
+	lumiDesc.Width = width;
+	lumiDesc.Height = height;
+	lumiDesc.MipLevels = 1;
+	lumiDesc.ArraySize = 1;
+	lumiDesc.Format = DXGI_FORMAT_R8_UNORM;
+	lumiDesc.SampleDesc.Count = 1;
+	lumiDesc.Usage = D3D11_USAGE_DYNAMIC;// Dynamic để CPU map/write
+	lumiDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	lumiDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	lumiDesc.MiscFlags = 0;
+	hr = device->CreateTexture2D(&lumiDesc, nullptr, this->m_texture_y.GetAddressOf());
+	if (FAILED(hr)) return false;
+
+	D3D11_TEXTURE2D_DESC chromaDesc = { 0 };
+	chromaDesc.Width = width / 2;
+	chromaDesc.Height = height / 2;
+	chromaDesc.MipLevels = 1;
+	chromaDesc.ArraySize = 1;
+	chromaDesc.Format = DXGI_FORMAT_R8_UNORM;
+	chromaDesc.SampleDesc.Count = 1;
+	chromaDesc.Usage = D3D11_USAGE_DYNAMIC;// Dynamic để CPU map/write
+	chromaDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	chromaDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	chromaDesc.MiscFlags = 0;
+	hr = device->CreateTexture2D(&chromaDesc, nullptr, this->m_texture_u.GetAddressOf());
+	if (FAILED(hr)) return false;
+	hr = device->CreateTexture2D(&chromaDesc, nullptr, this->m_texture_v.GetAddressOf());
+	if (FAILED(hr)) return false;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC const yPlaneDesc
+		= CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_y.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
+	hr = device->CreateShaderResourceView(this->m_texture_y.Get(), &yPlaneDesc, this->m_y_View_planar.GetAddressOf());
+	if (FAILED(hr))
+		return false;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC const uPlaneDesc =
+		CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_u.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
+	hr = device->CreateShaderResourceView(this->m_texture_u.Get(), &uPlaneDesc, this->m_u_View.GetAddressOf());
+	if (FAILED(hr)) return false;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC const vPlaneDesc =
+		CD3D11_SHADER_RESOURCE_VIEW_DESC(this->m_texture_v.Get(), D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8_UNORM);
+	hr = device->CreateShaderResourceView(this->m_texture_v.Get(), &vPlaneDesc, this->m_v_View.GetAddressOf());
+	if (FAILED(hr)) return false;
+
 
 	this->m_width = width;
 	this->m_height = height;
@@ -105,25 +107,15 @@ bool InputTextureNv12Class::Initialize(ID3D11Device* device, int width, int heig
 
 void InputTextureNv12Class::Shutdown() {
 	m_texture_nv12.Reset();
-	m_texture_nv12_cache.Reset();
-	m_luminanceView.Reset();
-	m_chrominanceView.Reset();
-}
+	m_texture_y.Reset();
+	m_texture_u.Reset();
+	m_texture_v.Reset();
 
-ID3D11ShaderResourceView* InputTextureNv12Class::GetLuminanceView() {
-	return this->m_luminanceView.Get();
-}
-
-ID3D11ShaderResourceView* InputTextureNv12Class::GetChrominanceView() {
-	return this->m_chrominanceView.Get();
-}
-
-int InputTextureNv12Class::Width() {
-	return this->m_width;
-}
-
-int InputTextureNv12Class::Height() {
-	return this->m_height;
+	m_y_View_nv12.Reset();
+	m_y_View_planar.Reset();
+	m_uv_View.Reset();
+	m_u_View.Reset();
+	m_v_View.Reset();
 }
 
 bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame) {
@@ -147,86 +139,90 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 			this->m_texture_nv12.Get(), 0, 0, 0, 0,
 			texture.Get(), (UINT32)texture_index, &box
 		);
+		this->m_isPlanar = FALSE;
 		return true;
 	}
 	else if (sourceFrame->format == AV_PIX_FMT_YUV420P)
 	{
-		/*this->m_texture_nv12_cache->SetEvictionPriority(DXGI_RESOURCE_PRIORITY_MAXIMUM);
-		this->m_texture_nv12->SetEvictionPriority(DXGI_RESOURCE_PRIORITY_MAXIMUM);*/
+		INT uv_height = sourceFrame->height / 2;
+		INT64 y_size = sourceFrame->linesize[0] * sourceFrame->height;
+		INT64 uv_size = sourceFrame->linesize[1] * uv_height;
+
 		device_ctx->ClearState();
+		HRESULT hr = 0;
 
 		D3D11_MAPPED_SUBRESOURCE map;
-		device_ctx->Map(this->m_texture_nv12_cache.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &map);
 
-		INT64 y_size = sourceFrame->linesize[0] * sourceFrame->height;
-		INT64 uv_size = sourceFrame->linesize[1] * sourceFrame->height;//linesize = 1/2 width, height / 2, * 2 u and v
-		INT64 totalSize = y_size + uv_size;
-
-		//assert(map.DepthPitch == 0 || map.DepthPitch == totalSize);
-		assert(sourceFrame->linesize[1] == sourceFrame->linesize[2]);
-
-		bool result = false;
-		if ((UINT)sourceFrame->width <= map.RowPitch &&
-			(map.DepthPitch == 0 || map.DepthPitch == map.RowPitch * 3 * sourceFrame->height / 2))
+		hr = device_ctx->Map(this->m_texture_y.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+			return FALSE;
+		if (sourceFrame->linesize[0] == map.RowPitch)
 		{
-			if (sourceFrame->linesize[0] == map.RowPitch)
-			{
-				memcpy(map.pData, sourceFrame->data[0], y_size);
-				planar_to_interleave(
-					(UINT32)uv_size, 
-					(uint8_t*)((UINT64)map.pData + y_size), 
-					sourceFrame->data[1], 
-					sourceFrame->data[2]
-				);
-			}
-			else
-			{
-				for (int row = 0; row < sourceFrame->height; row++)
-				{
-					memcpy(
-						(uint8_t*)((UINT64)map.pData + (map.RowPitch * row)),
-						sourceFrame->data[0] + (sourceFrame->linesize[0] * row),
-						sourceFrame->width);
-				}
-				uint8_t* start_uv = (uint8_t*)map.pData + map.RowPitch * sourceFrame->height;
-				int uv_rowSizeCopy = sourceFrame->width;//sourceFrame->linesize[1] + sourceFrame->linesize[2];
-				int uv_height = sourceFrame->height / 2;
-
-				for (int row = 0; row < uv_height; row++)
-				{
-					planar_to_interleave(
-						uv_rowSizeCopy,
-						start_uv + map.RowPitch * row,
-						sourceFrame->data[1] + (sourceFrame->linesize[1] * row),
-						sourceFrame->data[2] + (sourceFrame->linesize[2] * row)
-					);
-				}
-			}
-			result = true;
+			memcpy(map.pData, sourceFrame->data[0], y_size);
 		}
 		else
 		{
-			std::wstring f(L"sourceFrame linesize: ");
-			f.append(std::to_wstring(sourceFrame->linesize[0]));
-			f.append(L", TotalSize:");
-			f.append(std::to_wstring(totalSize));
-			f.append(L", W:");
-			f.append(std::to_wstring(sourceFrame->width));
-			f.append(L", H:");
-			f.append(std::to_wstring(sourceFrame->height));
-			std::wstring s(L"D3D11_MAPPED_SUBRESOURCE.RowPitch");
-			s.append(std::to_wstring(map.RowPitch));
-			s.append(L", DepthPitch:");
-			s.append(std::to_wstring(map.DepthPitch));
-			MessageBox(NULL, f.c_str(), s.c_str(), 0);
+			size_t lineSize = min(sourceFrame->linesize[0], map.RowPitch);
+			for (int i = 0; i < sourceFrame->height; i++)
+			{
+				memcpy(
+					(uint8_t*)map.pData + i * map.RowPitch,
+					sourceFrame->data[0] + i * sourceFrame->linesize[0],
+					lineSize
+				);
+			}
 		}
+		device_ctx->Unmap(this->m_texture_y.Get(), 0);
+		ZeroMemory(&map, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-		device_ctx->Unmap(this->m_texture_nv12_cache.Get(), 0);
+		hr = device_ctx->Map(this->m_texture_u.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+			return FALSE;
+		if (sourceFrame->linesize[1] == map.RowPitch)
+		{
+			memcpy(map.pData, sourceFrame->data[1], uv_size);
+		}
+		else
+		{
+			size_t lineSize = min(sourceFrame->linesize[1], map.RowPitch);
+			for (int i = 0; i < uv_height; i++)
+			{
+				memcpy(
+					(uint8_t*)map.pData + i * map.RowPitch,
+					sourceFrame->data[1] + i * sourceFrame->linesize[1],
+					lineSize
+				);
+			}
+		}
+		device_ctx->Unmap(this->m_texture_u.Get(), 0);
+		ZeroMemory(&map, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-		device_ctx->Flush();//force upload resoure from cpu -> gpu in m_texture_nv12_cache
+		hr = device_ctx->Map(this->m_texture_v.Get(), 0, D3D11_MAP::D3D11_MAP_WRITE_DISCARD, 0, &map);
+		if (FAILED(hr))
+			return FALSE;
+		if (sourceFrame->linesize[2] == map.RowPitch)
+		{
+			memcpy(map.pData, sourceFrame->data[2], uv_size);
+		}
+		else
+		{
+			size_t lineSize = min(sourceFrame->linesize[2], map.RowPitch);
+			for (int i = 0; i < uv_height; i++)
+			{
+				memcpy(
+					(uint8_t*)map.pData + i * map.RowPitch,
+					sourceFrame->data[2] + i * sourceFrame->linesize[2],
+					lineSize
+				);
+			}
+		}
+		device_ctx->Unmap(this->m_texture_v.Get(), 0);
+		ZeroMemory(&map, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-		device_ctx->CopyResource(this->m_texture_nv12.Get(), this->m_texture_nv12_cache.Get());
-		return result;
+		device_ctx->Flush();//force upload resoure from cpu -> gpu
+
+		this->m_isPlanar = TRUE;
+		return TRUE;
 	}
 	return false;
 }

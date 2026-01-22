@@ -14,7 +14,7 @@ typedef class D3DClass D3DClass;
 typedef class InputTextureNv12Class InputTextureNv12Class;
 
 typedef class PixelShaderNv12ToBgraClass PixelShaderNv12ToBgraClass;
-typedef class PixelShaderNv12ToRgbaClass PixelShaderNv12ToRgbaClass;
+typedef class PixelShaderNv12ToImage32Class PixelShaderNv12ToImage32Class;
 
 typedef class RenderTextureClass RenderTextureClass;
 typedef class RenderTextureSurfaceClass RenderTextureSurfaceClass;
@@ -25,8 +25,7 @@ typedef class VertexShaderClass VertexShaderClass;
 
 #include "InputTextureNv12Class.h"
 
-#include "PixelShaderNv12ToRgbaClass.h"
-#include "PixelShaderNv12ToBgraClass.h"
+#include "PixelShaderNv12ToImage32Class.h"
 
 #include "RenderTextureClass.h"
 #include "RenderTextureSurfaceClass.h"

@@ -42,8 +42,8 @@ float3 ConvertYUVtoRGB(float3 yuv)
 	return float3(yuv.z, yuv.y, yuv.x);//GRB
 }
 
-[numthreads(32, 32, 1)]
-float4 PS_planar(PixelShaderInput input) : SV_TARGET
+
+float4 PS_planar_rgba(PixelShaderInput input) : SV_TARGET
 {
 	float y = y_Channel.Sample(defaultSampler, input.texCoord);
 	float u = u_Channel.Sample(defaultSampler, input.texCoord);

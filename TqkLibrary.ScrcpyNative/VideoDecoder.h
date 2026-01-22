@@ -34,9 +34,9 @@ private:
 
 	InputTextureNv12Class* m_d3d11_inputNv12{ nullptr };
 
-	PixelShaderNv12ToRgbaClass* m_d3d11_pixel_Nv12ToRgba{ nullptr };//get screen shot
+	PixelShaderNv12ToImage32Class* m_d3d11_pixel_Nv12ToRgba{ nullptr };//get screen shot
 
-	PixelShaderNv12ToBgraClass* m_d3d11_pixel_Nv12ToBgra{ nullptr };//video render
+	PixelShaderNv12ToImage32Class* m_d3d11_pixel_Nv12ToBgra{ nullptr };//video render
 
 	RenderTextureClass* m_d3d11_renderTexture{ nullptr };
 

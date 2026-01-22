@@ -67,8 +67,8 @@ bool VideoDecoder::Init() {
 				return false;
 
 			m_d3d11_inputNv12 = new InputTextureNv12Class();
-			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
-			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
+			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToImage32Class(Image32Format::RGBA);
+			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToImage32Class(Image32Format::BGRA);
 			m_d3d11_renderTexture = new RenderTextureClass();
 
 			break;
@@ -84,8 +84,8 @@ bool VideoDecoder::Init() {
 				return false;
 
 			m_d3d11_inputNv12 = new InputTextureNv12Class();
-			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToRgbaClass();
-			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToBgraClass();
+			m_d3d11_pixel_Nv12ToRgba = new PixelShaderNv12ToImage32Class(Image32Format::RGBA);
+			m_d3d11_pixel_Nv12ToBgra = new PixelShaderNv12ToImage32Class(Image32Format::BGRA);
 			m_d3d11_renderTexture = new RenderTextureClass();
 			break;
 		}
@@ -212,10 +212,23 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 
 		this->m_vertex->Set(device_ctx.Get());
 
-		this->m_d3d11_pixel_Nv12ToRgba->Set(
-			device_ctx.Get(),
-			this->m_d3d11_inputNv12->GetLuminanceView(),
-			this->m_d3d11_inputNv12->GetChrominanceView());
+		if (this->m_d3d11_inputNv12->IsPlanar())
+		{
+			this->m_d3d11_pixel_Nv12ToRgba->Set(
+				device_ctx.Get(),
+				this->m_d3d11_inputNv12->Get_Y_View(),
+				this->m_d3d11_inputNv12->Get_U_View(),
+				this->m_d3d11_inputNv12->Get_V_View()
+			);
+		}
+		else
+		{
+			this->m_d3d11_pixel_Nv12ToRgba->Set(
+				device_ctx.Get(),
+				this->m_d3d11_inputNv12->Get_Y_View(),
+				this->m_d3d11_inputNv12->Get_UV_View()
+			);
+		}
 
 		this->m_d3d11_renderTexture->SetRenderTarget(device_ctx.Get(), nullptr);
 		this->m_d3d11_renderTexture->SetViewPort(device_ctx.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height());
@@ -303,10 +316,23 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 				this->m_vertex->Set(device_ctx.Get());
 
-				this->m_d3d11_pixel_Nv12ToBgra->Set(
-					device_ctx.Get(),
-					this->m_d3d11_inputNv12->GetLuminanceView(),
-					this->m_d3d11_inputNv12->GetChrominanceView());
+				if (this->m_d3d11_inputNv12->IsPlanar())
+				{
+					this->m_d3d11_pixel_Nv12ToBgra->Set(
+						device_ctx.Get(),
+						this->m_d3d11_inputNv12->Get_Y_View(),
+						this->m_d3d11_inputNv12->Get_U_View(),
+						this->m_d3d11_inputNv12->Get_V_View()
+					);
+				}
+				else
+				{
+					this->m_d3d11_pixel_Nv12ToBgra->Set(
+						device_ctx.Get(),
+						this->m_d3d11_inputNv12->Get_Y_View(),
+						this->m_d3d11_inputNv12->Get_UV_View()
+					);
+				}
 
 				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
 				renderSurface->SetViewPort(device_ctx.Get(), renderSurface->Width(), renderSurface->Height());
@@ -328,13 +354,13 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 		_mtx_frame.unlock();
 
 #if _DEBUG
-		auto finish(std::chrono::high_resolution_clock::now());
-		auto r = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
-		std::wstring text(L"Draw surface: ");
-		text.append(std::to_wstring(r.count()));
-		text.append(L"us");
-		text.append(L"\r");
-		OutputDebugString(text.c_str());
+		//auto finish(std::chrono::high_resolution_clock::now());
+		//auto r = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+		//std::wstring text(L"Draw surface: ");
+		//text.append(std::to_wstring(r.count()));
+		//text.append(L"us");
+		//text.append(L"\r");
+		//OutputDebugString(text.c_str());
 #endif
 	}
 

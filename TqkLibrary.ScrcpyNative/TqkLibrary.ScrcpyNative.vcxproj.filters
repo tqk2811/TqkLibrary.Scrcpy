@@ -87,7 +87,7 @@
     <ClInclude Include="VertexShaderClass.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PixelShaderNv12ToRgbaClass.h">
+    <ClInclude Include="PixelShaderNv12ToImage32Class.h">
       <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputTextureNv12Class.h">
@@ -95,9 +95,6 @@
     </ClInclude>
     <ClInclude Include="D3D11Header.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="PixelShaderNv12ToBgraClass.h">
-      <Filter>D3D11\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderTextureSurfaceClass.h">
       <Filter>D3D11\Header Files</Filter>
@@ -161,13 +158,10 @@
     <ClCompile Include="VertexShaderClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PixelShaderNv12ToRgbaClass.cpp">
+    <ClCompile Include="PixelShaderNv12ToImage32Class.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputTextureNv12Class.cpp">
-      <Filter>D3D11\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="PixelShaderNv12ToBgraClass.cpp">
       <Filter>D3D11\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderTextureSurfaceClass.cpp">
@@ -181,13 +175,19 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="PixelShaderNv12ToRgba.hlsl">
+    <FxCompile Include="PixelShaderNv12_interleaveToRgba.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
-    <FxCompile Include="PixelShaderNv12ToBgra.hlsl">
+    <FxCompile Include="PixelShaderNv12_interleaveToBgra.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNv12_planarToRgba.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PixelShaderNv12_planarToBgra.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>
