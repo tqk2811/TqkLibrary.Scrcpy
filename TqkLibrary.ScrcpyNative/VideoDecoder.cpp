@@ -11,8 +11,6 @@ VideoDecoder::VideoDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativ
 }
 
 VideoDecoder::~VideoDecoder() {
-
-	avcodec_close(_codec_ctx);
 	avcodec_free_context(&_codec_ctx);
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
 	DeleteHeap(this->m_vertex);

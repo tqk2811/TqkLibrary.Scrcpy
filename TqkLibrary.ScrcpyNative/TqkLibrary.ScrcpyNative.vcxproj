@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props" Condition="Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props')" />
+  <Import Project="..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.props" Condition="Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -98,7 +100,6 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Qvec-report:2</AdditionalOptions>
     </ClCompile>
@@ -106,8 +107,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>Ws2_32.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -118,7 +118,6 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Qvec-report:2</AdditionalOptions>
     </ClCompile>
@@ -126,8 +125,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>Ws2_32.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -140,7 +138,6 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Qvec-report:2</AdditionalOptions>
     </ClCompile>
@@ -150,8 +147,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>Ws2_32.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win64-gpl-shared-5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,7 +160,6 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/Qvec-report:2</AdditionalOptions>
     </ClCompile>
@@ -174,8 +169,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
-      <AdditionalDependencies>Ws2_32.lib;avcodec.lib;avdevice.lib;avfilter.lib;avformat.lib;avutil.lib;postproc.lib;swresample.lib;swscale.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\FFmpegBuildSubmodule\out\ffmpeg-n5.1.2-8-g5746987bad-win32-gpl-shared-5.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Ws2_32.lib;D3D11.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
@@ -338,7 +332,21 @@
   <ItemGroup>
     <ResourceCompile Include="Version.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets" Condition="Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets')" />
+    <Import Project="..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets" Condition="Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.props'))" />
+    <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets'))" />
+    <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props'))" />
+    <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets'))" />
+  </Target>
 </Project>

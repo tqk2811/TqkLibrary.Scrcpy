@@ -134,8 +134,7 @@ bool RenderTextureClass::GetImage(ID3D11DeviceContext* deviceContext, const AVFr
 			received->pts = source->pts;
 			received->pkt_dts = source->pkt_dts;
 			received->time_base = source->time_base;
-			received->pkt_duration = source->pkt_duration;
-			received->pkt_pos = source->pkt_pos;
+			received->duration = source->duration;
 
 			received->buf[0] = dataref;
 			if (received->linesize[0] == ms.RowPitch)

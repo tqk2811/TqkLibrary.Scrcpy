@@ -12,7 +12,6 @@ ParsePacket::~ParsePacket() {
 
 	av_parser_close(_parser);
 
-	avcodec_close(_codec_ctx);
 	avcodec_free_context(&_codec_ctx);
 }
 bool ParsePacket::Init() {
