@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-	  <DefineConstants>$(DefineConstants);AudioTest</DefineConstants>
+	  <!--<DefineConstants>$(DefineConstants);AudioTest</DefineConstants>-->
 	</PropertyGroup>
 
 	<ItemGroup>

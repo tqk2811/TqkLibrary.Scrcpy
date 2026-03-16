@@ -1,9 +1,10 @@
 ﻿using System.Drawing;
-using TqkLibrary.Scrcpy;
+using TestConsole;
 using TqkLibrary.AdbDotNet;
-using TqkLibrary.Scrcpy.Interfaces;
+using TqkLibrary.Scrcpy;
 using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.Enums;
+using TqkLibrary.Scrcpy.Interfaces;
 using TqkLibrary.Scrcpy.ListSupport;
 
 var env = System.Environment.GetEnvironmentVariables();
@@ -40,26 +41,8 @@ string deviceId = devices.First().DeviceId;
 
 
 int i = 0;
-ScrcpyConfig config = new ScrcpyConfig()
-{
-    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    IsUseD3D11ForUiRender = true,
-    ServerConfig = new ScrcpyServerConfig()
-    {
-        IsControl = true,
-        AudioConfig = new AudioConfig()
-        {
-            IsAudio = true,
-        },
-        VideoConfig = new VideoConfig()
-        {
-            MaxFps = 24,
-        },
-        ClipboardAutosync = false,
-        SCID = new Random(DateTime.Now.Millisecond).Next()
-    },
-    ConnectionTimeout = 10000,
-};
+
+ScrcpyConfig config = TestConsoleExtensions.GenControlOnlyConfigure();
 while (true)
 {
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Start");
@@ -78,18 +61,24 @@ while (true)
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connect");
         if (scrcpy.Connect(config))
         {
-            Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
-            //await Task.Delay(3000);
+            Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected, ScreenSize: {scrcpy.ScreenSize}");
+            await Task.Delay(500);
 
-
+            await scrcpy.Control.TapAsync(500, 500, 100);
+            await Task.Delay(500);
             //await TapKeyboard(scrcpy, "qwertyuiop");
-            //await Task.Delay(500);
-            //await scrcpy.Control.KeyAsync(AndroidKeyCode.KEYCODE_ENTER);
-            //await Task.Delay(3000);
-            ////scrcpy.Control.SetClipboard("test clipboard", true);
-            //await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
-            //string text = await scrcpy.Control.GetClipboardAsync();
-            //Console.WriteLine($"GetClipboardAsync: {text}");
+            scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_A);
+            scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_B);
+            scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_C);
+            scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_D);
+            scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_E);
+            await Task.Delay(500);
+            await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_ENTER);
+            await Task.Delay(3000);
+            scrcpy.Control.SetClipboard("test clipboard", true);
+            await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
+            string text = await scrcpy.Control.GetClipboardAsync();
+            Console.WriteLine($"GetClipboardAsync: {text}");
 
             //while (true)
             //    await Task.Delay(3000);

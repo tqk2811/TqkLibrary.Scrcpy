@@ -36,7 +36,7 @@ namespace TestRenderWpf
         readonly MainWindowVM mainWindowVM;
         readonly ScrcpyConfig scrcpyConfig = new ScrcpyConfig()
         {
-            //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+            HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
             IsUseD3D11ForUiRender = true,
             IsUseD3D11ForConvert = true,
             GpuThreadX = 1,
@@ -123,8 +123,8 @@ namespace TestRenderWpf
         private async void Scrcpy_OnDisconnect()
         {
             if (windowClosed) return;
-            await adb!.WaitFor(WaitForType.Device).ExecuteAsync();
-            scrcpy!.Connect(scrcpyConfig);
+            //await adb!.WaitFor(WaitForType.Device).ExecuteAsync();
+            //scrcpy!.Connect(scrcpyConfig);
         }
 
         private void Window_Unloaded(object sender, RoutedEventArgs e)
