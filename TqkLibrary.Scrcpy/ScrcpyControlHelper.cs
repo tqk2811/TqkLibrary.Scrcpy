@@ -11,7 +11,7 @@ namespace TqkLibrary.Scrcpy
     /// <summary>
     /// 
     /// </summary>
-    public static class IControlHelper
+    public static class ScrcpyControlHelper
     {
         static readonly Random random = new Random();
 
@@ -261,7 +261,7 @@ namespace TqkLibrary.Scrcpy
                   new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
                   1f,
                   AndroidMotionEventButton.BUTTON_PRIMARY,
-                  AndroidMotionEventButton.BUTTON_PRIMARY);
+                  AndroidMotionEventButton.None);
                 Task.Delay(delayStep, cancellationToken).Wait();
             }
 
@@ -274,7 +274,7 @@ namespace TqkLibrary.Scrcpy
              AndroidMotionEventButton.None);
         }
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="control"></param>
         /// <param name="x1"></param>
@@ -309,7 +309,7 @@ namespace TqkLibrary.Scrcpy
                       new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
                       1f,
                       AndroidMotionEventButton.BUTTON_PRIMARY,
-                      AndroidMotionEventButton.BUTTON_PRIMARY);
+                      AndroidMotionEventButton.None);
                 await Task.Delay(delayStep, cancellationToken);
             }
 
@@ -428,7 +428,7 @@ namespace TqkLibrary.Scrcpy
                     new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
                     1f,
                     AndroidMotionEventButton.BUTTON_PRIMARY,
-                    AndroidMotionEventButton.BUTTON_PRIMARY);
+                    AndroidMotionEventButton.None);
                 Task.Delay(delayStep, cancellationToken).Wait();
             }
 
@@ -436,12 +436,12 @@ namespace TqkLibrary.Scrcpy
                 AndroidMotionEventAction.ACTION_UP,
                 pointerId,
                 new Rectangle(x2, y2, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
-                1f,
+                0f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.None);
         }
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="control"></param>
         /// <param name="x1"></param>
@@ -482,7 +482,7 @@ namespace TqkLibrary.Scrcpy
                     new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
                     1f,
                     AndroidMotionEventButton.BUTTON_PRIMARY,
-                    AndroidMotionEventButton.BUTTON_PRIMARY);
+                    AndroidMotionEventButton.None);
                 await Task.Delay(delayStep, cancellationToken);
             }
 
