@@ -25,6 +25,9 @@ namespace TqkLibrary.Scrcpy.Configs
         [MarshalAs(UnmanagedType.U1)]
         public bool IsAudio;
 
+        [MarshalAs(UnmanagedType.U1)]
+        public bool IsVideo;
+
         [MarshalAs(UnmanagedType.LPWStr)]
         public string AdbPath;
 

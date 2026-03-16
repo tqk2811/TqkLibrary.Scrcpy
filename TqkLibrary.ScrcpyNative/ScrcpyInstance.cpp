@@ -105,6 +105,11 @@ ScrcpyInstance::~ScrcpyInstance() {
 		delete this->_control;
 	}
 
+	if (this->_audio != nullptr) {
+		this->_audio->Stop();
+		delete this->_audio;
+	}
+
 	if (this->_video != nullptr) {
 		this->_video->Stop();
 		delete this->_video;
@@ -170,7 +175,8 @@ bool ScrcpyInstance::Start() {
 	}
 
 
-	int backlog = 1;
+	int backlog = 0;
+	if (this->_nativeConfig.IsVideo) backlog += 1;
 	if (this->_nativeConfig.IsAudio) backlog += 1;
 	if (this->_nativeConfig.IsControl) backlog += 1;
 	const timeval timeout{ 2 , 0 };
@@ -220,50 +226,76 @@ bool ScrcpyInstance::Start() {
 
 
 
-	SOCKET video_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
-	if (video_sock == INVALID_SOCKET) {
-		return false;
-	}
-	this->_video = new Video(this->_scrcpy, video_sock, this->_nativeConfig);
-	if (!this->_video->Init()) {
-		return false;
-	}
-
-
+	// Accept sockets in order: video -> audio -> control (only for enabled streams)
+	// The first accepted socket carries the 64-byte device name header
+	SOCKET video_sock = INVALID_SOCKET;
 	SOCKET audio_sock = INVALID_SOCKET;
-	if (this->_nativeConfig.IsAudio)
-	{
-		audio_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
-		if (audio_sock == INVALID_SOCKET) {
-			return false;
-		}
-		this->_audio = new Audio(this->_scrcpy, audio_sock, this->_nativeConfig);
-		if (!this->_audio->Init()) {
-			return false;
-		}
+	SOCKET control_sock = INVALID_SOCKET;
+	SOCKET first_sock = INVALID_SOCKET;
+
+	if (this->_nativeConfig.IsVideo) {
+		video_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
+		if (video_sock == INVALID_SOCKET) return false;
+		first_sock = video_sock;
 	}
 
+	if (this->_nativeConfig.IsAudio) {
+		audio_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
+		if (audio_sock == INVALID_SOCKET) return false;
+		if (first_sock == INVALID_SOCKET) first_sock = audio_sock;
+	}
 
-	SOCKET control_sock = INVALID_SOCKET;
 	if (this->_nativeConfig.IsControl) {
 		control_sock = AcceptConnection(this->_listenSock, this->_nativeConfig.ConnectionTimeout);
-		if (control_sock == INVALID_SOCKET) {
-			return false;
+		if (control_sock == INVALID_SOCKET) return false;
+		if (first_sock == INVALID_SOCKET) first_sock = control_sock;
+	}
+
+	// Read 64-byte device name from the first socket (blocking)
+	{
+		u_long iModeBlocking = 0;
+		ioctlsocket(first_sock, FIONBIO, &iModeBlocking);
+		BYTE buff_deviceName[64] = { 0 };
+		int total = 0;
+		while (total < 64) {
+			int r = recv(first_sock, (char*)buff_deviceName + total, 64 - total, 0);
+			if (r <= 0) return false;
+			total += r;
 		}
+		this->_deviceName = (const char*)buff_deviceName;
+	}
+
+	if (this->_nativeConfig.IsVideo) {
+		this->_video = new Video(this->_scrcpy, video_sock, this->_nativeConfig);
+		if (!this->_video->Init()) return false;
+	}
+
+	if (this->_nativeConfig.IsAudio) {
+		this->_audio = new Audio(this->_scrcpy, audio_sock, this->_nativeConfig);
+		if (!this->_audio->Init()) return false;
+		if (!this->_nativeConfig.IsVideo)
+			this->_audio->SetNotifyDisconnect(true); // audio is primary stream for disconnect
+	}
+
+	if (this->_nativeConfig.IsControl) {
 		this->_control = new Control(this->_scrcpy, control_sock);
 	}
 
 
-	this->_video->Start();//start video thread
+	if (this->_nativeConfig.IsVideo)
+		this->_video->Start();
 	if (this->_nativeConfig.IsAudio)
-		this->_audio->Start();//start audio thread
+		this->_audio->Start();
 	if (this->_nativeConfig.IsControl)
-		this->_control->Start();//start control thread
+		this->_control->Start();
 
 
 	//close listen sock
 	closesocket(this->_listenSock);
 	this->_listenSock = INVALID_SOCKET;
 
-	return this->_video->WaitForFirstFrame(this->_nativeConfig.ConnectionTimeout);
+	if (this->_nativeConfig.IsVideo)
+		return this->_video->WaitForFirstFrame(this->_nativeConfig.ConnectionTimeout);
+
+	return true;
 }
