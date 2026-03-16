@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy.Control;
 using System.Threading;
@@ -56,7 +58,7 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public Size ScreenSize
         {
@@ -167,12 +169,17 @@ namespace TqkLibrary.Scrcpy
             if (countdownEvent.TryAddCount())
             {
                 if (config == null) config = new ScrcpyConfig();
+                _adbPath = config.AdbPath;
+                _physicalScreenSizeCache = null;
                 ScrcpyNativeConfig nativeConfig = config.NativeConfig();
                 result = NativeWrapper.ScrcpyConnect(_handle, ref nativeConfig);
                 countdownEvent.Signal();
             }
             return result;
         }
+
+        private string _adbPath = "adb.exe";
+        private Size? _physicalScreenSizeCache;
 
         /// <summary>
         /// 
@@ -361,7 +368,40 @@ namespace TqkLibrary.Scrcpy
                 NativeWrapper.ScrcpyGetScreenSize(_handle, ref w, ref h);
                 countdownEvent.Signal();
             }
+            if (w == -1 || h == -1)
+            {
+                // No video stream: query physical screen size via ADB (cached)
+                if (_physicalScreenSizeCache == null)
+                    _physicalScreenSizeCache = QueryScreenSizeViaAdb();
+                return _physicalScreenSizeCache ?? Size.Empty;
+            }
             return new Size(w, h);
+        }
+
+        Size QueryScreenSizeViaAdb()
+        {
+            try
+            {
+                using var p = new Process();
+                p.StartInfo = new ProcessStartInfo(_adbPath, $"-s {DeviceId} shell wm size")
+                {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                p.Start();
+                string output = p.StandardOutput.ReadToEnd();
+                p.WaitForExit(5000);
+                // Parse "Physical size: WxH" — last match wins (handles Override size)
+                var matches = Regex.Matches(output, @"(\d+)x(\d+)");
+                if (matches.Count > 0)
+                {
+                    var m = matches[matches.Count - 1];
+                    return new Size(int.Parse(m.Groups[1].Value), int.Parse(m.Groups[2].Value));
+                }
+            }
+            catch { }
+            return Size.Empty;
         }
 
         string GetDeviceName()

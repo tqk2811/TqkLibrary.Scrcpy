@@ -98,8 +98,16 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_video != nullptr) {
-		result = this->_scrcpyInstance->_video->GetScreenSize(w, h);
+	if (this->_scrcpyInstance != nullptr) {
+		if (this->_scrcpyInstance->_video != nullptr) {
+			result = this->_scrcpyInstance->_video->GetScreenSize(w, h);
+		}
+		if (!result) {
+			// No video: return stored physical size (-1 if not set, C# will query via ADB)
+			w = this->_scrcpyInstance->_physicalScreenW;
+			h = this->_scrcpyInstance->_physicalScreenH;
+			result = true;
+		}
 	}
 
 	_mutex.unlock();

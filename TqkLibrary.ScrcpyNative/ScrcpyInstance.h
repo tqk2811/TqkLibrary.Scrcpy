@@ -11,13 +11,15 @@ public:
 
 private:
 	bool _wsa_isStartUp = false;
-	//function	
+	//function
 	DWORD RunAdbProcess(LPCWSTR argument);
 
 	//const
 	Scrcpy* _scrcpy{ nullptr };//don't delete
 	ScrcpyNativeConfig _nativeConfig{ };
 	std::string _deviceName;
+	int _physicalScreenW{ -1 };
+	int _physicalScreenH{ -1 };
 	
 	//need release
 	SOCKET _listenSock{ INVALID_SOCKET };

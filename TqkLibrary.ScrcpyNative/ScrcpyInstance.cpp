@@ -136,7 +136,6 @@ DWORD ScrcpyInstance::RunAdbProcess(LPCWSTR argument)
 	return p.GetExitCode();
 }
 
-
 bool ScrcpyInstance::Start() {
 	WSAData wsaData{ 0 };
 	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
