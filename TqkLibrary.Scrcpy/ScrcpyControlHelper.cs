@@ -294,7 +294,7 @@ namespace TqkLibrary.Scrcpy
                 new Rectangle(x1, y1, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
                 1f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
-                AndroidMotionEventButton.None);
+                AndroidMotionEventButton.BUTTON_PRIMARY);
 
             await Task.Delay(delayStep, cancellationToken);
 
