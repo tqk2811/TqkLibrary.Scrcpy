@@ -50,7 +50,7 @@ namespace TestConsole
                 ServerConfig = new ScrcpyServerConfig()
                 {
                     IsControl = false,
-                    IsVideo = false,
+                    IsVideo = true,
                     VideoSource = VideoSource.Display,
                     AndroidConfig = new()
                     {
@@ -68,6 +68,12 @@ namespace TestConsole
                     SCID = new Random(DateTime.Now.Millisecond).Next()
                 },
             };
+        }
+
+        public static ScrcpyConfig EnableControl(this ScrcpyConfig scrcpyConfig)
+        {
+            scrcpyConfig.ServerConfig.IsControl = true;
+            return scrcpyConfig;
         }
 
 

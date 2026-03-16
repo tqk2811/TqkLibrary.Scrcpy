@@ -42,7 +42,7 @@ string deviceId = devices.First().DeviceId;
 
 int i = 0;
 
-ScrcpyConfig config = TestConsoleExtensions.GenControlOnlyConfigure();
+ScrcpyConfig config = TestConsoleExtensions.GenControlOnlyConfigure().EnableControl();
 while (true)
 {
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Start");
@@ -61,6 +61,8 @@ while (true)
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connect");
         if (scrcpy.Connect(config))
         {
+            if (!config.ServerConfig.IsVideo)
+                await scrcpy.RefreshScreenSizeFromAdbAsync();
             Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected, ScreenSize: {scrcpy.ScreenSize}");
             await Task.Delay(500);
 
