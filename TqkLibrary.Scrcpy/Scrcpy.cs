@@ -369,12 +369,7 @@ namespace TqkLibrary.Scrcpy
                 countdownEvent.Signal();
             }
             if (w == -1 || h == -1)
-            {
-                // No video stream: query physical screen size via ADB (cached)
-                if (_physicalScreenSizeCache == null)
-                    _physicalScreenSizeCache = QueryScreenSizeViaAdb();
                 return _physicalScreenSizeCache ?? Size.Empty;
-            }
             return new Size(w, h);
         }
 
@@ -384,13 +379,13 @@ namespace TqkLibrary.Scrcpy
         /// for example after a screen rotation event.
         /// </summary>
         /// <returns>The updated screen size, or <see cref="Size.Empty"/> if the query failed.</returns>
-        public Size RefreshScreenSizeFromAdb()
+        public async Task<Size> RefreshScreenSizeFromAdbAsync(CancellationToken cancellationToken = default)
         {
-            _physicalScreenSizeCache = QueryScreenSizeViaAdb();
+            _physicalScreenSizeCache = await QueryScreenSizeViaAdbAsync(cancellationToken).ConfigureAwait(false);
             return _physicalScreenSizeCache ?? Size.Empty;
         }
 
-        Size QueryScreenSizeViaAdb()
+        async Task<Size?> QueryScreenSizeViaAdbAsync(CancellationToken cancellationToken = default)
         {
             try
             {
@@ -402,8 +397,8 @@ namespace TqkLibrary.Scrcpy
                     CreateNoWindow = true,
                 };
                 p.Start();
-                string output = p.StandardOutput.ReadToEnd();
-                p.WaitForExit(5000);
+                string output = await p.StandardOutput.ReadToEndAsync().ConfigureAwait(false);
+                await Task.Run(() => p.WaitForExit(5000), cancellationToken).ConfigureAwait(false);
                 // Parse "Physical size: WxH" — last match wins (handles Override size)
                 var matches = Regex.Matches(output, @"(\d+)x(\d+)");
                 if (matches.Count > 0)
@@ -413,7 +408,7 @@ namespace TqkLibrary.Scrcpy
                 }
             }
             catch { }
-            return Size.Empty;
+            return null;
         }
 
         string GetDeviceName()

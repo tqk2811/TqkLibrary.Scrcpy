@@ -15,6 +15,15 @@ namespace TqkLibrary.Scrcpy
     {
         static readonly Random random = new Random();
 
+        static Size GetValidatedScreenSize(this IControl control)
+        {
+            var size = control.Scrcpy.ScreenSize;
+            if (size.IsEmpty)
+                throw new InvalidOperationException(
+                    "ScreenSize is empty. When IsVideo=false, call RefreshScreenSizeFromAdbAsync() before using touch/scroll controls.");
+            return size;
+        }
+
         /// <summary>
         /// 
         /// </summary>
@@ -28,7 +37,7 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public static bool InjectTouchEvent(this IControl control,
             AndroidMotionEventAction action, long pointerId, Point point, float pressure, AndroidMotionEventButton buttons, AndroidMotionEventButton actionButton)
-            => control.InjectTouchEvent(action, pointerId, new Rectangle(point, control.Scrcpy.ScreenSize), pressure, buttons, actionButton);
+            => control.InjectTouchEvent(action, pointerId, new Rectangle(point, control.GetValidatedScreenSize()), pressure, buttons, actionButton);
 
 
         /// <summary>
@@ -41,7 +50,7 @@ namespace TqkLibrary.Scrcpy
         /// <param name="androidMotion"></param>
         /// <returns></returns>
         public static bool InjectScrollEvent(this IControl control, Point point, float vScroll, float hScroll = 0, AndroidMotionEventButton androidMotion = AndroidMotionEventButton.BUTTON_PRIMARY)
-            => control.InjectScrollEvent(new Rectangle(point, control.Scrcpy.ScreenSize), vScroll, hScroll, androidMotion);
+            => control.InjectScrollEvent(new Rectangle(point, control.GetValidatedScreenSize()), vScroll, hScroll, androidMotion);
 
 
         /// <summary>
@@ -54,11 +63,12 @@ namespace TqkLibrary.Scrcpy
         /// <param name="cancellationToken"></param>
         public static void Tap(this IControl control, int x, int y, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
               AndroidMotionEventAction.ACTION_DOWN,
               pointerId,
-              new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+              new Rectangle(x, y, screenSize.Width, screenSize.Height),
               1f,
               AndroidMotionEventButton.BUTTON_PRIMARY,
               AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -68,8 +78,8 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
               AndroidMotionEventAction.ACTION_UP,
              pointerId,
-             new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
-             1f,
+             new Rectangle(x, y, screenSize.Width, screenSize.Height),
+             0f,
              AndroidMotionEventButton.BUTTON_PRIMARY,
              AndroidMotionEventButton.None);
         }
@@ -84,11 +94,12 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public static async Task TapAsync(this IControl control, int x, int y, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
-                new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x, y, screenSize.Width, screenSize.Height),
                 1f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -98,8 +109,8 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_UP,
                 pointerId,
-                new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
-                1f,
+                new Rectangle(x, y, screenSize.Width, screenSize.Height),
+                0f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.None);
         }
@@ -133,11 +144,10 @@ namespace TqkLibrary.Scrcpy
         /// <param name="releaseDelay"></param>
         /// <param name="cancellationToken"></param>
         public static void TapPercent(this IControl control, double x, double y, int releaseDelay = 100, CancellationToken cancellationToken = default)
-            => control.Tap(
-                (int)(x * control.Scrcpy.ScreenSize.Width),
-                (int)(y * control.Scrcpy.ScreenSize.Height),
-                releaseDelay,
-                cancellationToken);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            control.Tap((int)(x * screenSize.Width), (int)(y * screenSize.Height), releaseDelay, cancellationToken);
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -148,11 +158,10 @@ namespace TqkLibrary.Scrcpy
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static Task TapPercentAsync(this IControl control, double x, double y, int releaseDelay = 100, CancellationToken cancellationToken = default)
-            => control.TapAsync(
-                (int)(x * control.Scrcpy.ScreenSize.Width),
-                (int)(y * control.Scrcpy.ScreenSize.Height),
-                releaseDelay,
-                cancellationToken);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            return control.TapAsync((int)(x * screenSize.Width), (int)(y * screenSize.Height), releaseDelay, cancellationToken);
+        }
 
 
 
@@ -197,7 +206,10 @@ namespace TqkLibrary.Scrcpy
         /// <param name="hScroll"></param>
         /// <param name="androidMotion"></param>
         public static bool Scroll(this IControl control, int x, int y, float vScroll, float hScroll = 0, AndroidMotionEventButton androidMotion = AndroidMotionEventButton.BUTTON_PRIMARY)
-            => control.InjectScrollEvent(new Rectangle(x, y, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height), vScroll, hScroll, androidMotion);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            return control.InjectScrollEvent(new Rectangle(x, y, screenSize.Width, screenSize.Height), vScroll, hScroll, androidMotion);
+        }
 
 
         /// <summary>
@@ -220,11 +232,10 @@ namespace TqkLibrary.Scrcpy
         /// <param name="hScroll"></param>
         /// <param name="vScroll"></param>
         public static bool ScrollPercent(this IControl control, double x, double y, float hScroll, float vScroll)
-             => control.Scroll(
-                 (int)(x * control.Scrcpy.ScreenSize.Width),
-                 (int)(y * control.Scrcpy.ScreenSize.Height),
-                 hScroll,
-                 vScroll);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            return control.Scroll((int)(x * screenSize.Width), (int)(y * screenSize.Height), hScroll, vScroll);
+        }
 
         /// <summary>
         /// 
@@ -239,11 +250,12 @@ namespace TqkLibrary.Scrcpy
         /// <param name="cancellationToken"></param>
         public static void Swipe(this IControl control, int x1, int y1, int x2, int y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
               AndroidMotionEventAction.ACTION_DOWN,
               pointerId,
-              new Rectangle(x1, y1, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+              new Rectangle(x1, y1, screenSize.Width, screenSize.Height),
               1f,
               AndroidMotionEventButton.BUTTON_PRIMARY,
               AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -258,7 +270,7 @@ namespace TqkLibrary.Scrcpy
                 control.InjectTouchEvent(
                   AndroidMotionEventAction.ACTION_MOVE,
                   pointerId,
-                  new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                  new Rectangle(x1 + x * i, y1 + y * i, screenSize.Width, screenSize.Height),
                   1f,
                   AndroidMotionEventButton.BUTTON_PRIMARY,
                   AndroidMotionEventButton.None);
@@ -268,7 +280,7 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
              AndroidMotionEventAction.ACTION_UP,
              pointerId,
-             new Rectangle(x2, y2, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+             new Rectangle(x2, y2, screenSize.Width, screenSize.Height),
              0f,
              AndroidMotionEventButton.BUTTON_PRIMARY,
              AndroidMotionEventButton.None);
@@ -287,11 +299,12 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public static async Task SwipeAsync(this IControl control, int x1, int y1, int x2, int y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
-                new Rectangle(x1, y1, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x1, y1, screenSize.Width, screenSize.Height),
                 1f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -306,7 +319,7 @@ namespace TqkLibrary.Scrcpy
                 control.InjectTouchEvent(
                       AndroidMotionEventAction.ACTION_MOVE,
                       pointerId,
-                      new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                      new Rectangle(x1 + x * i, y1 + y * i, screenSize.Width, screenSize.Height),
                       1f,
                       AndroidMotionEventButton.BUTTON_PRIMARY,
                       AndroidMotionEventButton.None);
@@ -316,7 +329,7 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
                  AndroidMotionEventAction.ACTION_UP,
                  pointerId,
-                 new Rectangle(x2, y2, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                 new Rectangle(x2, y2, screenSize.Width, screenSize.Height),
                  0f,
                  AndroidMotionEventButton.BUTTON_PRIMARY,
                  AndroidMotionEventButton.None);
@@ -357,14 +370,13 @@ namespace TqkLibrary.Scrcpy
         /// <param name="delayStep"></param>
         /// <param name="cancellationToken"></param>
         public static void SwipePercent(this IControl control, double x1, double y1, double x2, double y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
-          => control.Swipe(
-              (int)(x1 * control.Scrcpy.ScreenSize.Width),
-              (int)(y1 * control.Scrcpy.ScreenSize.Height),
-              (int)(x2 * control.Scrcpy.ScreenSize.Width),
-              (int)(y2 * control.Scrcpy.ScreenSize.Height),
-              duration,
-              delayStep,
-              cancellationToken);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            control.Swipe(
+                (int)(x1 * screenSize.Width), (int)(y1 * screenSize.Height),
+                (int)(x2 * screenSize.Width), (int)(y2 * screenSize.Height),
+                duration, delayStep, cancellationToken);
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -378,14 +390,13 @@ namespace TqkLibrary.Scrcpy
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public static Task SwipePercentAsync(this IControl control, double x1, double y1, double x2, double y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
-          => control.SwipeAsync(
-              (int)(x1 * control.Scrcpy.ScreenSize.Width),
-              (int)(y1 * control.Scrcpy.ScreenSize.Height),
-              (int)(x2 * control.Scrcpy.ScreenSize.Width),
-              (int)(y2 * control.Scrcpy.ScreenSize.Height),
-              duration,
-              delayStep,
-              cancellationToken);
+        {
+            var screenSize = control.GetValidatedScreenSize();
+            return control.SwipeAsync(
+                (int)(x1 * screenSize.Width), (int)(y1 * screenSize.Height),
+                (int)(x2 * screenSize.Width), (int)(y2 * screenSize.Height),
+                duration, delayStep, cancellationToken);
+        }
 
         /// <summary>
         /// 
@@ -400,11 +411,12 @@ namespace TqkLibrary.Scrcpy
         /// <param name="cancellationToken"></param>
         public static void SwipeSpeed(this IControl control, int x1, int y1, int x2, int y2, int pixelPerSec = 1000, int delayStep = 10, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
-                new Rectangle(x1, y1, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x1, y1, screenSize.Width, screenSize.Height),
                 1f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -425,7 +437,7 @@ namespace TqkLibrary.Scrcpy
                 control.InjectTouchEvent(
                     AndroidMotionEventAction.ACTION_MOVE,
                     pointerId,
-                    new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                    new Rectangle(x1 + x * i, y1 + y * i, screenSize.Width, screenSize.Height),
                     1f,
                     AndroidMotionEventButton.BUTTON_PRIMARY,
                     AndroidMotionEventButton.None);
@@ -435,7 +447,7 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_UP,
                 pointerId,
-                new Rectangle(x2, y2, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x2, y2, screenSize.Width, screenSize.Height),
                 0f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.None);
@@ -454,11 +466,12 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public static async Task SwipeSpeedAsync(this IControl control, int x1, int y1, int x2, int y2, int pixelPerSec = 1000, int delayStep = 10, CancellationToken cancellationToken = default)
         {
+            var screenSize = control.GetValidatedScreenSize();
             long pointerId = random.Next(int.MinValue, int.MaxValue);
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
-                new Rectangle(x1, y1, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x1, y1, screenSize.Width, screenSize.Height),
                 1f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.BUTTON_PRIMARY);
@@ -479,7 +492,7 @@ namespace TqkLibrary.Scrcpy
                 control.InjectTouchEvent(
                     AndroidMotionEventAction.ACTION_MOVE,
                     pointerId,
-                    new Rectangle(x1 + x * i, y1 + y * i, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                    new Rectangle(x1 + x * i, y1 + y * i, screenSize.Width, screenSize.Height),
                     1f,
                     AndroidMotionEventButton.BUTTON_PRIMARY,
                     AndroidMotionEventButton.None);
@@ -489,7 +502,7 @@ namespace TqkLibrary.Scrcpy
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_UP,
                 pointerId,
-                new Rectangle(x2, y2, control.Scrcpy.ScreenSize.Width, control.Scrcpy.ScreenSize.Height),
+                new Rectangle(x2, y2, screenSize.Width, screenSize.Height),
                 0f,
                 AndroidMotionEventButton.BUTTON_PRIMARY,
                 AndroidMotionEventButton.None);
