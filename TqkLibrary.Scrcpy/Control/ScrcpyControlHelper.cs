@@ -181,7 +181,7 @@ namespace TqkLibrary.Scrcpy.Control
             unchecked
             {
                 int u = (int)(f * 32768.0F);// 0x1p15f; // 2^15
-                if (u > 0x8000) throw new InvalidOperationException();
+                if (u >= 0x8000) throw new InvalidOperationException();
                 if (u >= 0x7fff)
                 {
                     u = 0x7fff;
