@@ -92,7 +92,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             => this.ForEach(x => x.InjectKeycode(action, keycode, repeat, metaState));
 
         public bool InjectScrollEvent(Rectangle position, float vScroll, float hScroll = 0, AndroidMotionEventButton button = AndroidMotionEventButton.BUTTON_PRIMARY)
-            => this.ForEach(x => x.InjectScrollEvent(new Rectangle(position.Location, x.Scrcpy.ScreenSize), vScroll, hScroll, button));
+            => this.ForEach(x => x.InjectScrollEvent(new Rectangle(position.Location, x.Scrcpy?.ScreenSize ?? Size.Empty), vScroll, hScroll, button));
 
         public bool InjectText(string text)
             => this.ForEach(x => x.InjectText(text));
@@ -104,7 +104,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             float pressure = 1,
             AndroidMotionEventButton buttons = AndroidMotionEventButton.BUTTON_PRIMARY,
             AndroidMotionEventButton actionButton = AndroidMotionEventButton.BUTTON_PRIMARY)
-            => this.ForEach(x => x.InjectTouchEvent(action, pointerId, new Rectangle(position.Location, x.Scrcpy.ScreenSize), pressure, buttons, actionButton));
+            => this.ForEach(x => x.InjectTouchEvent(action, pointerId, new Rectangle(position.Location, x.Scrcpy?.ScreenSize ?? Size.Empty), pressure, buttons, actionButton));
 
         public bool RotateDevice()
             => this.ForEach(x => x.RotateDevice());
