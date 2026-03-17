@@ -16,12 +16,14 @@ public:
 	bool GetCurrentRgbaFrame(AVFrame* frame);
 	bool IsNewFrame(INT64& pts);
 	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
+	void SetNotifyDisconnect(bool notify);
 private:
 	ScrcpyNativeConfig _nativeConfig{};
 	Scrcpy* _scrcpy;
 	std::string _deviceName;
 
 	bool _isStopped{ false };
+	bool _notifyDisconnect{ false };
 
 	bool _ishaveFrame{ false };
 	ParsePacket* _parsePacket{ nullptr };
