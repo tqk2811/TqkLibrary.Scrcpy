@@ -18,9 +18,10 @@ namespace TqkLibrary.Scrcpy.Helpers
             CancellationToken cancellationToken = default)
         {
             using Process process = CreateProcess(adbPath, $"-s {deviceId} push {scrcpyPath} /sdcard/scrcpy-server-tqk.jar");
-            string stdout = await process.StandardOutput.ReadToEndAsync();
-            string stderr = await process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync(cancellationToken);
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         }
 
 
@@ -31,10 +32,11 @@ namespace TqkLibrary.Scrcpy.Helpers
             CancellationToken cancellationToken = default)
         {
             using Process process = CreateProcess(adbPath, $"-s {deviceId} {argument}");
-            string stdout = await process.StandardOutput.ReadToEndAsync();
-            string stderr = await process.StandardError.ReadToEndAsync();
-            await process.WaitForExitAsync(cancellationToken);
-            return new ProcessStd(stdout, stderr);
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            return new ProcessStd(stdoutTask.Result, stderrTask.Result);
         }
 
 
