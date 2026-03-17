@@ -71,9 +71,38 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("downsize_on_error")]
         public bool DownsizeOnError { get; set; } = true;
 
+        /// <summary>
+        /// Arbitrary rotation angle in degrees applied on the client side (v3.0+)<br></br>
+        /// Default: 0 (no rotation)
+        /// </summary>
+        [OptionName("angle")]
+        public float Angle { get; set; } = 0;
 
         /// <summary>
-        /// 
+        /// Create a new virtual display with the given size instead of mirroring a physical display (v3.0+)<br></br>
+        /// Format: "WxH" or "WxH/dpi", e.g. "1920x1080" or "1920x1080/420"<br></br>
+        /// Default: null (mirror existing display)
+        /// </summary>
+        [OptionName("new_display")]
+        public string? NewDisplay { get; set; }
+
+        /// <summary>
+        /// Destroy the content of the virtual display when scrcpy exits (v3.0+)<br></br>
+        /// Default: false
+        /// </summary>
+        [OptionName("vd_destroy_content")]
+        public bool VdDestroyContent { get; set; } = false;
+
+        /// <summary>
+        /// Show system decorations on the virtual display (v3.0+)<br></br>
+        /// Default: false
+        /// </summary>
+        [OptionName("vd_system_decorations")]
+        public bool VdSystemDecorations { get; set; } = false;
+
+
+        /// <summary>
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()
@@ -87,6 +116,10 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.VideoEncoder, string.IsNullOrWhiteSpace);
             yield return this._GetArgument(x => x.Crop, x => x.HasValue);
             yield return this._GetArgument(x => x.DownsizeOnError, !DownsizeOnError);
+            yield return this._GetArgument(x => x.Angle, x => x != 0, x => x.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            yield return this._GetArgument(x => x.NewDisplay, x => !string.IsNullOrWhiteSpace(x));
+            yield return this._GetArgument(x => x.VdDestroyContent, VdDestroyContent);
+            yield return this._GetArgument(x => x.VdSystemDecorations, VdSystemDecorations);
         }
     }
 }

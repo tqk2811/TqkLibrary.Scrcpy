@@ -36,9 +36,17 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("power_on")]
         public bool PowerOn { get; set; } = true;
 
+        /// <summary>
+        /// Set the device screen off timeout in milliseconds while scrcpy is running,
+        /// and restore it when scrcpy exits (v3.0+)<br></br>
+        /// Default: -1 (disabled)
+        /// </summary>
+        [OptionName("screen_off_timeout")]
+        public int ScreenOffTimeout { get; set; } = -1;
+
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()
@@ -47,6 +55,7 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.StayAwake, StayAwake);
             yield return this._GetArgument(x => x.PowerOffOnClose, PowerOffOnClose);
             yield return this._GetArgument(x => x.PowerOn, !PowerOn);
+            yield return this._GetArgument(x => x.ScreenOffTimeout, x => x >= 0);
         }
     }
 }
