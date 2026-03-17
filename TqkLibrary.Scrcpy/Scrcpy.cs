@@ -15,6 +15,7 @@ using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.ListSupport;
 using TqkLibrary.Scrcpy.Helpers;
 using TqkLibrary.Scrcpy.Enums;
+using System.IO;
 
 namespace TqkLibrary.Scrcpy
 {
@@ -290,34 +291,18 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        /// Returns a read-only <see cref="ScrcpyAudioStream"/> that delivers decoded audio
+        /// resampled to the specified format, sample rate, and channel count.
         /// </summary>
-        /// <param name="aVFrame"></param>
-        /// <param name="last_pts"></param>
-        /// <param name="waitFrameTime">in mili second</param>
-        /// <returns>return current pts</returns>
-        public long ReadAudioFrame(AVFrame aVFrame, long last_pts, UInt32 waitFrameTime = 0)
+        /// <param name="format">Output sample format (default: <see cref="AVSampleFormat.S16"/>).</param>
+        /// <param name="sampleRate">Output sample rate in Hz (default: 48000).</param>
+        /// <param name="channels">Number of output channels (default: 2).</param>
+        public ScrcpyAudioStream GetAudioStream(
+            AVSampleFormat format = AVSampleFormat.S16,
+            int sampleRate = 48000,
+            int channels = 2)
         {
-            if (aVFrame is null) throw new ArgumentNullException(nameof(aVFrame));
-            return ReadAudioFrame(aVFrame.Handle, last_pts, waitFrameTime);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pAVFrame"></param>
-        /// <param name="last_pts"></param>
-        /// <param name="waitFrameTime">in mili second</param>
-        /// <returns>return current pts</returns>
-        public long ReadAudioFrame(IntPtr pAVFrame, long last_pts, UInt32 waitFrameTime = 0)
-        {
-            long result = -1;
-            if (countdownEvent.SafeTryAddCount())
-            {
-                result = NativeWrapper.ScrcpyReadAudioFrame(this._handle, pAVFrame, last_pts, waitFrameTime);
-                countdownEvent.Signal();
-            }
-            return result;
+            return new ScrcpyAudioStream(this, format, sampleRate, channels);
         }
 
 

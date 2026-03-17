@@ -67,7 +67,16 @@ namespace TqkLibrary.Scrcpy
         internal static extern bool ScrcpyGetScreenShot(IntPtr scrcpy, IntPtr buffer, int sizeInByte, int w, int h, int lineSize, SwsFlag swsFlag = SwsFlag.SWS_FAST_BILINEAR);
 
         [DllImport("TqkLibrary.ScrcpyNative.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        internal static extern long ScrcpyReadAudioFrame(IntPtr scrcpy, IntPtr pFrame, long last_pts, UInt32 waitFrameTime);//return current pts if > 0
+        internal static extern long ScrcpyReadAudioRaw(
+            IntPtr scrcpy,
+            [In][Out][MarshalAs(UnmanagedType.LPArray)] byte[] buffer,
+            int bufferSize,
+            int outNbChannels,
+            int outSampleRate,
+            int outSampleFmt,
+            long last_pts,
+            UInt32 waitFrameTime,
+            ref int outBytesWritten);
 
 
         #region Callback
@@ -125,13 +134,5 @@ namespace TqkLibrary.Scrcpy
 
 
 
-        #region LibAV
-
-        [DllImport("avutil-60.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr av_frame_alloc();
-        [DllImport("avutil-60.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-        public static extern void av_frame_free(ref IntPtr pAVFrame);
-
-        #endregion
     }
 }
