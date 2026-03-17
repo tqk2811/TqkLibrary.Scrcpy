@@ -44,15 +44,18 @@ bool AudioDecoder::Decode(const AVPacket* packet) {
 #endif
 	if (avcheck(avcodec_send_packet(_codec_ctx, packet)))
 	{
-		_mtx_frame.lock();//lock read frame
-
-		av_frame_unref(_decoding_frame);
-		result = avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame));
-
+		AVFrame* temp = av_frame_alloc();
+		result = avcheck(avcodec_receive_frame(_codec_ctx, temp));
+		if (result)
+		{
+			_mtx_frame.lock();
+			std::swap(_decoding_frame, temp);
+			_mtx_frame.unlock();
+		}
 #if _DEBUG
-		pts = _decoding_frame->pts;
+		pts = temp ? temp->pts : 0;
 #endif
-		_mtx_frame.unlock();
+		av_frame_free(&temp);
 	}
 #if _DEBUG
 	auto finish(std::chrono::high_resolution_clock::now());
