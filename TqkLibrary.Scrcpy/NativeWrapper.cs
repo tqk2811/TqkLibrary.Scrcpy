@@ -127,9 +127,9 @@ namespace TqkLibrary.Scrcpy
 
         #region LibAV
 
-        [DllImport("avutil-57.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("avutil-60.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr av_frame_alloc();
-        [DllImport("avutil-57.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("avutil-60.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
         public static extern void av_frame_free(ref IntPtr pAVFrame);
 
         #endregion
