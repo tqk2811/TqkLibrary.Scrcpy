@@ -22,9 +22,10 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("display_id")]
         public int? DisplayId { get; set; }
         /// <summary>
+        /// Capture orientation. Append _Locked variant to lock the orientation.<br></br>
         /// Default: <see cref="Orientations.Auto"/>
         /// </summary>
-        [OptionName("lock_video_orientation")]
+        [OptionName("capture_orientation")]
         public Orientations Orientation { get; set; } = Orientations.Auto;
         /// <summary>
         /// Default: 0 or null (unlimit)
