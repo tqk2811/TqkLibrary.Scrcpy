@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using TqkLibrary.Scrcpy;
 using TqkLibrary.AdbDotNet;
-using System.Windows.Interop;
-using System.Timers;
-using TqkLibrary.Scrcpy.Wpf;
-using TqkLibrary.Scrcpy.Enums;
-using TqkLibrary.Scrcpy.Configs;
-using TqkLibrary.Scrcpy.ListSupport;
 using TqkLibrary.AudioPlayer.Sdl2;
+using TqkLibrary.AudioPlayer.Sdl2.Enums;
 using TqkLibrary.AudioPlayer.XAudio2;
-using System.Threading;
+using TqkLibrary.Scrcpy;
+using TqkLibrary.Scrcpy.Configs;
+using TqkLibrary.Scrcpy.Enums;
+using TqkLibrary.Scrcpy.ListSupport;
+using TqkLibrary.Scrcpy.Wpf;
 namespace TestRenderWpf
 {
     /// <summary>
@@ -54,6 +55,8 @@ namespace TestRenderWpf
                 {
 #if AudioTest
                     IsAudio = true,
+                    AudioSource = AudioSource.Output,
+                    AudioDup = false,
 #endif
                 },
             },
@@ -62,7 +65,7 @@ namespace TestRenderWpf
         XAudio2Engine? _audio2Engine;
         XAudio2MasterVoice? _audio2MasterVoice;
         XAudio2SourceVoice? _audio2SourceVoice;
-        AVFrame? _aVFrame;
+        ScrcpyAudioStream? _audioStream;
         public MainWindow()
         {
             InitializeComponent();
@@ -72,7 +75,7 @@ namespace TestRenderWpf
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault()?.DeviceId;
-            if(string.IsNullOrWhiteSpace(deviceId))
+            if (string.IsNullOrWhiteSpace(deviceId))
             {
                 MessageBox.Show("No device");
                 return;
@@ -115,7 +118,7 @@ namespace TestRenderWpf
 
             if (scrcpyConfig?.ServerConfig?.AudioConfig?.IsAudio == true)
             {
-                _aVFrame = new AVFrame();
+                _audioStream = scrcpy.GetAudioStream();
                 _ = Task.Factory.StartNew(RunReadAudio, TaskCreationOptions.LongRunning);
             }
         }
@@ -141,32 +144,42 @@ namespace TestRenderWpf
             mainWindowVM.ScrcpyUiView = null;
             mainWindowVM.Control = null;
             scrcpy?.Dispose();
-            _aVFrame?.Dispose();
+            _audioStream?.Dispose();
         }
 
-        void RunReadAudio()
+        async Task RunReadAudio()
         {
-            long last_pts = 0;
+            var stream = _audioStream!;
+            _sdlDevice = new SdlDevice(
+                stream.SampleRate,
+                (byte)stream.Channels,
+                stream.Format switch
+                {
+                    AVSampleFormat.S16 => SdlAudioFormat.AUDIO_S16,
+                    _ => throw new NotSupportedException()
+                });
+
+            byte[] readBuf = new byte[stream.SampleRate * stream.Channels * stream.SampleSizeBytes / 10]; // ~100ms
+
             while (scrcpy!.IsConnected)
             {
-                last_pts = scrcpy!.ReadAudioFrame(_aVFrame!, last_pts, 1000);
-                if (last_pts > 0) break;
-            }
+                int read = stream.Read(readBuf, 0, readBuf.Length);
+                if (read <= 0)
+                    break;
 
-            _sdlDevice = new SdlDevice(_aVFrame!.Handle);
-            _sdlDevice.QueueAudio(_aVFrame.Handle);
-            while (scrcpy.IsConnected)
-            {
-                long current_pts = scrcpy!.ReadAudioFrame(_aVFrame!, last_pts, 10);
-                if (current_pts > 0)
+                byte[] buffer = new byte[read];
+                Array.Copy(readBuf, 0, buffer, 0, read);
+                SdlSourceQueueResult result;
+                while (true)
                 {
-                    last_pts = current_pts;
-                    _sdlDevice.QueueAudio(_aVFrame.Handle);
-                }
-
-                if (_sdlDevice.GetQueuedAudioSize() > 320 * 1024)
-                {
-                    _sdlDevice.ClearQueuedAudio();
+                    result = _sdlDevice.QueueAudio(buffer, 1);
+                    if (result == SdlSourceQueueResult.Success)
+                        break;
+                    if (result == SdlSourceQueueResult.QueueFailed)
+                    {
+                        await Task.Delay(10);
+                        continue;
+                    }
                 }
             }
         }
