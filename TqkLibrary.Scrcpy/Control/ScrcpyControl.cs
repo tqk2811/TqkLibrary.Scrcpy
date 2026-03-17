@@ -74,6 +74,10 @@ namespace TqkLibrary.Scrcpy.Control
 #pragma warning restore CS0618
         public bool OpenHardKeyboardSetting()
             => SendControl(ScrcpyControlHelper.OpenHardKeyboardSetting());
+        public bool StartApp(string name)
+            => SendControl(ScrcpyControlHelper.StartApp(name));
+        public bool ResetVideo()
+            => SendControl(ScrcpyControlHelper.ResetVideo());
         #endregion
 
         #region Event
