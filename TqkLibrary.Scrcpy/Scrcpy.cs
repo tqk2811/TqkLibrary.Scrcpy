@@ -409,7 +409,8 @@ namespace TqkLibrary.Scrcpy
                 NativeWrapper.ScrcpyGetDeviceName(_handle, buffer, 64);
                 countdownEvent.Signal();
             }
-            return Encoding.ASCII.GetString(buffer);
+            int len = Array.IndexOf(buffer, (byte)0);
+            return Encoding.ASCII.GetString(buffer, 0, len < 0 ? buffer.Length : len);
         }
 
 
