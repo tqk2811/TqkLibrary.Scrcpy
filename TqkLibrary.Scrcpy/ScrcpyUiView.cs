@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Exceptions;
 
 namespace TqkLibrary.Scrcpy
 {
@@ -28,6 +29,8 @@ namespace TqkLibrary.Scrcpy
         {
             this.Scrcpy = scrcpy ?? throw new ArgumentNullException(nameof(scrcpy));
             d3dView = NativeWrapper.D3DImageViewAlloc();
+            if (d3dView == IntPtr.Zero)
+                throw new ScrcpyException("D3DImageViewAlloc failed.");
         }
         /// <summary>
         /// 
