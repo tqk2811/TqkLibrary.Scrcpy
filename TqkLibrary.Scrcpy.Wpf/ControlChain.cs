@@ -115,11 +115,22 @@ namespace TqkLibrary.Scrcpy.Wpf
         public bool SetClipboard(string text, bool paste, long sequence)
             => this.ForEach(x => x.SetClipboard(text, paste, sequence));
 
+        public bool SetDisplayPower(bool on)
+            => this.ForEach(x => x.SetDisplayPower(on));
+
+#pragma warning disable CS0618
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
             => this.ForEach(x => x.SetScreenPowerMode(powerMode));
+#pragma warning restore CS0618
 
         public bool OpenHardKeyboardSetting()
             => this.ForEach(x => x.OpenHardKeyboardSetting());
+
+        public bool StartApp(string name)
+            => this.ForEach(x => x.StartApp(name));
+
+        public bool ResetVideo()
+            => this.ForEach(x => x.ResetVideo());
         #endregion
     }
 
