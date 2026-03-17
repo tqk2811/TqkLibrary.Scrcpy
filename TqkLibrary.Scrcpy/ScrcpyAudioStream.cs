@@ -113,6 +113,7 @@ namespace TqkLibrary.Scrcpy
             }
         }
 
+#if NET5_0_OR_GREATER
         /// <inheritdoc/>
         public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
         {
@@ -129,7 +130,7 @@ namespace TqkLibrary.Scrcpy
                         return t.Result;
                     }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
         }
-
+#endif
         /// <summary>
         /// Reads decoded audio bytes asynchronously. Respects <paramref name="cancellationToken"/>.
         /// Returns 0 when the scrcpy session is disconnected or the token is cancelled.
