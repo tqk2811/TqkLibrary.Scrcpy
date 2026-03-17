@@ -14,7 +14,11 @@ namespace TqkLibrary.Scrcpy.Control
 {
     internal class ScrcpyControl : IControl
     {
-        static readonly Random random = new Random();
+#if NET5_0_OR_GREATER
+        static int NextRandomInt() => Random.Shared.Next();
+#else
+        static int NextRandomInt() => new Random().Next();
+#endif
         internal ScrcpyControl(Scrcpy scrcpy)
         {
             this.Scrcpy = scrcpy;
@@ -57,7 +61,7 @@ namespace TqkLibrary.Scrcpy.Control
         public bool RotateDevice()
             => SendControl(ScrcpyControlHelper.RotateDevice());
         public bool SetClipboard(string text, bool paste)
-            => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, random.Next()));
+            => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, NextRandomInt()));
         public bool SetClipboard(string text, bool paste, long sequence)
             => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, sequence));
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)

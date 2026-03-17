@@ -13,7 +13,11 @@ namespace TqkLibrary.Scrcpy
     /// </summary>
     public static class ScrcpyControlHelper
     {
-        static readonly Random random = new Random();
+#if NET5_0_OR_GREATER
+        static int NextRandomInt() => Random.Shared.Next(int.MinValue, int.MaxValue);
+#else
+        static int NextRandomInt() => new Random().Next(int.MinValue, int.MaxValue);
+#endif
 
         static Size GetValidatedScreenSize(this IControl control)
         {
@@ -64,7 +68,7 @@ namespace TqkLibrary.Scrcpy
         public static void Tap(this IControl control, int x, int y, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
               AndroidMotionEventAction.ACTION_DOWN,
               pointerId,
@@ -96,7 +100,7 @@ namespace TqkLibrary.Scrcpy
         public static async Task TapAsync(this IControl control, int x, int y, int releaseDelay = 100, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
@@ -253,7 +257,7 @@ namespace TqkLibrary.Scrcpy
         public static void Swipe(this IControl control, int x1, int y1, int x2, int y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
               AndroidMotionEventAction.ACTION_DOWN,
               pointerId,
@@ -305,7 +309,7 @@ namespace TqkLibrary.Scrcpy
         public static async Task SwipeAsync(this IControl control, int x1, int y1, int x2, int y2, int duration, int delayStep = 10, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
@@ -417,7 +421,7 @@ namespace TqkLibrary.Scrcpy
         public static void SwipeSpeed(this IControl control, int x1, int y1, int x2, int y2, int pixelPerSec = 1000, int delayStep = 10, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
@@ -474,7 +478,7 @@ namespace TqkLibrary.Scrcpy
         public static async Task SwipeSpeedAsync(this IControl control, int x1, int y1, int x2, int y2, int pixelPerSec = 1000, int delayStep = 10, CancellationToken cancellationToken = default)
         {
             var screenSize = control.GetValidatedScreenSize();
-            long pointerId = random.Next(int.MinValue, int.MaxValue);
+            long pointerId = NextRandomInt();
             control.InjectTouchEvent(
                 AndroidMotionEventAction.ACTION_DOWN,
                 pointerId,
