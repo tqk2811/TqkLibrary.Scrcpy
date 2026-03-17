@@ -144,7 +144,7 @@ namespace TqkLibrary.Scrcpy
         bool isDisposed = false;
         private void Dispose(bool disposing)
         {
-            if (!isDisposed) return;
+            if (isDisposed) return;
             isDisposed = true;
 
             if (AppDomain.CurrentDomain.IsDefaultAppDomain())
