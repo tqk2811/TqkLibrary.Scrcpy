@@ -64,8 +64,14 @@ namespace TqkLibrary.Scrcpy.Control
             => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, NextRandomInt()));
         public bool SetClipboard(string text, bool paste, long sequence)
             => SendControl(ScrcpyControlHelper.SetClipboard(text, paste, sequence));
+        public bool SetDisplayPower(bool on)
+            => SendControl(ScrcpyControlHelper.SetDisplayPower(on));
+
+#pragma warning disable CS0618
+        [System.Obsolete("SetScreenPowerMode is obsolete since scrcpy v3.0. Use SetDisplayPower(bool) instead.")]
         public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
             => SendControl(ScrcpyControlHelper.SetScreenPowerMode(powerMode));
+#pragma warning restore CS0618
         public bool OpenHardKeyboardSetting()
             => SendControl(ScrcpyControlHelper.OpenHardKeyboardSetting());
         #endregion

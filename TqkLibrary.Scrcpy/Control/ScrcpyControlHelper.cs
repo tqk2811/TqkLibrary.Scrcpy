@@ -107,10 +107,18 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
+        internal static byte[] SetDisplayPower(bool on)
+        {
+            using MemoryStream memoryStream = new MemoryStream();
+            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_DISPLAY_POWER, on);
+            return memoryStream.ToArray();
+        }
+
+        [System.Obsolete("SetScreenPowerMode is obsolete since scrcpy v3.0. Use SetDisplayPower(bool) instead.")]
         internal static byte[] SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
         {
             using MemoryStream memoryStream = new MemoryStream();
-            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_SCREEN_POWER_MODE, powerMode);
+            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_DISPLAY_POWER, powerMode);
             return memoryStream.ToArray();
         }
 

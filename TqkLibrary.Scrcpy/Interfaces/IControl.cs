@@ -118,10 +118,18 @@ namespace TqkLibrary.Scrcpy.Interfaces
         bool GetClipboard(CopyKey copyKey);
 
         /// <summary>
-        /// 
+        /// Turn on or off the display power (scrcpy v3.0+)
+        /// </summary>
+        /// <param name="on">true to turn on, false to turn off</param>
+        /// <returns></returns>
+        bool SetDisplayPower(bool on);
+
+        /// <summary>
+        ///
         /// </summary>
         /// <param name="powerMode"></param>
         /// <returns></returns>
+        [System.Obsolete("SetScreenPowerMode is obsolete since scrcpy v3.0. Use SetDisplayPower(bool) instead.")]
         bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode);
 
         /// <summary>
