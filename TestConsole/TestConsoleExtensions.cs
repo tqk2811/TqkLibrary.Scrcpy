@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TqkLibrary.Scrcpy;
 using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.Enums;
 
