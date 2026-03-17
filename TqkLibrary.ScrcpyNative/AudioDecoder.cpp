@@ -68,6 +68,52 @@ bool AudioDecoder::Decode(const AVPacket* packet) {
 	return result;
 }
 
+INT64 AudioDecoder::ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, AVSampleFormat outSampleFmt, INT64 last_pts, INT32* outBytesWritten)
+{
+	if (_decoding_frame == nullptr || buffer == nullptr || outBytesWritten == nullptr) return -1;
+
+	INT64 result = -1;
+	_mtx_frame.lock();
+	if (_decoding_frame->pts > last_pts && _decoding_frame->nb_samples > 0)
+	{
+		SwrContext* swr = nullptr;
+		AVChannelLayout out_ch_layout{};
+		av_channel_layout_default(&out_ch_layout, outNbChannels);
+
+		int r = swr_alloc_set_opts2(
+			&swr,
+			&out_ch_layout,
+			outSampleFmt,
+			outSampleRate,
+			&_decoding_frame->ch_layout,
+			(AVSampleFormat)_decoding_frame->format,
+			_decoding_frame->sample_rate,
+			0, nullptr
+		);
+
+		if (r >= 0 && swr_init(swr) >= 0)
+		{
+			int bytesPerSample = av_get_bytes_per_sample(outSampleFmt);
+			int out_count = bufferSize / (outNbChannels * bytesPerSample);
+			BYTE* out_ptr = buffer;
+
+			int converted = swr_convert(swr, &out_ptr, out_count,
+				(const uint8_t**)_decoding_frame->data,
+				_decoding_frame->nb_samples);
+			if (converted >= 0)
+			{
+				*outBytesWritten = converted * outNbChannels * bytesPerSample;
+				result = _decoding_frame->pts;
+			}
+		}
+
+		av_channel_layout_uninit(&out_ch_layout);
+		swr_free(&swr);
+	}
+	_mtx_frame.unlock();
+	return result;
+}
+
 INT64 AudioDecoder::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
 {
 	if (this->_decoding_frame == nullptr || pFrame == nullptr)

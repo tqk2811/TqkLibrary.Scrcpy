@@ -12,6 +12,7 @@ ScrcpyNativeExport bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command
 ScrcpyNativeExport bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize, const INT32 swsFlag);
 ScrcpyNativeExport bool ScrcpyGetDeviceName(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte);
 ScrcpyNativeExport INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
+ScrcpyNativeExport INT64 ScrcpyReadAudioRaw(Scrcpy* scrcpy, BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten);
 
 ScrcpyNativeExport RenderTextureSurfaceClass* D3DImageViewAlloc();
 ScrcpyNativeExport void D3DImageViewFree(RenderTextureSurfaceClass* renderSurface);

@@ -10,6 +10,7 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include <libswresample/swresample.h>
 
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>

@@ -27,6 +27,7 @@ public:
 
 	LPCWSTR GetDeviceId();
 	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
+	INT64 ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten);
 private:
 	//const
 	std::wstring _deviceId;

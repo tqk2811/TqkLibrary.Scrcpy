@@ -42,6 +42,11 @@ INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
 	if (this->_audioDecoder == nullptr) return -1;
 	return this->_audioDecoder->ReadAudioFrame(pFrame, last_pts);
 }
+INT64 Audio::ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, AVSampleFormat outSampleFmt, INT64 last_pts, INT32* outBytesWritten)
+{
+	if (this->_audioDecoder == nullptr) return -1;
+	return this->_audioDecoder->ReadAudioRaw(buffer, bufferSize, outNbChannels, outSampleRate, outSampleFmt, last_pts, outBytesWritten);
+}
 HANDLE Audio::GetWaitHanlde() {
 	return this->_mtx_waitNextFrame;
 }
