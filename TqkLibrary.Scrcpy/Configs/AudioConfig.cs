@@ -72,7 +72,7 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.AudioCodec, x => IsAudio && string.IsNullOrWhiteSpace(x));
             yield return this._GetArgument(x => x.AudioCodecOption, x => IsAudio && string.IsNullOrWhiteSpace(x));
             yield return this._GetArgument(x => x.AudioEncoder, x => IsAudio && string.IsNullOrWhiteSpace(x));
-            yield return this._GetArgument(x => x.AudioSource, x => IsAudio && x.HasValue && x.Value != AudioSource.Auto, x => x!.Value.ToString().ToLower());
+            yield return this._GetArgument(x => x.AudioSource, x => IsAudio && x.HasValue && x.Value != TqkLibrary.Scrcpy.Enums.AudioSource.Auto, x => x!.Value.ToString().ToLower());
             yield return this._GetArgument(x => x.AudioDup, IsAudio && AudioDup);
         }
     }

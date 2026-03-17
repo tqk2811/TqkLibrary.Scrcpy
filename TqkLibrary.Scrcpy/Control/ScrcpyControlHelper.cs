@@ -132,7 +132,7 @@ namespace TqkLibrary.Scrcpy.Control
         internal static byte[] UhdiCreate(UInt16 id, UInt16 vendorId, UInt16 productId, string name, byte[] data)
         {
             byte[] nameBytes = Encoding.UTF8.GetBytes(name ?? string.Empty);
-            if (nameBytes.Length > 127) nameBytes = nameBytes[..127];
+            if (nameBytes.Length > 127) Array.Resize(ref nameBytes, 127);
             using MemoryStream memoryStream = new MemoryStream();
             memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_UHID_CREATE, id, vendorId, productId);
             memoryStream.WriteByte((byte)nameBytes.Length);
