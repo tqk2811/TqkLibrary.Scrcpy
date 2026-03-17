@@ -38,16 +38,20 @@ bool Scrcpy::Connect(const ScrcpyNativeConfig& nativeConfig) {
 }
 
 void Scrcpy::Stop() {
+	ScrcpyInstance* instance = nullptr;
+
 	_mutex.lock();
-
-	if (this->_scrcpyInstance != nullptr) {
-		delete this->_scrcpyInstance;
-		this->_scrcpyInstance = nullptr;
-	}
-
+	instance = this->_scrcpyInstance;
+	this->_scrcpyInstance = nullptr;
 	av_frame_unref(&this->cache);
-
 	_mutex.unlock();
+
+	// Delete outside the mutex: destructor calls Video/Audio::Stop()
+	// which blocks on WaitForSingleObject(INFINITE) for the worker threads.
+	// Holding _mutex during that wait would block all other callers
+	// (ControlCommand, GetScreenShot, etc.) for the full thread-stop duration.
+	if (instance != nullptr)
+		delete instance;
 }
 
 bool Scrcpy::ControlCommand(const BYTE* command, const int sizeInByte) {
