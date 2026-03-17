@@ -35,14 +35,17 @@ bool ScrcpyInstance::Connect(SOCKET videoSock, SOCKET audioSock, SOCKET controlS
 	if (this->_nativeConfig.IsVideo) {
 		this->_video = new Video(this->_scrcpy, videoSock, this->_nativeConfig);
 		if (!this->_video->Init()) return false;
-		this->_video->SetNotifyDisconnect(true);
+	}
+
+	if (this->_nativeConfig.IsVideo) {
+		this->_video->SetNotifyDisconnect(true); // video is primary stream for disconnect
 	}
 
 	if (this->_nativeConfig.IsAudio) {
 		this->_audio = new Audio(this->_scrcpy, audioSock, this->_nativeConfig);
 		if (!this->_audio->Init()) return false;
 		if (!this->_nativeConfig.IsVideo)
-			this->_audio->SetNotifyDisconnect(true);
+			this->_audio->SetNotifyDisconnect(true); // audio is primary stream for disconnect when no video
 	}
 
 	if (this->_nativeConfig.IsControl) {
