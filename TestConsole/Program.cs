@@ -67,13 +67,16 @@ while (true)
             await Task.Delay(500);
 
             //await TapKeyboard(scrcpy, "qwertyuiop");
-            //await Task.Delay(500);
-            //await scrcpy.Control.KeyAsync(AndroidKeyCode.KEYCODE_ENTER);
-            //await Task.Delay(3000);
-            ////scrcpy.Control.SetClipboard("test clipboard", true);
-            //await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
-            //string text = await scrcpy.Control.GetClipboardAsync();
-            //Console.WriteLine($"GetClipboardAsync: {text}");
+            await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_A);
+            await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_B);
+            await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_C);
+            await Task.Delay(500);
+            await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_ENTER);
+            await Task.Delay(3000);
+            scrcpy.Control.SetClipboard("test clipboard", true);
+            await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
+            string text = await scrcpy.Control.GetClipboardAsync();
+            Console.WriteLine($"GetClipboardAsync: {text}");
 
             //while (true)
             //    await Task.Delay(3000);
