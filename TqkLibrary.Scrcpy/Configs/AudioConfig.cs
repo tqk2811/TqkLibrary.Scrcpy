@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Enums;
 using TqkLibrary.Scrcpy.Attributes;
 using TqkLibrary.Scrcpy.Interfaces;
 
@@ -44,11 +45,24 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         [OptionName("audio_encoder")]
         public string? AudioEncoder { get; set; }
+        /// <summary>
+        /// Audio source<br></br>
+        /// Default: null (auto)<br></br>
+        /// Use <see cref="AudioSource.Playback"/> to capture device audio playback without muting it (Android 13+)
+        /// </summary>
+        [OptionName("audio_source")]
+        public AudioSource? AudioSource { get; set; }
+        /// <summary>
+        /// Mirror audio to both scrcpy and the device speaker simultaneously<br></br>
+        /// Default: false
+        /// </summary>
+        [OptionName("audio_dup")]
+        public bool AudioDup { get; set; } = false;
 
 
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()
@@ -58,6 +72,8 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.AudioCodec, x => IsAudio && string.IsNullOrWhiteSpace(x));
             yield return this._GetArgument(x => x.AudioCodecOption, x => IsAudio && string.IsNullOrWhiteSpace(x));
             yield return this._GetArgument(x => x.AudioEncoder, x => IsAudio && string.IsNullOrWhiteSpace(x));
+            yield return this._GetArgument(x => x.AudioSource, x => IsAudio && x.HasValue && x.Value != Enums.AudioSource.Auto, x => x!.Value.ToString().ToLower());
+            yield return this._GetArgument(x => x.AudioDup, IsAudio && AudioDup);
         }
     }
 }

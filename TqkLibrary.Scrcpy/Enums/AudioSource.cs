@@ -14,8 +14,12 @@
         /// </summary>
         Output,
         /// <summary>
-        /// 
+        ///
         /// </summary>
-        Mic
+        Mic,
+        /// <summary>
+        /// Capture device audio playback without muting the device (Android 13+)
+        /// </summary>
+        Playback
     }
 }
