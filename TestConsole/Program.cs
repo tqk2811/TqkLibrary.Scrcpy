@@ -42,7 +42,7 @@ string deviceId = devices.First().DeviceId;
 
 int i = 0;
 
-ScrcpyConfig config = TestConsoleExtensions.GenControlOnlyConfigure().EnableControl();
+ScrcpyConfig config = TestConsoleExtensions.GenVideoOnlyConfigure().EnableControl();
 while (true)
 {
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Start");
@@ -66,8 +66,8 @@ while (true)
             Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected, ScreenSize: {scrcpy.ScreenSize}");
             await Task.Delay(500);
 
-            await scrcpy.Control.TapAsync(500, 500, 100);
-            await Task.Delay(500);
+            //await scrcpy.Control.TapAsync(500, 500, 100);
+            //await Task.Delay(500);
             //await TapKeyboard(scrcpy, "qwertyuiop");
             scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_A);
             scrcpy.Control.Key(AndroidKeyCode.AKEYCODE_B);
@@ -78,6 +78,7 @@ while (true)
             await scrcpy.Control.KeyAsync(AndroidKeyCode.AKEYCODE_ENTER);
             await Task.Delay(3000);
             scrcpy.Control.SetClipboard("test clipboard", true);
+            scrcpy.Control.Scroll(500, 500, 1, 0, AndroidMotionEventButton.BUTTON_PRIMARY);
             await scrcpy.Control.SwipeAsync(500, 2000, 500, 500, 1000);
             string text = await scrcpy.Control.GetClipboardAsync();
             Console.WriteLine($"GetClipboardAsync: {text}");
