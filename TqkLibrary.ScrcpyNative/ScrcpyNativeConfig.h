@@ -7,6 +7,7 @@ struct ScrcpyNativeConfig {
 	bool IsUseD3D11ForUiRender;
 	bool IsUseD3D11ForConvert;
 	bool IsAudio;
+	bool IsVideo;
 	LPCWSTR AdbPath;
 	LPCWSTR ScrcpyServerPath;
 	LPCWSTR ConfigureArguments;

@@ -104,6 +104,13 @@ namespace TqkLibrary.Scrcpy.Configs
 
         internal ScrcpyNativeConfig NativeConfig()
         {
+            if (ServerConfig is null) ServerConfig = new ScrcpyServerConfig();
+            bool isVideo = ServerConfig.IsVideo;
+            bool isAudio = ServerConfig.AudioConfig?.IsAudio ?? false;
+            bool isControl = ServerConfig.IsControl;
+            if (!isVideo && !isAudio && !isControl)
+                throw new InvalidOperationException("At least one stream (video, audio, control) must be enabled.");
+
             var ConfigureArguments = ToString();
             if (GpuThreadX < 1) GpuThreadX = 1;
             if (GpuThreadY < 1) GpuThreadY = 1;
@@ -112,11 +119,12 @@ namespace TqkLibrary.Scrcpy.Configs
             return new ScrcpyNativeConfig
             {
                 HwType = HwType,
-                ForceAdbForward = ServerConfig!.TunnelForward,
-                IsControl = ServerConfig.IsControl,
+                ForceAdbForward = ServerConfig.TunnelForward,
+                IsControl = isControl,
                 IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
                 IsUseD3D11ForConvert = IsUseD3D11ForConvert,
-                IsAudio = ServerConfig.AudioConfig!.IsAudio,
+                IsAudio = isAudio,
+                IsVideo = isVideo,
                 ScrcpyServerPath = ScrcpyServerPath,
                 AdbPath = AdbPath,
                 ConfigureArguments = ConfigureArguments,

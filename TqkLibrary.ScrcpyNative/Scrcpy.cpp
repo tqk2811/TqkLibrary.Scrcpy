@@ -110,8 +110,12 @@ bool Scrcpy::GetDeviceName(BYTE* buffer, int sizeInByte) {
 	_mutex.lock();
 
 	bool result = false;
-	if (this->_scrcpyInstance != nullptr && this->_scrcpyInstance->_video != nullptr) {
-		result = this->_scrcpyInstance->_video->GetDeviceName(buffer, sizeInByte);
+	if (this->_scrcpyInstance != nullptr && !this->_scrcpyInstance->_deviceName.empty()) {
+		auto& name = this->_scrcpyInstance->_deviceName;
+		int len = min(sizeInByte - 1, (int)name.size());
+		memcpy(buffer, name.c_str(), len);
+		buffer[len] = 0;
+		result = true;
 	}
 
 	_mutex.unlock();

@@ -33,7 +33,14 @@ namespace TqkLibrary.Scrcpy.Configs
         public CameraConfig? CameraConfig { get; set; } = new CameraConfig();
 
         /// <summary>
-        /// 
+        /// Enable video stream<br></br>
+        /// Default: true
+        /// </summary>
+        [OptionName("video")]
+        public bool IsVideo { get; set; } = true;
+
+        /// <summary>
+        ///
         /// </summary>
         [OptionName("video_source")]
         public VideoSource VideoSource { get; set; } = VideoSource.Display;
@@ -95,13 +102,14 @@ namespace TqkLibrary.Scrcpy.Configs
         IEnumerable<string> _GetArguments()
         {
             yield return ScrcpyServerVersion;
+            yield return this._GetArgument(x => x.IsVideo, !IsVideo);
             yield return this._GetArgument(x => x.IsControl, !IsControl);
             yield return this._GetArgument(x => x.SCID, x => x != -1, x => $"{SCID & 0x7FFFFFFF:X4}".ToLower());
             yield return this._GetArgument(x => x.ClipboardAutosync, !ClipboardAutosync);
             yield return this._GetArgument(x => x.Cleanup, !Cleanup);
             yield return this._GetArgument(x => x.TunnelForward, TunnelForward);
             yield return this._GetArgument(x => x.MaxSize, x => x > 0);
-            yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
+            if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>
         /// 
@@ -116,20 +124,23 @@ namespace TqkLibrary.Scrcpy.Configs
                 .Concat(AndroidConfig.GetArguments())
                 .Concat(AudioConfig.GetArguments());
 
-            switch (VideoSource)
+            if (IsVideo)
             {
-                case VideoSource.Camera:
-                    if (CameraConfig is null) CameraConfig = new CameraConfig();
-                    result = result.Concat(CameraConfig.GetArguments());
-                    break;
+                switch (VideoSource)
+                {
+                    case VideoSource.Camera:
+                        if (CameraConfig is null) CameraConfig = new CameraConfig();
+                        result = result.Concat(CameraConfig.GetArguments());
+                        break;
 
-                case VideoSource.Display:
-                    if (VideoConfig is null) VideoConfig = new VideoConfig();
-                    result = result.Concat(VideoConfig.GetArguments());
-                    break;
+                    case VideoSource.Display:
+                        if (VideoConfig is null) VideoConfig = new VideoConfig();
+                        result = result.Concat(VideoConfig.GetArguments());
+                        break;
 
-                default:
-                    throw new System.NotSupportedException(VideoSource.ToString());
+                    default:
+                        throw new System.NotSupportedException(VideoSource.ToString());
+                }
             }
             return result.Where(x => !string.IsNullOrWhiteSpace(x));
         }

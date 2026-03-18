@@ -17,6 +17,7 @@ private:
 	//const
 	Scrcpy* _scrcpy{ nullptr };//don't delete
 	ScrcpyNativeConfig _nativeConfig{ };
+	std::string _deviceName;
 	
 	//need release
 	SOCKET _listenSock{ INVALID_SOCKET };

@@ -11,6 +11,7 @@ public:
 
 	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts);
 	HANDLE GetWaitHanlde();
+	void SetNotifyDisconnect(bool notify);
 
 private:
 	ScrcpyNativeConfig _nativeConfig{};
@@ -20,6 +21,7 @@ private:
 
 
 	bool _isStopped = false;
+	bool _notifyDisconnect = false;
 
 	//need delete
 	AudioDecoder* _audioDecoder{ nullptr };

@@ -45,11 +45,16 @@ INT64 Audio::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts)
 HANDLE Audio::GetWaitHanlde() {
 	return this->_mtx_waitNextFrame;
 }
+void Audio::SetNotifyDisconnect(bool notify) {
+	this->_notifyDisconnect = notify;
+}
 
 DWORD Audio::MyThreadFunction(LPVOID lpParam) {
 	Audio* audio = (Audio*)lpParam;
 	audio->threadStart();
 	audio->_isStopped = true;
+	if (audio->_notifyDisconnect)
+		audio->_scrcpy->VideoDisconnectCallback();
 	return 0;
 }
 void Audio::threadStart() {

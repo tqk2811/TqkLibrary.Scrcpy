@@ -66,12 +66,7 @@ bool Video::WaitForFirstFrame(DWORD timeout) {
 void Video::threadStart() {
 	this->_videoSock->ChangeBufferSize();
 
-	BYTE buff_deviceName[DEVICE_NAME_SIZE];
-	if (this->_videoSock->ReadAll(buff_deviceName, DEVICE_NAME_SIZE) != DEVICE_NAME_SIZE)//device name
-		return;
-	this->_deviceName = (const char*)buff_deviceName;
-
-
+	// Device name is read in ScrcpyInstance::Start() before the thread starts
 
 	AVCodecID codecId = this->_videoSock->ReadCodecId();
 	const AVCodec* codec_decoder = avcodec_find_decoder(codecId);
