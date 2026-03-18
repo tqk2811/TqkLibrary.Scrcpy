@@ -38,7 +38,12 @@ namespace TqkLibrary.Scrcpy
         /// </summary>
         public string DeviceName
         {
-            get { return GetDeviceName(); }
+            get
+            {
+                if (_handle == IntPtr.Zero)
+                    return string.Empty;
+                return GetDeviceName();
+            }
         }
 
         /// <summary>
@@ -48,6 +53,8 @@ namespace TqkLibrary.Scrcpy
         {
             get
             {
+                if (_handle == IntPtr.Zero)
+                    return false;
                 bool result = false;
                 if (countdownEvent.TryAddCount())
                 {
@@ -65,6 +72,8 @@ namespace TqkLibrary.Scrcpy
         {
             get
             {
+                if (_handle == IntPtr.Zero)
+                    return Size.Empty;
                 return GetScreenSize();
             }
         }
