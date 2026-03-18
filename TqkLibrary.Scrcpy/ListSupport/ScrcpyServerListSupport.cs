@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TqkLibrary.Scrcpy.Attributes;
+using TqkLibrary.Scrcpy.Enums;
 using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.ListSupport
