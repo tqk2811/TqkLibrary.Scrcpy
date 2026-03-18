@@ -11,7 +11,7 @@
 		<Configurations>Debug;Release</Configurations>
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<Version>2.6.1</Version>
+		<Version>2.7</Version>
 	</PropertyGroup>	
 	
 	<ItemGroup Condition="'$(Platform)' == 'x86'">
@@ -39,7 +39,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\scrcpy-server-v2.6.1.jar" Link="scrcpy-server.jar">
+		<None Include="..\scrcpy-server-v2.7.jar" Link="scrcpy-server.jar">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
