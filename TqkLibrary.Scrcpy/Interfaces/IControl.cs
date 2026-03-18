@@ -125,14 +125,6 @@ namespace TqkLibrary.Scrcpy.Interfaces
         bool SetDisplayPower(bool on);
 
         /// <summary>
-        ///
-        /// </summary>
-        /// <param name="powerMode"></param>
-        /// <returns></returns>
-        [System.Obsolete("SetScreenPowerMode is obsolete since scrcpy v3.0. Use SetDisplayPower(bool) instead.")]
-        bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode);
-
-        /// <summary>
         /// Action for Back button in android
         /// </summary>
         /// <param name="KeyEventAction"></param>

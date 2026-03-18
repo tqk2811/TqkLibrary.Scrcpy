@@ -47,7 +47,7 @@ namespace TqkLibrary.Scrcpy.Control
                 AndroidMotionEventButton buttons,
                 AndroidMotionEventButton actionButton)
         {
-            if (pressure != 1.0f && pressure != 0.0f) throw new InvalidRangeException($"{nameof(pressure)} must be 0.0f or 1.0f");
+            if (pressure < 0.0f || pressure > 1.0f) throw new InvalidRangeException($"{nameof(pressure)} must be in range 0.0f <= {nameof(pressure)} <= 1.0f");
 
             using MemoryStream stream = new MemoryStream();
             stream.WriteHostToNetworkOrder(
@@ -111,14 +111,6 @@ namespace TqkLibrary.Scrcpy.Control
         {
             using MemoryStream memoryStream = new MemoryStream();
             memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_DISPLAY_POWER, on);
-            return memoryStream.ToArray();
-        }
-
-        [System.Obsolete("SetScreenPowerMode is obsolete since scrcpy v3.0. Use SetDisplayPower(bool) instead.")]
-        internal static byte[] SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
-        {
-            using MemoryStream memoryStream = new MemoryStream();
-            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SET_DISPLAY_POWER, powerMode);
             return memoryStream.ToArray();
         }
 

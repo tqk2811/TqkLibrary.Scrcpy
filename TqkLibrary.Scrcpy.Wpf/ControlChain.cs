@@ -118,11 +118,6 @@ namespace TqkLibrary.Scrcpy.Wpf
         public bool SetDisplayPower(bool on)
             => this.ForEach(x => x.SetDisplayPower(on));
 
-#pragma warning disable CS0618
-        public bool SetScreenPowerMode(ScrcpyScreenPowerMode powerMode)
-            => this.ForEach(x => x.SetScreenPowerMode(powerMode));
-#pragma warning restore CS0618
-
         public bool OpenHardKeyboardSetting()
             => this.ForEach(x => x.OpenHardKeyboardSetting());
 
