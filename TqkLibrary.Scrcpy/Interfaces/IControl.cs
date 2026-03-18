@@ -162,9 +162,10 @@ namespace TqkLibrary.Scrcpy.Interfaces
         bool OpenHardKeyboardSetting();
 
         /// <summary>
-        /// Start an app by name on the device (scrcpy 3.0+)
+        /// Start an app by package name on the device (scrcpy 3.0+).<br></br>
+        /// Prefix name with '+' to force-stop the app before starting (e.g. "+com.example.app").
         /// </summary>
-        /// <param name="name">App name (max 255 bytes UTF-8)</param>
+        /// <param name="name">Package name (max 255 bytes UTF-8). Prefix with '+' to force-stop first.</param>
         /// <returns></returns>
         bool StartApp(string name);
 
