@@ -36,15 +36,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// 
         /// </summary>
-        public string DeviceName
-        {
-            get
-            {
-                if (_handle == IntPtr.Zero)
-                    return string.Empty;
-                return GetDeviceName();
-            }
-        }
+        public string DeviceName => _deviceName;
 
         /// <summary>
         /// 
@@ -108,7 +100,7 @@ namespace TqkLibrary.Scrcpy
             if (string.IsNullOrWhiteSpace(deviceId)) throw new ArgumentNullException(nameof(deviceId));
             this.DeviceId = deviceId;
 
-            _handle = NativeWrapper.ScrcpyAlloc(deviceId);
+            _handle = NativeWrapper.ScrcpyAlloc();
 
             Control = new ScrcpyControl(this);
             Control.OnClipboardReceived += Control_OnClipboardReceived;
@@ -173,7 +165,7 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="config"></param>
         public bool Connect(ScrcpyConfig? config = null)
@@ -186,14 +178,143 @@ namespace TqkLibrary.Scrcpy
                 lock (_physicalScreenSizeLock)
                     _physicalScreenSizeCache = null;
                 ScrcpyNativeConfig nativeConfig = config.NativeConfig();
-                result = NativeWrapper.ScrcpyConnect(_handle, ref nativeConfig);
+                result = ConnectInternal(config, ref nativeConfig);
                 this.IsClipboardAutoSync = config.ServerConfig?.ClipboardAutosync ?? false;
                 countdownEvent.Signal();
             }
             return result;
         }
 
+        private bool ConnectInternal(ScrcpyConfig config, ref ScrcpyNativeConfig nativeConfig)
+        {
+            string scidPrefix = "localabstract:scrcpy";
+            int scid = config.ServerConfig?.SCID ?? -1;
+            if (scid != -1)
+                scidPrefix += $"_{(scid & 0x7FFFFFFF):x}";
+
+            bool isVideo = nativeConfig.IsVideo;
+            bool isAudio = nativeConfig.IsAudio;
+            bool isControl = nativeConfig.IsControl;
+            int backlog = (isVideo ? 1 : 0) + (isAudio ? 1 : 0) + (isControl ? 1 : 0);
+
+            // Create TCP listener on a free port chosen by the OS
+            var listener = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+            listener.Start(backlog);
+            int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+
+            // adb setup
+            RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
+            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" /sdcard/scrcpy-server-tqk.jar") != 0)
+                return false;
+            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
+                return false;
+
+            // Start scrcpy server process
+            Process? serverProcess = StartAdbProcess(config.AdbPath,
+                $"-s {DeviceId} shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar app_process / com.genymobile.scrcpy.Server {config}");
+            if (serverProcess is null)
+                return false;
+
+            // Accept connections in order: video → audio → control
+            listener.Server.ReceiveTimeout = nativeConfig.ConnectionTimeout;
+            System.Net.Sockets.Socket? videoSock = null, audioSock = null, controlSock = null;
+            System.Net.Sockets.Socket? firstSock = null;
+            try
+            {
+                if (isVideo) { videoSock = listener.AcceptSocket(); firstSock = videoSock; }
+                if (isAudio) { audioSock = listener.AcceptSocket(); firstSock ??= audioSock; }
+                if (isControl) { controlSock = listener.AcceptSocket(); firstSock ??= controlSock; }
+            }
+            catch
+            {
+                videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
+                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+                return false;
+            }
+
+            // Read 64-byte device name from first socket
+            try
+            {
+                byte[] nameBytes = new byte[64];
+                int total = 0;
+                while (total < 64)
+                {
+                    int r = firstSock!.Receive(nameBytes, total, 64 - total, System.Net.Sockets.SocketFlags.None);
+                    if (r <= 0) throw new Exception("Connection closed while reading device name");
+                    total += r;
+                }
+                int len = Array.IndexOf(nameBytes, (byte)0);
+                _deviceName = Encoding.ASCII.GetString(nameBytes, 0, len < 0 ? nameBytes.Length : len);
+            }
+            catch
+            {
+                videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
+                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+                return false;
+            }
+
+            IntPtr videoHandle = GetSocketHandle(videoSock);
+            IntPtr audioHandle = GetSocketHandle(audioSock);
+            IntPtr controlHandle = GetSocketHandle(controlSock);
+
+            bool connected = NativeWrapper.ScrcpyConnect(_handle, ref nativeConfig, videoHandle, audioHandle, controlHandle);
+            if (connected)
+            {
+                _serverProcess = serverProcess;
+                // C# owns the sockets; closed in Stop() after ScrcpyStop shuts them down
+                _activeSockets = new[] { videoSock, audioSock, controlSock };
+            }
+            else
+            {
+                videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
+                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+            }
+            return connected;
+        }
+
+        private static IntPtr GetSocketHandle(System.Net.Sockets.Socket? socket)
+        {
+            if (socket is null) return new IntPtr(-1); // INVALID_SOCKET
+            return socket.Handle; // C# retains ownership; C++ reads only
+        }
+
+        private static int RunAdbSync(string adbPath, string arguments)
+        {
+            try
+            {
+                using var p = new Process();
+                p.StartInfo = new ProcessStartInfo(adbPath, arguments)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                p.Start();
+                p.WaitForExit();
+                return p.ExitCode;
+            }
+            catch { return -1; }
+        }
+
+        private static Process? StartAdbProcess(string adbPath, string arguments)
+        {
+            try
+            {
+                var p = new Process();
+                p.StartInfo = new ProcessStartInfo(adbPath, arguments)
+                {
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+                p.Start();
+                return p;
+            }
+            catch { return null; }
+        }
+
         private string _adbPath = "adb.exe";
+        private string _deviceName = string.Empty;
+        private Process? _serverProcess;
+        private System.Net.Sockets.Socket?[]? _activeSockets;
         private readonly object _physicalScreenSizeLock = new();
         private Size? _physicalScreenSizeCache;
 
@@ -205,7 +326,16 @@ namespace TqkLibrary.Scrcpy
         {
             if (countdownEvent.SafeTryAddCount())
             {
-                NativeWrapper.ScrcpyStop(_handle);
+                NativeWrapper.ScrcpyStop(_handle); // calls shutdown() on all sockets → threads exit
+                var sockets = Interlocked.Exchange(ref _activeSockets, null);
+                if (sockets != null)
+                    foreach (var s in sockets) s?.Close();
+                var proc = Interlocked.Exchange(ref _serverProcess, null);
+                if (proc != null)
+                {
+                    try { proc.Kill(); } catch { }
+                    proc.Dispose();
+                }
                 countdownEvent.Signal();
             }
         }
@@ -416,17 +546,6 @@ namespace TqkLibrary.Scrcpy
             return null;
         }
 
-        string GetDeviceName()
-        {
-            byte[] buffer = new byte[64];
-            if (countdownEvent.TryAddCount())
-            {
-                NativeWrapper.ScrcpyGetDeviceName(_handle, buffer, 64);
-                countdownEvent.Signal();
-            }
-            int len = Array.IndexOf(buffer, (byte)0);
-            return Encoding.ASCII.GetString(buffer, 0, len < 0 ? buffer.Length : len);
-        }
 
 
         readonly NativeUhdiOutputDelegate _uhdiOutputDelegate;

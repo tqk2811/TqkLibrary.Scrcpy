@@ -9,7 +9,7 @@ SocketWrapper::SocketWrapper(SOCKET sock) {
 }
 
 SocketWrapper::~SocketWrapper() {
-	closesocket(this->_sock);
+	// Socket is owned and closed by C# — do not closesocket here
 }
 
 int SocketWrapper::ReadAll(BYTE* buff, int length) {

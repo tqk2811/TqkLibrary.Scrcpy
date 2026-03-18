@@ -111,7 +111,6 @@ namespace TqkLibrary.Scrcpy.Configs
             if (!isVideo && !isAudio && !isControl)
                 throw new InvalidOperationException("At least one stream (video, audio, control) must be enabled.");
 
-            var ConfigureArguments = ToString();
             if (GpuThreadX < 1) GpuThreadX = 1;
             if (GpuThreadY < 1) GpuThreadY = 1;
             if (GpuThreadX > 32) GpuThreadX = 32;
@@ -119,18 +118,13 @@ namespace TqkLibrary.Scrcpy.Configs
             return new ScrcpyNativeConfig
             {
                 HwType = HwType,
-                ForceAdbForward = ServerConfig.TunnelForward,
                 IsControl = isControl,
                 IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
                 IsUseD3D11ForConvert = IsUseD3D11ForConvert,
                 IsAudio = isAudio,
                 IsVideo = isVideo,
-                ScrcpyServerPath = ScrcpyServerPath,
-                AdbPath = AdbPath,
-                ConfigureArguments = ConfigureArguments,
                 ConnectionTimeout = ConnectionTimeout,
                 Filter = Filter,
-                SCID = ServerConfig.SCID,
                 GpuThreadX = GpuThreadX,
                 GpuThreadY = GpuThreadY,
                 IsForceUiGpuFlush = IsForceUiGpuFlush,

@@ -2,7 +2,6 @@
 #define _H_Scrcpy_pch_H_
 
 #include "ScrcpyNativeConfig.h"
-#include "ProcessWrapper.h"
 #include "SocketWrapper.h"
 #include "ParsePacket.h"
 #include "FrameConventer.h"

@@ -3,15 +3,14 @@
 class Scrcpy
 {
 public:
-	Scrcpy(LPCWSTR deviceId);
+	Scrcpy();
 	~Scrcpy();
-	bool Connect(const ScrcpyNativeConfig& nativeConfig);
+	bool Connect(const ScrcpyNativeConfig& nativeConfig, SOCKET videoSock, SOCKET audioSock, SOCKET controlSock);
 	void Stop();
 
 	bool ControlCommand(const BYTE* command, const int sizeInByte);
 	bool GetScreenShot(BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize, const INT32 swsFlag);
 	bool GetScreenSize(int& w, int& h);
-	bool GetDeviceName(BYTE* buffer, int sizeInByte);
 	bool IsHaveScrcpyInstance();
 
 	bool RegisterClipboardEvent(ClipboardReceivedDelegate callback);
@@ -25,17 +24,13 @@ public:
 	void ControlClipboardAcknowledgementCallback(UINT64 sequence);
 	void UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff);
 
-	LPCWSTR GetDeviceId();
 	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime);
 	INT64 ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten);
 private:
-	//const
-	std::wstring _deviceId;
 	std::mutex _mutex;
 	std::mutex _mutex_instance;
 
 	AVFrame cache{ 0 };
-	//need release
 	ScrcpyInstance* _scrcpyInstance{ nullptr };
 	ClipboardReceivedDelegate clipboardCallback{ nullptr };
 	ClipboardAcknowledgementDelegate clipboardAcknowledgementCallback{ nullptr };

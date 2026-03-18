@@ -1,16 +1,14 @@
 #include "pch.h"
 #include "Scrcpy_pch.h"
 
-Scrcpy::Scrcpy(LPCWSTR deviceId) {
-	this->_deviceId = deviceId;
+Scrcpy::Scrcpy() {
 }
 
 Scrcpy::~Scrcpy() {
 	Stop();
 }
 
-bool Scrcpy::Connect(const ScrcpyNativeConfig& nativeConfig) {
-
+bool Scrcpy::Connect(const ScrcpyNativeConfig& nativeConfig, SOCKET videoSock, SOCKET audioSock, SOCKET controlSock) {
 	_mutex_instance.lock();
 	_mutex.lock();
 	bool result = false;
@@ -18,22 +16,18 @@ bool Scrcpy::Connect(const ScrcpyNativeConfig& nativeConfig) {
 		_mutex.unlock();
 
 		auto instance = new ScrcpyInstance(this, nativeConfig);
-		if (instance->Start()) {//long work
-
+		if (instance->Connect(videoSock, audioSock, controlSock)) {
 			_mutex.lock();
 			this->_scrcpyInstance = instance;
 			_mutex.unlock();
-
 			result = true;
 		}
-		else
-		{
+		else {
 			delete instance;
 		}
 	}
 	else _mutex.unlock();
 	_mutex_instance.unlock();
-
 	return result;
 }
 
@@ -118,21 +112,6 @@ bool Scrcpy::GetScreenSize(int& w, int& h) {
 	return result;
 }
 
-bool Scrcpy::GetDeviceName(BYTE* buffer, int sizeInByte) {
-	_mutex.lock();
-
-	bool result = false;
-	if (this->_scrcpyInstance != nullptr && !this->_scrcpyInstance->_deviceName.empty()) {
-		auto& name = this->_scrcpyInstance->_deviceName;
-		int len = min(sizeInByte - 1, (int)name.size());
-		memcpy(buffer, name.c_str(), len);
-		buffer[len] = 0;
-		result = true;
-	}
-
-	_mutex.unlock();
-	return result;
-}
 
 bool Scrcpy::IsHaveScrcpyInstance() {
 	_mutex.lock();
@@ -197,9 +176,6 @@ void Scrcpy::UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff) {
 	if (this->_uhdiOutputDelegate) this->_uhdiOutputDelegate(id, size, buff);
 }
 
-LPCWSTR Scrcpy::GetDeviceId() {
-	return this->_deviceId.c_str();
-}
 INT64 Scrcpy::ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten)
 {
 	INT64 result = -1;

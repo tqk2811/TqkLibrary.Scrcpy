@@ -18,8 +18,6 @@ typedef class Scrcpy Scrcpy;
 typedef class ScrcpyInstance ScrcpyInstance;
 
 typedef class SocketWrapper SocketWrapper;
-typedef class ProcessWrapper ProcessWrapper;
-
 typedef class Control Control;
 typedef class Video Video;
 typedef class ParsePacket ParsePacket;

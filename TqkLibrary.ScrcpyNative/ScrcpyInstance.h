@@ -6,24 +6,16 @@ class ScrcpyInstance
 public:
 	ScrcpyInstance(Scrcpy* scrcpy, const ScrcpyNativeConfig& nativeConfig);
 	~ScrcpyInstance();
-	bool Start();
-
+	bool Connect(SOCKET videoSock, SOCKET audioSock, SOCKET controlSock);
 
 private:
-	bool _wsa_isStartUp = false;
-	//function
-	DWORD RunAdbProcess(LPCWSTR argument);
-
-	//const
 	Scrcpy* _scrcpy{ nullptr };//don't delete
 	ScrcpyNativeConfig _nativeConfig{ };
-	std::string _deviceName;
 	int _physicalScreenW{ -1 };
 	int _physicalScreenH{ -1 };
-	
+	bool _wsa_isStartUp = false;
+
 	//need release
-	SOCKET _listenSock{ INVALID_SOCKET };
-	ProcessWrapper* _process{ nullptr };
 	Video* _video{ nullptr };
 	Audio* _audio{ nullptr };
 	Control* _control{ nullptr };

@@ -11,9 +11,6 @@ namespace TqkLibrary.Scrcpy.Configs
         public FFmpegAVHWDeviceType HwType;//uint8
 
         [MarshalAs(UnmanagedType.U1)]
-        public bool ForceAdbForward;
-
-        [MarshalAs(UnmanagedType.U1)]
         public bool IsControl;
 
         [MarshalAs(UnmanagedType.U1)]
@@ -28,23 +25,13 @@ namespace TqkLibrary.Scrcpy.Configs
         [MarshalAs(UnmanagedType.U1)]
         public bool IsVideo;
 
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string AdbPath;
-
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string ScrcpyServerPath;
-
-        [MarshalAs(UnmanagedType.LPWStr)]
-        public string ConfigureArguments;
-
         public int ConnectionTimeout;
 
         public D3D11Filter Filter;
 
-        public int SCID;
         public uint GpuThreadX;
         public uint GpuThreadY;
-        [MarshalAs(UnmanagedType.U1)]
+        [MarshalAs(UnmanagedType.Bool)]
         public bool IsForceUiGpuFlush;
     }
 }

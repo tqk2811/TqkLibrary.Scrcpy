@@ -189,7 +189,6 @@
     <ClInclude Include="ParsePacket.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PixelShaderNv12ToImage32Class.h" />
-    <ClInclude Include="ProcessWrapper.h" />
     <ClInclude Include="RenderTextureClass.h" />
     <ClInclude Include="RenderTextureSurfaceClass.h" />
     <ClInclude Include="Scrcpy.h" />
@@ -219,7 +218,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PixelShaderNv12ToImage32Class.cpp" />
-    <ClCompile Include="ProcessWrapper.cpp" />
     <ClCompile Include="RenderTextureClass.cpp" />
     <ClCompile Include="RenderTextureSurfaceClass.cpp" />
     <ClCompile Include="Scrcpy.cpp" />

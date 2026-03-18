@@ -6,15 +6,15 @@ BYTE FFmpegHWSupport(BYTE bHWSupport)
 {
 	return (BYTE)av_hwdevice_iterate_types((AVHWDeviceType)bHWSupport);
 }
-Scrcpy* ScrcpyAlloc(LPCWSTR deviceId) {
-	return new Scrcpy(deviceId);
+Scrcpy* ScrcpyAlloc() {
+	return new Scrcpy();
 }
 void ScrcpyFree(Scrcpy* scrcpy) {
 	if (scrcpy != nullptr) delete scrcpy;
 }
-bool ScrcpyConnect(Scrcpy* scrcpy, const ScrcpyNativeConfig& nativeConfig) {
+bool ScrcpyConnect(Scrcpy* scrcpy, const ScrcpyNativeConfig& nativeConfig, SOCKET videoSock, SOCKET audioSock, SOCKET controlSock) {
 	if (scrcpy == nullptr) return false;
-	return scrcpy->Connect(nativeConfig);
+	return scrcpy->Connect(nativeConfig, videoSock, audioSock, controlSock);
 }
 void ScrcpyStop(Scrcpy* scrcpy) {
 	if (scrcpy == nullptr) return;
@@ -35,10 +35,6 @@ bool ScrcpyControlCommand(Scrcpy* scrcpy, const BYTE* command, const int sizeInB
 bool ScrcpyGetScreenShot(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte, const int w, const int h, const int lineSize, const INT32 swsFlag) {
 	if (scrcpy == nullptr || buffer == nullptr) return false;
 	return scrcpy->GetScreenShot(buffer, sizeInByte, w, h, lineSize, swsFlag);
-}
-bool ScrcpyGetDeviceName(Scrcpy* scrcpy, BYTE* buffer, const int sizeInByte) {
-	if (scrcpy == nullptr || buffer == nullptr) return false;
-	return scrcpy->GetDeviceName(buffer, sizeInByte);
 }
 INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime) {
 	if (scrcpy == nullptr || pFrame == nullptr) return -1;
