@@ -26,6 +26,7 @@ namespace TestRenderWpf
             CollapsePanelCommand = new BaseCommand(_CollapsePanelCommand);
             RotateDeviceCommand = new BaseCommand(_RotateDeviceCommand);
             OpenHardKeyboardSettingCommand = new BaseCommand(_OpenHardKeyboardSettingCommand);
+            ResetVideoCommand = new BaseCommand(() => Control?.ResetVideo());
         }
 
         IControl? _control;
@@ -127,5 +128,7 @@ namespace TestRenderWpf
         {
             Control?.OpenHardKeyboardSetting();
         }
+
+        public BaseCommand ResetVideoCommand { get; }
     }
 }

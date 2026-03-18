@@ -27,6 +27,7 @@
             <Button Content="CollapsePanel" Command="{Binding CollapsePanelCommand}"/>
             <Button Content="RotateDevice" Command="{Binding RotateDeviceCommand}"/>
             <Button Content="OpenHardKeyboardSetting" Command="{Binding OpenHardKeyboardSettingCommand}"/>
+            <Button Content="ResetVideo" Command="{Binding ResetVideoCommand}"/>
         </StackPanel>
         <scrcpy:ScrcpyControl Grid.Column="1"
                               IsControl="{Binding IsControl}" 
