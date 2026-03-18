@@ -54,13 +54,8 @@ DWORD WINAPI Video::MyThreadFunction(LPVOID lpParam) {
 	Video* video = (Video*)lpParam;
 	video->threadStart();
 	video->_isStopped = true;
-	if (video->_notifyDisconnect && !video->_isStopMainLoop)
-		video->_scrcpy->VideoDisconnectCallback();
+	video->_scrcpy->FireDisconnectCallback(ScrcpyDisconnectSource_Video);
 	return 0;
-}
-
-void Video::SetNotifyDisconnect(bool notify) {
-	this->_notifyDisconnect = notify;
 }
 
 bool Video::WaitForFirstFrame(DWORD timeout) {

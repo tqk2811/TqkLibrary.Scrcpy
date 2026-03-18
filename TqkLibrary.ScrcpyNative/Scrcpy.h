@@ -19,7 +19,7 @@ public:
 	bool RegisterUhdiOutputEvent(UhdiOutputDelegate uhdiOutputDelegate);
 
 	bool Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
-	void VideoDisconnectCallback();
+	void FireDisconnectCallback(ScrcpyDisconnectSource source);
 	void ControlClipboardCallback(BYTE* buffer, int length);
 	void ControlClipboardAcknowledgementCallback(UINT64 sequence);
 	void UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff);

@@ -42,6 +42,7 @@ typedef class AudioDecoder AudioDecoder;
 
 #endif //TQKLIBRARYSCRCPYNATIVE_EXPORTS
 
+#include "ScrcpyDisconnectSource.h"
 #include "Exports.h"
 
 #endif //ScrcpyNativePCH_H

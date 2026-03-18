@@ -83,7 +83,7 @@ namespace TqkLibrary.Scrcpy
         /// 
         /// </summary>
 
-        public event Action? OnDisconnect;
+        public event Action<ScrcpyDisconnectSource>? OnDisconnect;
 
 
 
@@ -443,12 +443,12 @@ namespace TqkLibrary.Scrcpy
 
 
         readonly NativeOnDisconnectDelegate NativeOnDisconnectDelegate;
-        void onDisconnect()
+        void onDisconnect(ScrcpyDisconnectSource source)
         {
             ThreadPool.QueueUserWorkItem(o =>
             {
                 Stop();
-                OnDisconnect?.Invoke();
+                OnDisconnect?.Invoke(source);
             });
         }
 

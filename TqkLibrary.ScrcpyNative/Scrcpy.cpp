@@ -158,8 +158,8 @@ bool Scrcpy::RegisterUhdiOutputEvent(UhdiOutputDelegate uhdiOutputDelegate) {
 	this->_uhdiOutputDelegate = uhdiOutputDelegate;
 	return true;
 }
-void Scrcpy::VideoDisconnectCallback() {
-	if (this->disconnectCallback) this->disconnectCallback();
+void Scrcpy::FireDisconnectCallback(ScrcpyDisconnectSource source) {
+	if (this->disconnectCallback) this->disconnectCallback(source);
 }
 
 void Scrcpy::ControlClipboardCallback(BYTE* buffer, int length) {

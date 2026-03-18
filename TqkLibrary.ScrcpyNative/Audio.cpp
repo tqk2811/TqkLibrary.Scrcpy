@@ -50,16 +50,11 @@ INT64 Audio::ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, I
 HANDLE Audio::GetWaitHanlde() {
 	return this->_mtx_waitNextFrame;
 }
-void Audio::SetNotifyDisconnect(bool notify) {
-	this->_notifyDisconnect = notify;
-}
-
 DWORD Audio::MyThreadFunction(LPVOID lpParam) {
 	Audio* audio = (Audio*)lpParam;
 	audio->threadStart();
 	audio->_isStopped = true;
-	if (audio->_notifyDisconnect)
-		audio->_scrcpy->VideoDisconnectCallback();
+	audio->_scrcpy->FireDisconnectCallback(ScrcpyDisconnectSource_Audio);
 	return 0;
 }
 void Audio::threadStart() {

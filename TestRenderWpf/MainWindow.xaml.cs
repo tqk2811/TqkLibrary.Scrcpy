@@ -121,7 +121,7 @@ namespace TestRenderWpf
             }
         }
 
-        private async void Scrcpy_OnDisconnect()
+        private async void Scrcpy_OnDisconnect(ScrcpyDisconnectSource disconnectSource)
         {
             if (windowClosed) return;
             await adb!.WaitFor(WaitForType.Device).ExecuteAsync();

@@ -12,17 +12,12 @@ public:
 	INT64 ReadAudioFrame(AVFrame* pFrame, INT64 last_pts);
 	INT64 ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, AVSampleFormat outSampleFmt, INT64 last_pts, INT32* outBytesWritten);
 	HANDLE GetWaitHanlde();
-	void SetNotifyDisconnect(bool notify);
 
 private:
 	ScrcpyNativeConfig _nativeConfig{};
 	Scrcpy* _scrcpy;
 
-
-
-
 	bool _isStopped = false;
-	bool _notifyDisconnect = false;
 
 	//need delete
 	AudioDecoder* _audioDecoder{ nullptr };

@@ -35,14 +35,10 @@ void Control::Stop() {
 	if (this->_threadHandle != INVALID_HANDLE_VALUE)
 		WaitForSingleObject(this->_threadHandle, INFINITE);
 }
-void Control::SetNotifyDisconnect(bool notify) {
-	this->_notifyDisconnect = notify;
-}
 DWORD WINAPI Control::MyThreadFunction(LPVOID lpParam) {
 	Control* control = (Control*)lpParam;
 	control->threadStart();
-	if (control->_notifyDisconnect)
-		control->scrcpy->VideoDisconnectCallback();
+	control->scrcpy->FireDisconnectCallback(ScrcpyDisconnectSource_Control);
 	return 0;
 }
 bool Control::ControlCommand(const BYTE* command, const int sizeInByte) {

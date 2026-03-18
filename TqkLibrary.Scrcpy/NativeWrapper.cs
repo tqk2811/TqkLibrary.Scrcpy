@@ -11,7 +11,7 @@ using TqkLibrary.Scrcpy.Enums;
 
 namespace TqkLibrary.Scrcpy
 {
-    internal delegate void NativeOnDisconnectDelegate();
+    internal delegate void NativeOnDisconnectDelegate(ScrcpyDisconnectSource source);
     internal delegate void NativeOnClipboardReceivedDelegate(IntPtr intPtr, int length);
     internal delegate void NativeOnClipboardAcknowledgementDelegate(long length);
     internal delegate void NativeUhdiOutputDelegate(UInt16 id, UInt16 size, IntPtr buff);

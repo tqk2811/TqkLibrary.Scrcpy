@@ -19,7 +19,7 @@ ScrcpyNativeExport bool D3DImageViewRender(RenderTextureSurfaceClass* renderSurf
 
 typedef bool (*ClipboardReceivedDelegate)(BYTE* buffer, int length);
 typedef bool (*ClipboardAcknowledgementDelegate)(UINT64 sequence);
-typedef bool (*OnDisconnectDelegate)();
+typedef bool (*OnDisconnectDelegate)(ScrcpyDisconnectSource source);
 typedef bool (*UhdiOutputDelegate)(UINT16 id, UINT16 size, const BYTE* buff);
 
 ScrcpyNativeExport bool RegisterClipboardEvent(Scrcpy* scrcpy, ClipboardReceivedDelegate clipboardDelegate);
