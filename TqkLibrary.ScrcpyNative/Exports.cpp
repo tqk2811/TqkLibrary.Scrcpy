@@ -44,6 +44,10 @@ INT64 ScrcpyReadAudioFrame(Scrcpy* scrcpy, AVFrame* pFrame, INT64 last_pts, DWOR
 	if (scrcpy == nullptr || pFrame == nullptr) return -1;
 	return scrcpy->ReadAudioFrame(pFrame, last_pts, waitFrameTime);
 }
+INT64 ScrcpyReadAudioRaw(Scrcpy* scrcpy, BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten) {
+	if (scrcpy == nullptr || buffer == nullptr || outBytesWritten == nullptr) return -1;
+	return scrcpy->ReadAudioRaw(buffer, bufferSize, outNbChannels, outSampleRate, outSampleFmt, last_pts, waitFrameTime, outBytesWritten);
+}
 
 RenderTextureSurfaceClass* D3DImageViewAlloc() {
 	return new RenderTextureSurfaceClass();

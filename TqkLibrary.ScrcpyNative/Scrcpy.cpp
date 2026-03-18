@@ -196,6 +196,39 @@ void Scrcpy::UhdiOutputCallback(UINT16 id, UINT16 size, const BYTE* buff) {
 LPCWSTR Scrcpy::GetDeviceId() {
 	return this->_deviceId.c_str();
 }
+INT64 Scrcpy::ReadAudioRaw(BYTE* buffer, INT32 bufferSize, INT32 outNbChannels, INT32 outSampleRate, INT32 outSampleFmt, INT64 last_pts, DWORD waitFrameTime, INT32* outBytesWritten)
+{
+	INT64 result = -1;
+	HANDLE waitHandle = INVALID_HANDLE_VALUE;
+
+	_mutex.lock();
+	if (this->_scrcpyInstance != nullptr &&
+		this->_scrcpyInstance->_audio != nullptr)
+	{
+		waitHandle = this->_scrcpyInstance->_audio->GetWaitHanlde();
+		ResetEvent(waitHandle);
+		result = this->_scrcpyInstance->_audio->ReadAudioRaw(buffer, bufferSize, outNbChannels, outSampleRate, (AVSampleFormat)outSampleFmt, last_pts, outBytesWritten);
+	}
+	_mutex.unlock();
+
+	if (result < 0 && waitFrameTime > 0 && waitHandle != INVALID_HANDLE_VALUE)
+	{
+		auto ret = WaitForSingleObject(waitHandle, waitFrameTime);
+		if (ret == WAIT_OBJECT_0)
+		{
+			_mutex.lock();
+			if (this->_scrcpyInstance != nullptr &&
+				this->_scrcpyInstance->_audio != nullptr)
+			{
+				result = this->_scrcpyInstance->_audio->ReadAudioRaw(buffer, bufferSize, outNbChannels, outSampleRate, (AVSampleFormat)outSampleFmt, last_pts, outBytesWritten);
+			}
+			_mutex.unlock();
+		}
+	}
+
+	return result;
+}
+
 INT64 Scrcpy::ReadAudioFrame(AVFrame* pFrame, INT64 last_pts, DWORD waitFrameTime)
 {
 	INT64 result = -1;
