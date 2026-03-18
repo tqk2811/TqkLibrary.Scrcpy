@@ -539,6 +539,8 @@ namespace TqkLibrary.Scrcpy
         /// <returns></returns>
         public static async Task<string> GetClipboardAsync(this IControl control, CopyKey copyKey = CopyKey.None, CancellationToken cancellationToken = default)
         {
+            if (control.Scrcpy.IsClipboardAutoSync)
+                return control.Scrcpy.LastClipboard;
             TaskCompletionSource<string> taskCompletionSource = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
             OnDataReceived<string> dataDelegate = (control, text) => taskCompletionSource.TrySetResult(text);
             try

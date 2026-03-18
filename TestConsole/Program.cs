@@ -40,26 +40,8 @@ string deviceId = devices.First().DeviceId;
 
 
 int i = 0;
-ScrcpyConfig config = new ScrcpyConfig()
-{
-    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-    IsUseD3D11ForUiRender = true,
-    ServerConfig = new ScrcpyServerConfig()
-    {
-        IsControl = true,
-        AudioConfig = new AudioConfig()
-        {
-            IsAudio = true,
-        },
-        VideoConfig = new VideoConfig()
-        {
-            MaxFps = 24,
-        },
-        ClipboardAutosync = false,
-        SCID = new Random(DateTime.Now.Millisecond).Next()
-    },
-    ConnectionTimeout = 10000,
-};
+
+ScrcpyConfig config = TestConsoleExtensions.GenControlOnlyConfigure().EnableControl();
 while (true)
 {
     Console.WriteLine($"{DateTime.Now:mm:ss.fff} Start");
@@ -78,9 +60,10 @@ while (true)
         Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connect");
         if (scrcpy.Connect(config))
         {
-            Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected");
-            //await Task.Delay(3000);
-
+            if (!config.ServerConfig.IsVideo)
+                await scrcpy.RefreshScreenSizeFromAdbAsync();
+            Console.WriteLine($"{DateTime.Now:mm:ss.fff} Connected, ScreenSize: {scrcpy.ScreenSize}");
+            await Task.Delay(500);
 
             //await TapKeyboard(scrcpy, "qwertyuiop");
             //await Task.Delay(500);
