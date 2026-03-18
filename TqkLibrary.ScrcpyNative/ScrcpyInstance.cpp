@@ -278,6 +278,8 @@ bool ScrcpyInstance::Start() {
 
 	if (this->_nativeConfig.IsControl) {
 		this->_control = new Control(this->_scrcpy, control_sock);
+		if (!this->_nativeConfig.IsVideo && !this->_nativeConfig.IsAudio)
+			this->_control->SetNotifyDisconnect(true); // control is primary stream for disconnect when no video and no audio
 	}
 
 

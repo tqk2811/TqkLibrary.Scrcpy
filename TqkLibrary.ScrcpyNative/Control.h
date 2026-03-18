@@ -10,7 +10,9 @@ public:
 	void Stop();
 
 	bool ControlCommand(const BYTE* command, const int sizeInByte);
+	void SetNotifyDisconnect(bool notify);
 private:
+	bool _notifyDisconnect = false;
 	//no need delete
 	Scrcpy* scrcpy{ nullptr };
 
