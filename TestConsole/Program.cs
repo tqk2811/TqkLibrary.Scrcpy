@@ -5,6 +5,7 @@ using TqkLibrary.Scrcpy.Interfaces;
 using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.Enums;
 using TqkLibrary.Scrcpy.ListSupport;
+using TestConsole;
 
 var env = System.Environment.GetEnvironmentVariables();
 var h = 1080 % 16;

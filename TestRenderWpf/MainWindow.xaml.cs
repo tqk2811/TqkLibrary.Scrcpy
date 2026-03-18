@@ -55,8 +55,6 @@ namespace TestRenderWpf
                 {
 #if AudioTest
                     IsAudio = true,
-                    AudioSource = AudioSource.Output,
-                    AudioDup = false,
 #endif
                 },
             },
