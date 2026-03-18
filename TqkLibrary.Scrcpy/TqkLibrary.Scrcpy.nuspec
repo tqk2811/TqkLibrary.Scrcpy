@@ -20,7 +20,7 @@
 				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
 				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
 			</group>
-			<group targetFramework="net7.0-windows7.0">
+			<group targetFramework="net8.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
 				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
 				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
