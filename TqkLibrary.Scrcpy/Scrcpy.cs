@@ -183,6 +183,9 @@ namespace TqkLibrary.Scrcpy
         private bool ConnectInternal(ScrcpyConfig config, ref ScrcpyNativeConfig nativeConfig)
         {
             string scidPrefix = "localabstract:scrcpy";
+            string ScrcpyServerAndroidPath = config.ServerConfig?.ScrcpyServerAndroidPath ?? Constant.ScrcpyServerAndroidPath;
+            ScrcpyServerAndroidPath = ScrcpyServerAndroidPath.Replace("{ver}", Constant.ScrcpyServerVersion);
+
             int scid = config.ServerConfig?.SCID ?? -1;
             if (scid != -1)
                 scidPrefix += $"_{(scid & 0x7FFFFFFF):x}";
@@ -199,14 +202,14 @@ namespace TqkLibrary.Scrcpy
 
             // adb setup
             RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
-            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" /sdcard/scrcpy-server-tqk.jar") != 0)
+            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" {ScrcpyServerAndroidPath}") != 0)
                 return false;
             if (RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
                 return false;
 
             // Start scrcpy server process
             Process? serverProcess = StartAdbProcess(config.AdbPath,
-                $"-s {DeviceId} shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar app_process / com.genymobile.scrcpy.Server {config}");
+                $"-s {DeviceId} shell CLASSPATH={ScrcpyServerAndroidPath} app_process / com.genymobile.scrcpy.Server {config}");
             if (serverProcess is null)
                 return false;
 
@@ -223,7 +226,8 @@ namespace TqkLibrary.Scrcpy
             catch
             {
                 videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
-                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+                try { serverProcess.Kill(); } catch { }
+                serverProcess.Dispose();
                 return false;
             }
 
@@ -244,7 +248,8 @@ namespace TqkLibrary.Scrcpy
             catch
             {
                 videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
-                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+                try { serverProcess.Kill(); } catch { }
+                serverProcess.Dispose();
                 return false;
             }
 
@@ -262,7 +267,8 @@ namespace TqkLibrary.Scrcpy
             else
             {
                 videoSock?.Close(); audioSock?.Close(); controlSock?.Close();
-                try { serverProcess.Kill(); } catch { } serverProcess.Dispose();
+                try { serverProcess.Kill(); } catch { }
+                serverProcess.Dispose();
             }
             return connected;
         }
