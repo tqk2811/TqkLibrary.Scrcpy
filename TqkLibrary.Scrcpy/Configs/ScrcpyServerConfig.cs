@@ -117,9 +117,17 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public bool VdSystemDecorations { get; set; } = true;
 
+        /// <summary>
+        /// Destroy the content (move tasks to the main display) when the virtual display is closed.<br></br>
+        /// Set to false to pass vd_destroy_content=false (--no-vd-destroy-content).<br></br>
+        /// Default: true (omit)<br></br>
+        /// scrcpy 3.1
+        /// </summary>
+        public bool VdDestroyContent { get; set; } = true;
+
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string ScrcpyServerVersion { get; } = Constant.ScrcpyServerVersion;
 
@@ -142,6 +150,8 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.NewDisplay, x => !string.IsNullOrWhiteSpace(x));
             if (!VdSystemDecorations)
                 yield return "vd_system_decorations=false";
+            if (!VdDestroyContent)
+                yield return "vd_destroy_content=false";
             if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>
