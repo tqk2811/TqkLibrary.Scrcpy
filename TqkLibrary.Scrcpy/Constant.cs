@@ -9,5 +9,7 @@ namespace TqkLibrary.Scrcpy
     internal static class Constant
     {
         public const string ScrcpyServerVersion = "2.5";
+
+        public const string ScrcpyServerAndroidPath = "/sdcard/scrcpy-server-tqk-{ver}.jar";
     }
 }
