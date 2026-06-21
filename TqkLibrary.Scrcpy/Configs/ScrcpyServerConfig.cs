@@ -119,9 +119,14 @@ namespace TqkLibrary.Scrcpy.Configs
 
 
         /// <summary>
-        /// 2.0
+        /// 
         /// </summary>
         public string ScrcpyServerVersion { get; } = Constant.ScrcpyServerVersion;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string ScrcpyServerAndroidPath { get; set; } = Constant.ScrcpyServerAndroidPath;
 
         IEnumerable<string> _GetArguments()
         {
