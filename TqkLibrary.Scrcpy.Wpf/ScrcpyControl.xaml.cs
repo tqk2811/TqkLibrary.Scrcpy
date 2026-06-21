@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using TqkLibrary.Scrcpy;
 using TqkLibrary.Scrcpy.Control;
 using TqkLibrary.Scrcpy.Enums;
@@ -136,6 +137,23 @@ namespace TqkLibrary.Scrcpy.Wpf
         System.Drawing.Rectangle drawRect;
         double rateVideoAndDraw;
         TimeSpan lastRender;
+
+        /// <summary>
+        /// Debounce interval to defer D3D surface re-allocation during window resize.
+        /// While the user drags the window, WPF will uniformly stretch the existing
+        /// D3D11Image; only after the size has been stable for this interval do we
+        /// actually re-create the GPU surface at the new pixel size. This avoids the
+        /// per-pixel flash caused by SurfaceQueueInteropHelper.CleanupSurfaces.
+        /// </summary>
+        public TimeSpan ResizeDebounceInterval { get; set; } = TimeSpan.FromMilliseconds(120);
+
+        DispatcherTimer? _resizeDebounceTimer;
+        int _pendingPixelWidth;
+        int _pendingPixelHeight;
+        bool _hasPendingPixelSize;
+        int _appliedPixelWidth;
+        int _appliedPixelHeight;
+
         public ScrcpyControl()
         {
             InitializeComponent();
@@ -183,11 +201,6 @@ namespace TqkLibrary.Scrcpy.Wpf
                 (int)((base_surfHeight - surfHeight) / 2),
                 (int)surfWidth,
                 (int)surfHeight);
-            // Notify the D3D11Image of the pixel size desired for the DirectX rendering.
-            // The D3DRendering component will determine the size of the new surface it is given, at that point.
-            InteropImage?.SetPixelSize(drawRect.Width, drawRect.Height);
-
-
 
             // Stop rendering if the D3DImage isn't visible - currently just if width or height is 0
             // TODO: more optimizations possible (scrolled off screen, etc...)
@@ -198,13 +211,82 @@ namespace TqkLibrary.Scrcpy.Wpf
                 lastVisible = isVisible;
                 if (lastVisible)
                 {
-                    RenderSizeChanged?.Invoke(this, this.RenderVideoSize);
                     CompositionTarget.Rendering += CompositionTarget_Rendering;
                 }
                 else
                 {
                     CompositionTarget.Rendering -= CompositionTarget_Rendering;
                 }
+            }
+
+            // Defer the actual D3D surface re-allocation. While the user is actively
+            // resizing the window we let WPF stretch the existing D3D11Image (Image
+            // control has Uniform stretch). Only re-create the GPU surface once the
+            // size has stayed stable for ResizeDebounceInterval.
+            SchedulePixelSizeUpdate(drawRect.Width, drawRect.Height);
+        }
+
+        void SchedulePixelSizeUpdate(int pixelWidth, int pixelHeight)
+        {
+            // Skip if we're already at this size and there's nothing pending.
+            if (!_hasPendingPixelSize
+                && pixelWidth == _appliedPixelWidth
+                && pixelHeight == _appliedPixelHeight)
+            {
+                return;
+            }
+
+            _pendingPixelWidth = pixelWidth;
+            _pendingPixelHeight = pixelHeight;
+            _hasPendingPixelSize = true;
+
+            // First time: initial sizing should be immediate so the first frame is sharp.
+            if (_appliedPixelWidth == 0 && _appliedPixelHeight == 0)
+            {
+                ApplyPendingPixelSize();
+                return;
+            }
+
+            if (_resizeDebounceTimer == null)
+            {
+                _resizeDebounceTimer = new DispatcherTimer(DispatcherPriority.Render, Dispatcher)
+                {
+                    Interval = ResizeDebounceInterval
+                };
+                _resizeDebounceTimer.Tick += ResizeDebounceTimer_Tick;
+            }
+            else
+            {
+                _resizeDebounceTimer.Interval = ResizeDebounceInterval;
+            }
+            _resizeDebounceTimer.Stop();
+            _resizeDebounceTimer.Start();
+        }
+
+        void ResizeDebounceTimer_Tick(object? sender, EventArgs e)
+        {
+            _resizeDebounceTimer?.Stop();
+            ApplyPendingPixelSize();
+        }
+
+        void ApplyPendingPixelSize()
+        {
+            if (!_hasPendingPixelSize) return;
+            _hasPendingPixelSize = false;
+
+            if (_pendingPixelWidth == _appliedPixelWidth && _pendingPixelHeight == _appliedPixelHeight)
+                return;
+
+            _appliedPixelWidth = _pendingPixelWidth;
+            _appliedPixelHeight = _pendingPixelHeight;
+
+            // Notify the D3D11Image of the pixel size desired for the DirectX rendering.
+            // The D3DRendering component will determine the size of the new surface it is given, at that point.
+            InteropImage?.SetPixelSize(_appliedPixelWidth, _appliedPixelHeight);
+
+            if (lastVisible)
+            {
+                RenderSizeChanged?.Invoke(this, this.RenderVideoSize);
             }
         }
 
