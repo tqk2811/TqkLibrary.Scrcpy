@@ -125,6 +125,14 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public bool VdDestroyContent { get; set; } = true;
 
+        /// <summary>
+        /// Set the policy for the IME (input method, e.g. soft keyboard) on the captured display.<br></br>
+        /// Default: null (omit — server default)<br></br>
+        /// scrcpy 3.2 (--display-ime-policy)
+        /// </summary>
+        [OptionName("display_ime_policy")]
+        public DisplayImePolicy? DisplayImePolicy { get; set; }
+
 
         /// <summary>
         ///
@@ -152,6 +160,8 @@ namespace TqkLibrary.Scrcpy.Configs
                 yield return "vd_system_decorations=false";
             if (!VdDestroyContent)
                 yield return "vd_destroy_content=false";
+            if (DisplayImePolicy.HasValue)
+                yield return $"display_ime_policy={DisplayImePolicy.Value.ToString().ToLower()}";
             if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>
