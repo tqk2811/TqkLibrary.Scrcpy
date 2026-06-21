@@ -328,6 +328,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="version.generated.h" />
     <ResourceCompile Include="Version.rc" />
   </ItemGroup>
   <ItemGroup>
@@ -346,5 +347,8 @@
     <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x64.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x64.targets'))" />
     <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.props'))" />
     <Error Condition="!Exists('..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TqkLibrary.FFmpeg.Native.Win.x86.8.0.1.48\build\native\TqkLibrary.FFmpeg.Native.Win.x86.targets'))" />
+  </Target>
+  <Target Name="EnsureVersionHeader" BeforeTargets="ResourceCompile">
+    <WriteLinesToFile Condition="!Exists('$(MSBuildProjectDirectory)\version.generated.h')" File="$(MSBuildProjectDirectory)\version.generated.h" Overwrite="true" Lines="#pragma once;#define VER_FILE_MAJOR    0;#define VER_FILE_MINOR    0;#define VER_FILE_BUILD    0;#define VER_FILE_REVISION 0;#define VER_FILEVERSION_STR    &quot;0.0.0.0&quot;;#define VER_PRODUCTVERSION_STR &quot;0.0.0&quot;" />
   </Target>
 </Project>

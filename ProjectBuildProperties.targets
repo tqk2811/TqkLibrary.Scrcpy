@@ -1,0 +1,46 @@
+<Project>
+	<!-- Emit XML doc (IntelliSense); CS1591 = missing doc comment. -->
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);CS1591</NoWarn>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<Deterministic>true</Deterministic>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<EmbedAllSources>true</EmbedAllSources>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="Exists('$(MSBuildProjectDirectory)\$(MSBuildProjectName).nuspec')">
+		<NuspecFile>$(MSBuildProjectName).nuspec</NuspecFile>
+		<EnableGitVersion>true</EnableGitVersion>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(EnableGitVersion)' == 'true'">
+		<DisableGitVersionTask>true</DisableGitVersionTask>
+		<WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
+		<GenerateGitVersionInformation>false</GenerateGitVersionInformation>
+		<UpdateAssemblyInfo>false</UpdateAssemblyInfo>
+		<GenerateGitVersionFiles>false</GenerateGitVersionFiles>
+		<Version>0.0.0-debug</Version>
+		<PackageVersion>0.0.0-debug</PackageVersion>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(EnableGitVersion)' == 'true'">
+		<PackageReference Include="GitVersion.MsBuild" Version="6.7.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<Target Name="SetVersionFromGitVersion" AfterTargets="GetVersion" Condition="'$(EnableGitVersion)' == 'true' and '$(DisableGitVersionTask)' != 'true'">
+		<PropertyGroup>
+			<Version>$(GitVersion_Major).$(GitVersion_Minor).$(GitVersion_CommitsSinceVersionSource)</Version>
+			<PackageVersion>$(Version)</PackageVersion>
+			<AssemblyVersion>$(GitVersion_Major).$(GitVersion_Minor).0.0</AssemblyVersion>
+			<FileVersion>$(GitVersion_Major).$(GitVersion_Minor).$(GitVersion_CommitsSinceVersionSource).0</FileVersion>
+			<InformationalVersion>$(Version)</InformationalVersion>
+			<NuspecProperties>id=$(MSBuildProjectName);version=$(Version)</NuspecProperties>
+		</PropertyGroup>
+	</Target>
+</Project>

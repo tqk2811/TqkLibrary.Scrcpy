@@ -1,0 +1,13 @@
+deployment-mode: ManualDeployment
+tag-prefix: '[vV]?'
+branches:
+  master:
+    regex: ^master$
+    increment: None
+  main:
+    regex: ^main$
+    increment: None
+  version-branch:
+    regex: .*
+    increment: None
+    source-branches: []

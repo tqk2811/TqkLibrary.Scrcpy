@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<Import Project="..\ProjectBuildProperties.targets" />
+
 	<PropertyGroup>
 		<TargetFrameworks>net462;net6.0-windows7.0;net8.0-windows7.0</TargetFrameworks>
 		<LangVersion>10.0</LangVersion>
@@ -11,8 +13,7 @@
 		<Configurations>Debug;Release</Configurations>
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<Version>2.6.1</Version>
-	</PropertyGroup>	
+	</PropertyGroup>
 	
 	<ItemGroup Condition="'$(Platform)' == 'x86'">
 		<None Include="..\x86\$(Configuration)\TqkLibrary.ScrcpyNative.dll" Link="runtimes\win-x86\native\TqkLibrary.ScrcpyNative.dll">
