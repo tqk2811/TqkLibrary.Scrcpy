@@ -133,6 +133,14 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("display_ime_policy")]
         public DisplayImePolicy? DisplayImePolicy { get; set; }
 
+        /// <summary>
+        /// Keep the device "active" (prevent the captured display from going idle/dimming) while scrcpy is running.<br></br>
+        /// Default: false (omit)<br></br>
+        /// scrcpy 4.0 (--keep-active)
+        /// </summary>
+        [OptionName("keep_active")]
+        public bool KeepActive { get; set; } = false;
+
 
         /// <summary>
         ///
@@ -162,6 +170,7 @@ namespace TqkLibrary.Scrcpy.Configs
                 yield return "vd_destroy_content=false";
             if (DisplayImePolicy.HasValue)
                 yield return $"display_ime_policy={DisplayImePolicy.Value.ToString().ToLower()}";
+            yield return this._GetArgument(x => x.KeepActive, KeepActive);
             if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>

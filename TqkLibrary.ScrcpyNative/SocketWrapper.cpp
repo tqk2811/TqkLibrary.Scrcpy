@@ -52,19 +52,42 @@ bool SocketWrapper::ChangeBufferSize(int sizeInByte) {
 
 bool SocketWrapper::ReadPackage(AVPacket* packet) {
 
-#define SC_PACKET_FLAG_CONFIG    (UINT64_C(1) << 63)
-#define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 62)
+	// scrcpy v4.0 wire format (ref app/src/demuxer.c @ v4.0).
+	// A 12-byte meta header precedes each packet. The MSB of byte 0 is the
+	// session/media discriminator:
+	//   header[0] & 0x80 == 1 -> SESSION packet (video only): 12-byte header,
+	//                            NO payload (carries width/height/client_resized).
+	//                            The decoder re-derives the frame size from the
+	//                            bitstream, so it is safe to skip it here.
+	//   header[0] & 0x80 == 0 -> MEDIA packet: 12-byte header + <len> payload.
+	// Flag bits moved vs v3.x: CONFIG 1<<63 -> 1<<62, KEY 1<<62 -> 1<<61.
+#define SC_PACKET_FLAG_CONFIG    (UINT64_C(1) << 62)
+#define SC_PACKET_FLAG_KEY_FRAME (UINT64_C(1) << 61)
 #define SC_PACKET_PTS_MASK (SC_PACKET_FLAG_KEY_FRAME - 1)
 
 	if (!packet)
 		return false;
 
 	BYTE header_buffer[HEADER_SIZE];
-	if (this->ReadAll(header_buffer, HEADER_SIZE) != HEADER_SIZE)
-		return false;
+
+	// Skip any session header(s) until a media header is received.
+	for (;;) {
+		if (this->ReadAll(header_buffer, HEADER_SIZE) != HEADER_SIZE)
+			return false;
+
+		if (!(header_buffer[0] & 0x80))
+			break; // media packet
+
+		// Session packet: no payload follows; consume and keep reading.
+	}
 
 	UINT64 pts_flags = sc_read64be(header_buffer);
 	INT32 len = sc_read32be(header_buffer + 8);
+
+	if (len <= 0) {
+		// v4.0: a zero packet length is invalid.
+		return false;
+	}
 
 	if (!avcheck(av_new_packet(packet, len))) {
 		return false;

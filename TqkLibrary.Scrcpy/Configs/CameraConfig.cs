@@ -47,7 +47,22 @@ namespace TqkLibrary.Scrcpy.Configs
         public bool CameraHighSpeed { get; set; } = false;
 
         /// <summary>
-        /// 
+        /// Set the camera zoom (a multiplicative factor, e.g. 2.0 for 2x).<br></br>
+        /// default: 1 (omit)<br></br>
+        /// scrcpy 4.0 (--camera-zoom)
+        /// </summary>
+        public float CameraZoom { get; set; } = 1;
+
+        /// <summary>
+        /// Turn the camera torch (flashlight) on.<br></br>
+        /// default: false<br></br>
+        /// scrcpy 4.0 (--camera-torch)
+        /// </summary>
+        [OptionName("camera_torch")]
+        public bool CameraTorch { get; set; } = false;
+
+        /// <summary>
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()
@@ -58,6 +73,10 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.CameraAr, string.IsNullOrWhiteSpace);
             yield return this._GetArgument(x => x.Camerafps, x => x > 0);
             yield return this._GetArgument(x => x.CameraHighSpeed, CameraHighSpeed);
+            yield return this._GetArgument(x => x.CameraTorch, CameraTorch);
+            // camera_zoom is a float (not supported by _GetArgument); emit manually when non-default.
+            if (CameraZoom != 1)
+                yield return $"camera_zoom={CameraZoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         }
     }
 }

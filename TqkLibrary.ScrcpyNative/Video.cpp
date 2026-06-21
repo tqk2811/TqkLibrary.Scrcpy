@@ -77,15 +77,26 @@ void Video::threadStart() {
 		|| codecId == AV_CODEC_ID_H265;
 
 
-	BYTE screenSize_buffer[8];
-	if (this->_videoSock->ReadAll(screenSize_buffer, 8) != 8)
+	// scrcpy v4.0 wire format (ref app/src/demuxer.c @ v4.0):
+	// After codec_id, the video stream begins with a 12-byte "session" header
+	// (MSB of byte 0 set) carrying the initial width/height. It replaces the
+	// old 8-byte width/height block. The decoder re-derives the frame size from
+	// the bitstream, so these values are informational only here.
+	BYTE session_buffer[HEADER_SIZE];
+	if (this->_videoSock->ReadAll(session_buffer, HEADER_SIZE) != HEADER_SIZE)
+		return;
+
+	// First header must be a session header (MSB of byte 0 set).
+	if (!(session_buffer[0] & 0x80))
 		return;
 
 #if _DEBUG
-	uint32_t width = sc_read32be(screenSize_buffer);
-	uint32_t height = sc_read32be(screenSize_buffer + 4);
+	uint32_t width = sc_read32be(session_buffer + 4);
+	uint32_t height = sc_read32be(session_buffer + 8);
+	bool client_resized = (session_buffer[3] & 1) != 0;
 	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
 	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());
+	printf(std::string("client_resized:").append(std::to_string(client_resized)).append("\r\n").c_str());
 #endif
 
 	if (must_merge_config_packet)

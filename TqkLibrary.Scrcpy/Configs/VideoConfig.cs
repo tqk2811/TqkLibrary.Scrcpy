@@ -91,6 +91,22 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public float? Angle { get; set; }
 
+        /// <summary>
+        /// Round the video dimensions down to a multiple of this value (must be 1, 2, 4, 8 or 16).<br></br>
+        /// Default: 1 (omit)<br></br>
+        /// scrcpy 4.0 (--max-size alignment)
+        /// </summary>
+        [OptionName("min_size_alignment")]
+        public int MinSizeAlignment { get; set; } = 1;
+
+        /// <summary>
+        /// Allow the virtual display resolution to change at runtime (flexible display).<br></br>
+        /// Default: false (omit)<br></br>
+        /// scrcpy 4.0 (--new-display flexible)
+        /// </summary>
+        [OptionName("flex_display")]
+        public bool FlexDisplay { get; set; } = false;
+
 
         /// <summary>
         ///
@@ -106,6 +122,8 @@ namespace TqkLibrary.Scrcpy.Configs
             yield return this._GetArgument(x => x.VideoEncoder, string.IsNullOrWhiteSpace);
             yield return this._GetArgument(x => x.Crop, x => x.HasValue);
             yield return this._GetArgument(x => x.DownsizeOnError, !DownsizeOnError);
+            yield return this._GetArgument(x => x.MinSizeAlignment, x => x > 1);
+            yield return this._GetArgument(x => x.FlexDisplay, FlexDisplay);
 
             // capture_orientation: [[@]<value>|@]
             if (CaptureOrientation.HasValue || CaptureOrientationLock == CaptureOrientationLock.LockedInitial)
