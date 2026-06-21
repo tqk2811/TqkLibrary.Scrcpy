@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<Import Project="..\ProjectBuildProperties.targets" />
+
 	<PropertyGroup>
 		<TargetFrameworks>net462;net6.0-windows7.0;net7.0-windows7.0</TargetFrameworks>
 		<LangVersion>10.0</LangVersion>
@@ -7,7 +9,6 @@
 		<UseWPF>true</UseWPF>
 		<Nullable>enable</Nullable>
 		<Platforms>AnyCPU;x86;x64</Platforms>
-		<Version>2.4.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
