@@ -9,6 +9,7 @@
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
 		<license type="expression">MIT</license>
+		<readme>docs\README.md</readme>
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
@@ -32,6 +33,8 @@
 	</metadata>
 
 	<files>
+		<file src="..\README.md" target="docs\README.md" />
+
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.dll" target="lib\" />
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.pdb" target="lib\" />
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.xml" target="lib\" />
