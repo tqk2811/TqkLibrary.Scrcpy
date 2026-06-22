@@ -68,15 +68,15 @@ namespace TqkLibrary.Scrcpy.Control
             float hScroll,
             AndroidMotionEventButton button)
         {
-            if (vScroll > 1.0f || vScroll < -1.0f) throw new InvalidRangeException($"{nameof(vScroll)} must be in range -1.0f <= {nameof(vScroll)} <= 1.0f");
-            if (hScroll > 1.0f || hScroll < -1.0f) throw new InvalidRangeException($"{nameof(hScroll)} must be in range -1.0f <= {nameof(hScroll)} <= 1.0f");
+            if (vScroll > 16.0f || vScroll < -16.0f) throw new InvalidRangeException($"{nameof(vScroll)} must be in range -16.0f <= {nameof(vScroll)} <= 16.0f");
+            if (hScroll > 16.0f || hScroll < -16.0f) throw new InvalidRangeException($"{nameof(hScroll)} must be in range -16.0f <= {nameof(hScroll)} <= 16.0f");
 
             using MemoryStream stream = new MemoryStream();
             stream.WriteHostToNetworkOrder(
                 ScrcpyControlType.TYPE_INJECT_SCROLL_EVENT,
                 position,
-                ToSignedFixedPoint16(hScroll),
-                ToSignedFixedPoint16(vScroll),
+                ToSignedFixedPoint16(Math.Max(-1.0f, Math.Min(1.0f, hScroll / 16.0f))),
+                ToSignedFixedPoint16(Math.Max(-1.0f, Math.Min(1.0f, vScroll / 16.0f))),
                 button
                 );
             return stream.ToArray();
