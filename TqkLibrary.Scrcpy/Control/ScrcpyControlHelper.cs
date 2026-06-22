@@ -56,8 +56,8 @@ namespace TqkLibrary.Scrcpy.Control
                 pointerId,
                 position,
                 ToUnsignedFixedPoint16(pressure),
-                buttons,
-                actionButton
+                actionButton,
+                buttons
                 );
             return stream.ToArray();
         }
@@ -130,12 +130,12 @@ namespace TqkLibrary.Scrcpy.Control
 
         internal static byte[] RotateDevice() => CreateEmpty(ScrcpyControlType.TYPE_ROTATE_DEVICE);
 
-        internal static byte[] UhdiCreate(UInt16 id, byte[] data, string? name = null)
+        internal static byte[] UhdiCreate(UInt16 id, byte[] data, string? name = null, UInt16 vendorId = 0, UInt16 productId = 0)
         {
             byte[] nameBytes = name != null ? Encoding.UTF8.GetBytes(name) : Array.Empty<byte>();
             if (nameBytes.Length > 127) Array.Resize(ref nameBytes, 127);
             using MemoryStream memoryStream = new MemoryStream();
-            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_UHID_CREATE, id);
+            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_UHID_CREATE, id, vendorId, productId);
             memoryStream.WriteByte((byte)nameBytes.Length);
             memoryStream.Write(nameBytes, 0, nameBytes.Length);
             memoryStream.WriteHostToNetworkOrder((UInt16)data.Length, data);
