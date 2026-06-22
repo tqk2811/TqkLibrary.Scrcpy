@@ -18,51 +18,98 @@ namespace TqkLibrary.Scrcpy.ListSupport
     /// </summary>
     public class ScrcpyServerListSupport
     {
-        static readonly Regex regex_video = new Regex("--video-codec=(\\S+) --video-encoder='(\\S+)'");
-        static readonly Regex regex_audio = new Regex("--audio-codec=(\\S+) --audio-encoder='(\\S+)'");
+        // Tolerant of scrcpy 2.x and 3.0+/4.0 --list-* output:
+        //  - encoder name: quoted ('name', scrcpy 2.x) OR unquoted with trailing " (hw)/(sw) [vendor]" (scrcpy 3.0+, commit acff5b00)
+        //  - camera fps set: "[15, 30]" (<=3.3.4) OR "{15, 30}" (4.0, commit af355804); optional trailing ", zoom-range=[...]" (4.0)
+        static readonly Regex regex_video = new Regex("--video-codec=(\\S+) --video-encoder='?([^'\\s]+)'?");
+        static readonly Regex regex_audio = new Regex("--audio-codec=(\\S+) --audio-encoder='?([^'\\s]+)'?");
         static readonly Regex regex_display = new Regex("--display-id=(\\d+) +\\((\\d+)x(\\d+)\\)");
-        static readonly Regex regex_camera = new Regex("--camera-id=(\\d+) +\\((\\S+), (\\d+)x(\\d+), fps=\\[([0-9 ,]+)\\]\\)");
+        static readonly Regex regex_camera = new Regex("--camera-id=(\\d+) +\\((\\S+), (\\d+)x(\\d+), fps=[\\[{]([0-9 ,]+)[\\]}]");
         static readonly Regex regex_camera_size = new Regex("- (\\d+)x(\\d+)");
-        static readonly Regex regex_camera_fps = new Regex("\\(fps=\\[([0-9 ,]+)\\]\\)");
+        static readonly Regex regex_camera_fps = new Regex("\\(fps=[\\[{]([0-9 ,]+)[\\]}]\\)");
         internal static ScrcpyServerListSupport Parse(string data)
         {
             /*
+[server] INFO: Device: [Xiaomi] Redmi Redmi Note 9S (Android 12)
 [server] INFO: List of video encoders:
-    --video-codec=h264 --video-encoder='OMX.qcom.video.encoder.avc'
-    --video-codec=h264 --video-encoder='c2.android.avc.encoder'
-    --video-codec=h264 --video-encoder='OMX.google.h264.encoder'
-    --video-codec=h265 --video-encoder='OMX.qcom.video.encoder.hevc'
-    --video-codec=h265 --video-encoder='OMX.qcom.video.encoder.hevc.cq'
-    --video-codec=h265 --video-encoder='c2.android.hevc.encoder'
+    --video-codec=h264 --video-encoder=OMX.qcom.video.encoder.avc     (hw) [vendor]
+    --video-codec=h264 --video-encoder=c2.android.avc.encoder         (sw)
+    --video-codec=h264 --video-encoder=OMX.google.h264.encoder        (sw) (alias for c2.android.avc.encoder)
+    --video-codec=h265 --video-encoder=OMX.qcom.video.encoder.hevc    (hw) [vendor]
+    --video-codec=h265 --video-encoder=OMX.qcom.video.encoder.hevc.cq (hw) [vendor]
+    --video-codec=h265 --video-encoder=c2.android.hevc.encoder        (sw)
 [server] INFO: List of audio encoders:
-    --audio-codec=opus --audio-encoder='c2.android.opus.encoder'
-    --audio-codec=aac --audio-encoder='c2.android.aac.encoder'
-    --audio-codec=aac --audio-encoder='OMX.google.aac.encoder'
+    --audio-codec=opus --audio-encoder=c2.android.opus.encoder        (sw)
+    --audio-codec=aac --audio-encoder=c2.android.aac.encoder          (sw)
+    --audio-codec=aac --audio-encoder=OMX.google.aac.encoder          (sw) (alias for c2.android.aac.encoder)
+    --audio-codec=flac --audio-encoder=c2.android.flac.encoder        (sw)
+    --audio-codec=flac --audio-encoder=OMX.google.flac.encoder        (sw) (alias for c2.android.flac.encoder)
 [server] INFO: List of displays:
     --display-id=0    (1080x2400)
 [server] INFO: List of cameras:
-    --video-source=camera --camera-id=0    (back, 4000x3000, fps=[15, 30])
+    --camera-id=0    (back, 4000x3000, fps=[15, 30])
         - 3840x2160
         - 3264x2448
         - 3200x2400
         - 2688x1512
         - 2608x1960
-            .....
+        - 2592x1944
+        - 2592x1940
+        - 2400x1080
+        - 2340x1080
+        - 2304x1728
+        - 2160x1080
+        - 1920x1440
+        - 1920x1080
+        - 1600x1200
+        - 1560x720
+        - 1440x1080
+        - 1440x720
+        - 1280x960
+        - 1280x768
+        - 1280x720
+        - 1024x738
+        - 1024x768
+        - 800x600
+        - 800x480
+        - 720x480
+        - 640x480
+        - 640x360
+        - 352x288
+        - 320x240
+        - 176x144
       High speed capture (--camera-high-speed):
         - 1280x720 (fps=[120, 240])
         - 720x480 (fps=[120, 240])
         - 640x480 (fps=[120, 240])
         - 1920x1080 (fps=[120, 240])
-    --video-source=camera --camera-id=1    (front, 2304x1728, fps=[15, 30])
+    --camera-id=1    (front, 2304x1728, fps=[15, 30])
         - 2304x1728
         - 2160x1080
         - 1920x1440
         - 1920x1080
-            ....
+        - 1600x1200
+        - 1560x720
+        - 1440x1080
+        - 1440x720
+        - 1280x960
+        - 1280x768
+        - 1280x720
+        - 1024x738
+        - 1024x768
+        - 800x600
+        - 800x480
+        - 720x480
+        - 640x480
+        - 640x360
+        - 352x288
+        - 320x240
+        - 176x144
       High speed capture (--camera-high-speed):
         - 1280x720 (fps=[120])
         - 720x480 (fps=[120])
         - 640x480 (fps=[120])
+
              */
 
             var datas = data.Split('\r', '\n')
