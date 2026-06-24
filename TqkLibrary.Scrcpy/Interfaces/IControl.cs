@@ -174,5 +174,38 @@ namespace TqkLibrary.Scrcpy.Interfaces
         /// </summary>
         /// <returns></returns>
         bool ResetVideo();
+
+        /// <summary>
+        /// Turn the camera torch (flashlight) on or off at runtime (scrcpy 4.0+).<br></br>
+        /// Only meaningful when capturing the camera (video source = camera).
+        /// </summary>
+        /// <param name="on">true to turn the torch on, false to turn it off</param>
+        /// <returns></returns>
+        bool CameraSetTorch(bool on);
+
+        /// <summary>
+        /// Zoom the camera in by one step at runtime (scrcpy 4.0+).<br></br>
+        /// Only meaningful when capturing the camera (video source = camera).
+        /// </summary>
+        /// <returns></returns>
+        bool CameraZoomIn();
+
+        /// <summary>
+        /// Zoom the camera out by one step at runtime (scrcpy 4.0+).<br></br>
+        /// Only meaningful when capturing the camera (video source = camera).
+        /// </summary>
+        /// <returns></returns>
+        bool CameraZoomOut();
+
+        /// <summary>
+        /// Resize the virtual display at runtime (scrcpy 4.0+).<br></br>
+        /// Only valid for a flexible virtual display (started with new_display and flex_display=true);
+        /// the server rejects a resize on a non-flex display. The server constrains and debounces the
+        /// requested size, so it may apply a slightly different (constrained) resolution.
+        /// </summary>
+        /// <param name="width">New display width in pixels (1..65535)</param>
+        /// <param name="height">New display height in pixels (1..65535)</param>
+        /// <returns></returns>
+        bool ResizeDisplay(ushort width, ushort height);
     }
 }

@@ -68,6 +68,14 @@ namespace TqkLibrary.Scrcpy.Control
             => SendControl(ScrcpyControlHelper.StartApp(name));
         public bool ResetVideo()
             => SendControl(ScrcpyControlHelper.ResetVideo());
+        public bool CameraSetTorch(bool on)
+            => SendControl(ScrcpyControlHelper.CameraSetTorch(on));
+        public bool CameraZoomIn()
+            => SendControl(ScrcpyControlHelper.CameraZoomIn());
+        public bool CameraZoomOut()
+            => SendControl(ScrcpyControlHelper.CameraZoomOut());
+        public bool ResizeDisplay(ushort width, ushort height)
+            => SendControl(ScrcpyControlHelper.ResizeDisplay(width, height));
         #endregion
 
         #region Event

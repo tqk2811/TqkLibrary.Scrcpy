@@ -124,6 +124,14 @@ namespace TqkLibrary.Scrcpy.Wpf
             => this.ForEach(x => x.StartApp(name));
         public bool ResetVideo()
             => this.ForEach(x => x.ResetVideo());
+        public bool CameraSetTorch(bool on)
+            => this.ForEach(x => x.CameraSetTorch(on));
+        public bool CameraZoomIn()
+            => this.ForEach(x => x.CameraZoomIn());
+        public bool CameraZoomOut()
+            => this.ForEach(x => x.CameraZoomOut());
+        public bool ResizeDisplay(ushort width, ushort height)
+            => this.ForEach(x => x.ResizeDisplay(width, height));
         #endregion
     }
 

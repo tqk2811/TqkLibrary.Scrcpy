@@ -23,5 +23,9 @@
         OPEN_HARD_KEYBOARD_SETTINGS = 15,
         TYPE_START_APP = 16,
         TYPE_RESET_VIDEO = 17,
+        TYPE_CAMERA_SET_TORCH = 18,
+        TYPE_CAMERA_ZOOM_IN = 19,
+        TYPE_CAMERA_ZOOM_OUT = 20,
+        TYPE_RESIZE_DISPLAY = 21,
     }
 }

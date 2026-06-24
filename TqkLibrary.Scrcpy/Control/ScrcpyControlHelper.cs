@@ -172,6 +172,25 @@ namespace TqkLibrary.Scrcpy.Control
 
         internal static byte[] ResetVideo() => CreateEmpty(ScrcpyControlType.TYPE_RESET_VIDEO);
 
+        internal static byte[] CameraSetTorch(bool on)
+        {
+            using MemoryStream memoryStream = new MemoryStream();
+            memoryStream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_CAMERA_SET_TORCH);
+            memoryStream.WriteByte((byte)(on ? 1 : 0));
+            return memoryStream.ToArray();
+        }
+
+        internal static byte[] CameraZoomIn() => CreateEmpty(ScrcpyControlType.TYPE_CAMERA_ZOOM_IN);
+
+        internal static byte[] CameraZoomOut() => CreateEmpty(ScrcpyControlType.TYPE_CAMERA_ZOOM_OUT);
+
+        internal static byte[] ResizeDisplay(ushort width, ushort height)
+        {
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_RESIZE_DISPLAY, width, height);
+            return stream.ToArray();
+        }
+
 
 
         static byte[] CreateEmpty(ScrcpyControlType type)
