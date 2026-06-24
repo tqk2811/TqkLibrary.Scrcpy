@@ -40,16 +40,23 @@ namespace TqkLibrary.Scrcpy.ListSupport
         public bool ListCameras { get; set; } = false;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         [OptionName("list_camera_sizes")]
         public bool ListCameraSizes { get; set; } = false;
+
+        /// <summary>
+        /// print the list of installed apps to adb shell output (scrcpy 3.0+)<br></br>
+        /// default: false
+        /// </summary>
+        [OptionName("list_apps")]
+        public bool ListApps { get; set; } = false;
 
 
 
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()
@@ -59,6 +66,7 @@ namespace TqkLibrary.Scrcpy.ListSupport
             yield return this._GetArgument(x => x.ListDisplays, ListDisplays);
             yield return this._GetArgument(x => x.ListCameras, ListCameras);
             yield return this._GetArgument(x => x.ListCameraSizes, ListCameraSizes);
+            yield return this._GetArgument(x => x.ListApps, ListApps);
         }
     }
 }
