@@ -27,6 +27,11 @@ namespace TqkLibrary.Scrcpy.ListSupport
         static readonly Regex regex_camera = new Regex("--camera-id=(\\d+) +\\((\\S+), (\\d+)x(\\d+), fps=[\\[{]([0-9 ,]+)[\\]}]");
         static readonly Regex regex_camera_size = new Regex("- (\\d+)x(\\d+)");
         static readonly Regex regex_camera_fps = new Regex("\\(fps=[\\[{]([0-9 ,]+)[\\]}]\\)");
+        // --list-apps (scrcpy 3.0+): " * <Name padded to 30> <package>" (system) / " - <Name> <package>" (user).
+        // When the name is >= 30 chars the package wraps to the next line.
+        static readonly Regex regex_app = new Regex("^([*-]) (.+?)\\s{2,}(\\S+)$");
+        static readonly Regex regex_app_name_only = new Regex("^([*-]) (\\S.*)$");
+        static readonly Regex regex_app_package = new Regex("^[\\w.]+$");
         internal static ScrcpyServerListSupport Parse(string data)
         {
             /*
@@ -120,6 +125,7 @@ namespace TqkLibrary.Scrcpy.ListSupport
             string l_current = string.Empty;
             bool isCameraHighSpeed = false;
             CameraInfo? cameraInfoCurrent = null;
+            AppInfo? pendingApp = null;//app whose name wrapped (package is on the next line)
 
             foreach (var d in datas)
             {
@@ -224,6 +230,39 @@ namespace TqkLibrary.Scrcpy.ListSupport
                         }
                     }
                 }
+                else if (l_current.Contains("apps:"))
+                {
+                    Match appMatch = regex_app.Match(d);
+                    if (appMatch.Success)
+                    {
+                        result.Apps.Add(new AppInfo()
+                        {
+                            IsSystem = appMatch.Groups[1].Value == "*",
+                            Name = appMatch.Groups[2].Value.Trim(),
+                            PackageName = appMatch.Groups[3].Value,
+                        });
+                        pendingApp = null;
+                    }
+                    else
+                    {
+                        appMatch = regex_app_name_only.Match(d);
+                        if (appMatch.Success)
+                        {
+                            //long name (>= 30 chars): the package wraps to the next line
+                            pendingApp = new AppInfo()
+                            {
+                                IsSystem = appMatch.Groups[1].Value == "*",
+                                Name = appMatch.Groups[2].Value.Trim(),
+                            };
+                        }
+                        else if (pendingApp is not null && regex_app_package.IsMatch(d))
+                        {
+                            pendingApp.PackageName = d;
+                            result.Apps.Add(pendingApp);
+                            pendingApp = null;
+                        }
+                    }
+                }
             }
 
             return result;
@@ -242,8 +281,12 @@ namespace TqkLibrary.Scrcpy.ListSupport
         /// </summary>
         public List<DisplayInfo> Displays { get; set; } = new List<DisplayInfo>();
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public List<CameraInfo> CameraInfos { get; set; } = new List<CameraInfo>();
+        /// <summary>
+        /// Installed apps reported by <c>--list-apps</c> (scrcpy 3.0+).
+        /// </summary>
+        public List<AppInfo> Apps { get; set; } = new List<AppInfo>();
     }
 }
