@@ -76,6 +76,12 @@ namespace TqkLibrary.Scrcpy.Wpf
             typeof(ScrcpyControl),
             new FrameworkPropertyMetadata(ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER, FrameworkPropertyMetadataOptions.None));
 
+        public static readonly DependencyProperty AutoResizeFlexDisplayProperty = DependencyProperty.Register(
+            nameof(AutoResizeFlexDisplay),
+            typeof(bool),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.None));
+
 
 
 
@@ -118,6 +124,18 @@ namespace TqkLibrary.Scrcpy.Wpf
             get { return (long)GetValue(MousePointerIdProperty); }
             set { SetValue(MousePointerIdProperty, value); }
         }
+        /// <summary>
+        /// Opt-in (default false). When true, resizing the window sends a resize_display control
+        /// message (scrcpy 4.0+) so the device's virtual display follows the window size.<br></br>
+        /// Requires a flexible virtual display: the server must be started with new_display and
+        /// flex_display=true, otherwise the server rejects the resize. The window pixel size is sent
+        /// as-is (no capture-orientation swap is applied), debounced by <see cref="ResizeDebounceInterval"/>.
+        /// </summary>
+        public bool AutoResizeFlexDisplay
+        {
+            get { return (bool)GetValue(AutoResizeFlexDisplayProperty); }
+            set { SetValue(AutoResizeFlexDisplayProperty, value); }
+        }
 
         /// <summary>
         /// 
@@ -153,6 +171,13 @@ namespace TqkLibrary.Scrcpy.Wpf
         bool _hasPendingPixelSize;
         int _appliedPixelWidth;
         int _appliedPixelHeight;
+
+        // Full host (window) pixel size, used to drive AutoResizeFlexDisplay (the virtual display
+        // follows the whole window, not the letterboxed video draw rect).
+        int _pendingDisplayPixelWidth;
+        int _pendingDisplayPixelHeight;
+        int _appliedDisplayPixelWidth;
+        int _appliedDisplayPixelHeight;
 
         public ScrcpyControl()
         {
@@ -219,6 +244,11 @@ namespace TqkLibrary.Scrcpy.Wpf
                 }
             }
 
+            // Track the full window pixel size for AutoResizeFlexDisplay (sent to the device so the
+            // flexible virtual display follows the window, independent of video letterboxing).
+            _pendingDisplayPixelWidth = (int)base_surfWidth;
+            _pendingDisplayPixelHeight = (int)base_surfHeight;
+
             // Defer the actual D3D surface re-allocation. While the user is actively
             // resizing the window we let WPF stretch the existing D3D11Image (Image
             // control has Uniform stretch). Only re-create the GPU surface once the
@@ -244,6 +274,7 @@ namespace TqkLibrary.Scrcpy.Wpf
             if (_appliedPixelWidth == 0 && _appliedPixelHeight == 0)
             {
                 ApplyPendingPixelSize();
+                MaybeSendResizeDisplay();
                 return;
             }
 
@@ -267,6 +298,47 @@ namespace TqkLibrary.Scrcpy.Wpf
         {
             _resizeDebounceTimer?.Stop();
             ApplyPendingPixelSize();
+            MaybeSendResizeDisplay();
+        }
+
+        /// <summary>
+        /// When <see cref="AutoResizeFlexDisplay"/> is enabled, send a resize_display control message
+        /// so the device's flexible virtual display matches the current window pixel size. No-op when
+        /// disabled, when no <see cref="Control"/> is bound, or when the size has not changed.
+        /// </summary>
+        void MaybeSendResizeDisplay()
+        {
+            if (!AutoResizeFlexDisplay)
+                return;
+
+            IControl? control = Control;
+            if (control is null)
+                return;
+
+            int width = _pendingDisplayPixelWidth;
+            int height = _pendingDisplayPixelHeight;
+            if (width <= 0 || height <= 0)
+                return;
+
+            // resize_display carries the size as two uint16 values.
+            if (width > ushort.MaxValue) width = ushort.MaxValue;
+            if (height > ushort.MaxValue) height = ushort.MaxValue;
+
+            if (width == _appliedDisplayPixelWidth && height == _appliedDisplayPixelHeight)
+                return;
+
+            _appliedDisplayPixelWidth = width;
+            _appliedDisplayPixelHeight = height;
+
+            try
+            {
+                control.ResizeDisplay((ushort)width, (ushort)height);
+            }
+            catch
+            {
+                // The control may not be connected yet or the display may not be flexible;
+                // ignore so a resize never tears down the UI.
+            }
         }
 
         void ApplyPendingPixelSize()
