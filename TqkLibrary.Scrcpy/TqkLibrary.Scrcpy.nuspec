@@ -5,6 +5,7 @@
 		<id>TqkLibrary.Scrcpy</id>
 		<version>$version$</version>
 		<description>Stream screen and control android devices</description>
+		<releaseNotes>https://github.com/tqk2811/TqkLibrary.Scrcpy/releases</releaseNotes>
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
