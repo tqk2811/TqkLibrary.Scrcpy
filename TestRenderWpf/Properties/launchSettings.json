@@ -3,6 +3,16 @@
     "TestRenderWpf": {
       "commandName": "Project",
       "nativeDebugging": true
+    },
+    "FlexDisplay Chrome": {
+      "commandName": "Project",
+      "commandLineArgs": "--new-display=1280x720/320 --flex --auto-resize --start-app=com.android.chrome",
+      "nativeDebugging": true
+    },
+    "FlexDisplay Chrome (no auto-resize)": {
+      "commandName": "Project",
+      "commandLineArgs": "--new-display=1280x720/320 --flex --start-app=com.android.chrome",
+      "nativeDebugging": true
     }
   }
 }

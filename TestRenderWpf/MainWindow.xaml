@@ -35,8 +35,9 @@
             </StackPanel>
         </StackPanel>
         <scrcpy:ScrcpyControl Grid.Column="1"
-                              IsControl="{Binding IsControl}" 
-                              Control="{Binding Control}" 
+                              x:Name="scrcpyControl"
+                              IsControl="{Binding IsControl}"
+                              Control="{Binding Control}"
                               ScrcpyUiView="{Binding ScrcpyUiView}"
                               IsMouseHandler="True"
                               IsKeyHandler="True"

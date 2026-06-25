@@ -70,6 +70,23 @@ namespace TestRenderWpf
             mainWindowVM = this.DataContext as MainWindowVM ?? throw new InvalidOperationException();
         }
 
+        // Parse "--key=value" / "--flag" command-line args (from launchSettings.json) into a map.
+        static Dictionary<string, string> ParseArgs()
+        {
+            var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var arg in Environment.GetCommandLineArgs().Skip(1))
+            {
+                if (!arg.StartsWith("--")) continue;
+                string body = arg.Substring(2);
+                int eq = body.IndexOf('=');
+                if (eq >= 0)
+                    result[body.Substring(0, eq)] = body.Substring(eq + 1);
+                else
+                    result[body] = string.Empty;
+            }
+            return result;
+        }
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             deviceId = Adb.Devices().Where(x => x.DeviceState == DeviceState.Device).FirstOrDefault()?.DeviceId;
@@ -89,7 +106,28 @@ namespace TestRenderWpf
                 ListDisplays = true,
                 ListCameras = true,
                 ListCameraSizes = true,
+                ListApps = true,
             });
+
+            // --- Flex display test options (passed via launchSettings.json commandLineArgs) ---
+            // e.g. --new-display=1280x720/320 --flex --auto-resize --start-app=com.android.chrome
+            //
+            // NOTE: This flex-display path has NOT been validated end-to-end yet, because no Android 14+
+            // device was available for testing (only a Redmi Note 9S, Android 12 / API 31).
+            // Reason it cannot be verified on Android 12:
+            //   --new-display + flex needs the virtual display to be "trusted" and own its focus, but
+            //   scrcpy only sets those flags on newer Android (see NewDisplayCapture.startNew):
+            //     - TRUSTED | OWN_DISPLAY_GROUP | ALWAYS_UNLOCKED  -> only from API 33 (Android 13)
+            //     - OWN_FOCUS | DEVICE_DISPLAY_GROUP               -> only from API 34 (Android 14)
+            //   On Android 12 the virtual display IS created and resize_display IS sent, but apps
+            //   (e.g. Chrome) cannot reliably launch/focus on it, so the feature can't be confirmed here.
+            //   Test with an Android 14+ device or AVD.
+            var args = ParseArgs();
+            if (args.TryGetValue("new-display", out var newDisplay) && !string.IsNullOrWhiteSpace(newDisplay))
+                scrcpyConfig.ServerConfig!.NewDisplay = newDisplay;
+            if (args.ContainsKey("flex"))
+                scrcpyConfig.ServerConfig!.VideoConfig!.FlexDisplay = true;
+            scrcpyControl.AutoResizeFlexDisplay = args.ContainsKey("auto-resize");
 
 #if CameraTest
             scrcpyConfig.ServerConfig.VideoSource = VideoSource.Camera;
@@ -112,6 +150,13 @@ namespace TestRenderWpf
             if (!scrcpy.Connect(scrcpyConfig))
             {
                 MessageBox.Show("Connect Failed");
+            }
+            else if (args.TryGetValue("start-app", out var startApp) && !string.IsNullOrWhiteSpace(startApp))
+            {
+                // launch the app on the (virtual) display; keep it in the textbox for re-launch
+                mainWindowVM.AppPackageName = startApp;
+                await Task.Delay(800);// let the virtual display register before starting the app
+                mainWindowVM.Control?.StartApp(startApp);
             }
 
             if (scrcpyConfig?.ServerConfig?.AudioConfig?.IsAudio == true)
