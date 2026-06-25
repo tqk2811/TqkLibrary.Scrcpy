@@ -1,0 +1,101 @@
+name: Release
+
+# CI build + publish. KHONG chay mac dinh: chi build khi commit (head cua push) chua marker
+# '[release]'. Cung cho chay tay (workflow_dispatch).
+#
+# Mo hinh /releases: moi dong minor M.N co 1 GitHub Release ten theo tag 'vM.N.0'.
+# Moi lan chay -> build version 'M.N.<so-commit>' -> upload 2 nupkg (Scrcpy + Scrcpy.Wpf) lam
+# asset vao Release 'vM.N.0' + cap nhat notes (tang dan, danh so) cac change ke tu 'vM.N.0'.
+#
+# Trigger: cac branch version (2.4 ... 4.0) + master. Vi master == dong moi nhat, push cung
+# commit len ca hai branch co the trigger 2 lan (vo hai: cung tag, --clobber + --skip-duplicate).
+#
+# Tien dieu kien: tag 'vM.N.0' phai ton tai tren origin truoc (moc GitVersion + ten Release).
+# Push nuget.org chi khi co secret 'nugetKey'.
+
+on:
+  push:
+    branches:
+      - master
+      - '[0-9]*.[0-9]*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    runs-on: windows-latest
+    steps:
+      - name: Checkout (full history + tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            6.0.x
+            7.0.x
+            8.0.x
+
+      - name: Install git-cliff
+        shell: pwsh
+        run: |
+          $ver = "2.13.1"
+          $url = "https://github.com/orhun/git-cliff/releases/download/v$ver/git-cliff-$ver-x86_64-pc-windows-msvc.zip"
+          $zip = Join-Path $env:RUNNER_TEMP "git-cliff.zip"
+          Invoke-WebRequest $url -OutFile $zip
+          $dst = Join-Path $env:RUNNER_TEMP "git-cliff"
+          Expand-Archive $zip -DestinationPath $dst -Force
+          $exe = Get-ChildItem $dst -Recurse -Filter git-cliff.exe | Select-Object -First 1
+          Add-Content -Path $env:GITHUB_PATH -Value $exe.DirectoryName
+
+      - name: Build + pack (native x64/Win32 + managed: Scrcpy + Scrcpy.Wpf)
+        shell: pwsh
+        run: ./.github/workflows/BuildCI.ps1   # build + pack only; nuget push handled below
+
+      - name: Create/update Release, upload nupkg, push nuget
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUGET_KEY: ${{ secrets.nugetKey }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $core = Get-ChildItem ./TqkLibrary.Scrcpy/bin/Release/*.nupkg | Select-Object -First 1
+          $wpf  = Get-ChildItem ./TqkLibrary.Scrcpy.Wpf/bin/Release/*.nupkg | Select-Object -First 1
+          if (-not $core) { throw "No TqkLibrary.Scrcpy .nupkg produced by BuildCI.ps1" }
+          if (-not $wpf)  { throw "No TqkLibrary.Scrcpy.Wpf .nupkg produced by BuildCI.ps1" }
+          if ($core.BaseName -notmatch '\.(\d+)\.(\d+)\.(\d+)$') { throw "Cannot parse version from $($core.Name)" }
+          $major = $Matches[1]; $minor = $Matches[2]
+          $tag = "v$major.$minor.0"   # tags carry the 'v' prefix (v2.4.0 ... v4.0.0)
+          $mn  = "$major.$minor"
+          Write-Host "core=$($core.Name)  wpf=$($wpf.Name)  release-tag=$tag"
+
+          # Release notes: commit ke tu tag vM.N.0, tang dan, danh so M.N.<n>.
+          # Dung range '<tag>..HEAD' (topology dung); template emit '__MN__' -> thay bang M.N.
+          $notes = git-cliff --config cliff-release.toml "$tag..HEAD" | Out-String
+          $notes = ($notes -replace '__MN__', $mn).Trim()
+          if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "Release $tag" }
+          Set-Content -Path RELEASE_NOTES.md -Value $notes -Encoding utf8
+
+          # Tao Release 'vM.N.0' neu chua co (tren tag da ton tai), neu co thi cap nhat notes.
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release edit $tag --notes-file RELEASE_NOTES.md
+          } else {
+            gh release create $tag --title $tag --notes-file RELEASE_NOTES.md --verify-tag
+          }
+
+          # Dinh kem ca 2 nupkg cua lan build nay (clobber neu rebuild cung version).
+          gh release upload $tag $core.FullName $wpf.FullName --clobber
+
+          # Push nuget.org chi khi co secret nugetKey (push core truoc vi Wpf phu thuoc no).
+          if (-not [string]::IsNullOrWhiteSpace($env:NUGET_KEY)) {
+            dotnet nuget push $core.FullName -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+            dotnet nuget push $wpf.FullName  -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+          } else {
+            Write-Host "No 'nugetKey' secret -> skip nuget.org push"
+          }
