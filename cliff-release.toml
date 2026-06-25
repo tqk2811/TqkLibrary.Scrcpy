@@ -1,0 +1,47 @@
+# git-cliff config rieng cho GitHub Release notes (sinh boi CI .github/workflows/release.yml).
+# Khac cliff.toml (CHANGELOG.md local): KHONG header/footer, sap xep TANG DAN (oldest first),
+# danh so M.N.<n> tang dan. Dung voi range '<tag>..HEAD' (cac commit ke tu tag vM.N.0).
+
+[changelog]
+header = ""
+# Chi liet ke cac loai thay doi nguoi dung quan tam. Loc o BUOC HIEN THI (khong skip khoi
+# mang) de loop.index van = so commit thuc te ke tu tag -> so dung, co khoang trong o cho bi bo.
+# Muon them/bot loai: sua danh sach trong `commit.group in [...]` ben duoi.
+body = """
+{% for commit in commits %}\
+{% if commit.group in ["feat", "fix", "perf", "revert"] %}\
+- __MN__.{{ loop.index }} ({{ commit.group }}){% if commit.scope %} **{{ commit.scope }}**{% endif %} {{ commit.message | upper_first }}{% if commit.breaking %} [**breaking**]{% endif %}
+{% endif %}\
+{% endfor %}\
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+split_commits = false
+commit_preprocessors = [
+    { pattern = '  +', replace = " " },
+]
+commit_parsers = [
+    { message = "^feat", group = "feat" },
+    { message = "^fix", group = "fix" },
+    { message = "^perf", group = "perf" },
+    { message = "^refactor", group = "refactor" },
+    { message = "^docs", group = "docs" },
+    { message = "^test", group = "test" },
+    { message = "^build", group = "build" },
+    { message = "^ci", group = "ci" },
+    { message = "^style", group = "style" },
+    { message = "^revert", group = "revert" },
+    { message = "^sample", group = "sample" },
+    { message = "^chore", group = "chore" },
+    { message = ".*", group = "other" },
+    # Khong dung skip o day: moi commit phai con trong mang de loop.index = so commit thuc te
+    # ke tu tag (= GitVersion). Viec loc loai nao hien thi nam o body template.
+]
+filter_commits = false
+tag_pattern = '[vV]?[0-9]+\.[0-9]+\.[0-9]+'
+# Tang dan: commit cu nhat (ngay sau tag) len dau, loop.index = 1 -> M.N.1
+sort_commits = "oldest"
