@@ -441,15 +441,39 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         System.Drawing.Point GetRemotePoint(System.Windows.Point point)
         {
-            double x = point.X / drawRect.Width;// (point.X - drawRect.X) / drawRect.Width;
-            double y = point.Y / drawRect.Height;// (point.Y - drawRect.Y) / drawRect.Height;
-            double real_x = x * videoSize.Width;
-            double real_y = y * videoSize.Height;
-            var outpoint = new System.Drawing.Point((int)real_x, (int)real_y);
-#if DEBUG
-            //Debug.WriteLine($"drawRect: {drawRect}, videoSize: {videoSize}, inPoint: {point}, outPoint: {outpoint}, image_w: {InteropImage.Width}, image_h: {InteropImage.Height}");
-#endif
-            return outpoint;
+            // point is in DIPs, relative to the Image. The video is shown with Stretch=Uniform,
+            // so it is scaled to fit the Image's layout box while preserving the device aspect
+            // ratio and centered (black letterbox bars fill the rest). Map the click using that
+            // DIP layout box and the device aspect only. This is intentionally independent of the
+            // Windows DPI scale and of the physical-pixel render surface (drawRect): both the
+            // mouse point and img.ActualWidth/Height are in the same DIP space, so the mapping
+            // stays correct at any display scaling (e.g. with a pinned DpiScale).
+            //
+            // Use the CURRENT device screen size read fresh (the SAME value ControlChain sends as the
+            // touch event's screen_size), NOT the cached this.videoSize, so point and screen_size stay
+            // consistent and the server scales the click correctly.
+            System.Drawing.Size screen = ScrcpyUiView?.Scrcpy?.ScreenSize ?? videoSize;
+            double boxW = img.ActualWidth;
+            double boxH = img.ActualHeight;
+            if (boxW <= 0 || boxH <= 0 || screen.Width <= 0 || screen.Height <= 0)
+                return new System.Drawing.Point(0, 0);
+
+            double rate = Math.Min(boxW / screen.Width, boxH / screen.Height);
+            double dispW = screen.Width * rate;   // displayed video width in DIPs
+            double dispH = screen.Height * rate;  // displayed video height in DIPs
+            double offX = (boxW - dispW) / 2.0;    // letterbox offset (DIPs)
+            double offY = (boxH - dispH) / 2.0;
+
+            double x = (point.X - offX) / dispW;
+            double y = (point.Y - offY) / dispH;
+
+            // Clamp so clicks on the black letterbox bars stay inside the device screen.
+            x = Math.Max(0.0, Math.Min(1.0, x));
+            y = Math.Max(0.0, Math.Min(1.0, y));
+
+            int real_x = (int)(x * screen.Width);
+            int real_y = (int)(y * screen.Height);
+            return new System.Drawing.Point(real_x, real_y);
         }
 
         void ResolveMouseButton(IControl control, System.Drawing.Point point, MouseButton mouseButton, AndroidMotionEventAction action)
