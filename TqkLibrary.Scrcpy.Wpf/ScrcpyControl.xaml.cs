@@ -76,6 +76,12 @@ namespace TqkLibrary.Scrcpy.Wpf
             typeof(ScrcpyControl),
             new FrameworkPropertyMetadata(ScrcpyMousePointerId.POINTER_ID_GENERIC_FINGER, FrameworkPropertyMetadataOptions.None));
 
+        public static readonly DependencyProperty DpiScaleProperty = DependencyProperty.Register(
+            nameof(DpiScale),
+            typeof(DpiScale?),
+            typeof(ScrcpyControl),
+            new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None, OnDpiScaleChanged));
+
 
 
 
@@ -117,6 +123,20 @@ namespace TqkLibrary.Scrcpy.Wpf
         {
             get { return (long)GetValue(MousePointerIdProperty); }
             set { SetValue(MousePointerIdProperty, value); }
+        }
+        /// <summary>
+        /// DPI scale used to convert the window's DIP size (host.ActualWidth/Height, 96-dpi units) into
+        /// the physical-pixel render size of the D3D surface.
+        /// <para><b>get</b>: returns the fixed value if one was set; otherwise (not set / <see langword="null"/>)
+        /// returns <see cref="VisualTreeHelper.GetDpi(Visual)"/> read FRESH for the current monitor
+        /// (e.g. 1.0 / 1.25 / 1.5), never a cached value - so it follows the window moving across monitors.</para>
+        /// <para><b>set</b>: pin a fixed scale (e.g. <c>new DpiScale(1.0, 1.0)</c>); set <see langword="null"/>
+        /// to go back to auto.</para>
+        /// </summary>
+        public DpiScale? DpiScale
+        {
+            get { return (DpiScale?)GetValue(DpiScaleProperty) ?? VisualTreeHelper.GetDpi(this); }
+            set { SetValue(DpiScaleProperty, value); }
         }
 
         /// <summary>
@@ -172,18 +192,14 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         private void host_SizeChanged(object? sender, SizeChangedEventArgs? e)
         {
-            double dpiScale = 1.0; // default value for 96 dpi
+            // DPI scale to convert host.ActualWidth/Height (DIPs, 96-dpi units) into physical pixels, so
+            // the D3D surface size matches what is actually drawn on screen. Uses the DpiScale override
+            // when pinned; otherwise the getter returns VisualTreeHelper.GetDpi read FRESH here on every
+            // SizeChanged, so it also follows the window moving to another monitor.
+            DpiScale dpi = this.DpiScale ?? VisualTreeHelper.GetDpi(this);
 
-            // determine DPI
-            // (as of .NET 4.6.1, this returns the DPI of the primary monitor, if you have several different DPIs)
-            //var hwndTarget = PresentationSource.FromVisual(this)?.CompositionTarget as HwndTarget;
-            //if (hwndTarget != null)
-            //{
-            //    dpiScale = hwndTarget.TransformToDevice.M11;
-            //}
-
-            double base_surfWidth = host.ActualWidth < 0 ? 0 : Math.Ceiling(host.ActualWidth * dpiScale);
-            double base_surfHeight = host.ActualHeight < 0 ? 0 : Math.Ceiling(host.ActualHeight * dpiScale);
+            double base_surfWidth = host.ActualWidth < 0 ? 0 : Math.Ceiling(host.ActualWidth * dpi.DpiScaleX);
+            double base_surfHeight = host.ActualHeight < 0 ? 0 : Math.Ceiling(host.ActualHeight * dpi.DpiScaleY);
             var videoSize = ScrcpyUiView?.Scrcpy?.ScreenSize;
 
 
@@ -224,6 +240,14 @@ namespace TqkLibrary.Scrcpy.Wpf
             // control has Uniform stretch). Only re-create the GPU surface once the
             // size has stayed stable for ResizeDebounceInterval.
             SchedulePixelSizeUpdate(drawRect.Width, drawRect.Height);
+        }
+
+        static void OnDpiScaleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            // A runtime DpiScale change must re-run the layout math so the D3D surface is re-sized
+            // right away, not only on the next resize.
+            if (d is ScrcpyControl control && control.host is not null)
+                control.host_SizeChanged(null, null);
         }
 
         void SchedulePixelSizeUpdate(int pixelWidth, int pixelHeight)
