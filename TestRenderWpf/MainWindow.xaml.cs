@@ -47,9 +47,19 @@ namespace TestRenderWpf
             ServerConfig = new ScrcpyServerConfig()
             {
                 IsControl = true,
+                // Keep the Android screen on while scrcpy runs - otherwise the device sleeps and
+                // injected touches do nothing (looks like "can't click"). StayAwake only holds the
+                // screen on while the device is CHARGING, so also override the device screen-off
+                // timeout (works when unplugged). Both are restored by scrcpy on exit.
+                ScreenOffTimeout = int.MaxValue,
+                AndroidConfig = new AndroidConfig()
+                {
+                    StayAwake = true,
+                    PowerOn = true,
+                },
                 VideoConfig = new VideoConfig()
                 {
-                    MaxFps = 24
+                    MaxFps = 24,
                 },
                 AudioConfig = new AudioConfig()
                 {
@@ -157,7 +167,16 @@ namespace TestRenderWpf
                 // launch the app on the (virtual) display; keep it in the textbox for re-launch
                 mainWindowVM.AppPackageName = startApp;
                 await Task.Delay(800);// let the virtual display register before starting the app
-                mainWindowVM.Control?.StartApp(startApp);
+
+                // On a new (virtual) display, force-stop the app first (the '+' prefix) so it launches
+                // FRESH on the display scrcpy just captured. An already-running singleTask app such as
+                // Chrome would otherwise be reused on whatever display its existing task sits on - often
+                // a STALE virtual display left over from a previous, killed FlexDisplay session. In that
+                // case scrcpy mirrors/feeds the new display while the app stays on the old one, so it
+                // looks like "the app cannot be controlled". Verified via `dumpsys display`/`activity`:
+                // scrcpy captured displayId=24 while Chrome was stuck on a leftover displayId=27.
+                bool onNewDisplay = !string.IsNullOrWhiteSpace(scrcpyConfig.ServerConfig?.NewDisplay);
+                mainWindowVM.Control?.StartApp(onNewDisplay ? "+" + startApp : startApp);
             }
 
             if (scrcpyConfig?.ServerConfig?.AudioConfig?.IsAudio == true)
