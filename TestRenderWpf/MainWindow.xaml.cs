@@ -64,6 +64,7 @@ namespace TestRenderWpf
         XAudio2MasterVoice? _audio2MasterVoice;
         XAudio2SourceVoice? _audio2SourceVoice;
         ScrcpyAudioStream? _audioStream;
+        Task? _audioTask;
         public MainWindow()
         {
             InitializeComponent();
@@ -162,7 +163,10 @@ namespace TestRenderWpf
             if (scrcpyConfig?.ServerConfig?.AudioConfig?.IsAudio == true)
             {
                 _audioStream = scrcpy.GetAudioStream();
-                _ = Task.Factory.StartNew(RunReadAudio, TaskCreationOptions.LongRunning);
+                // Keep the task so Window_Closed can wait for the loop to finish before disposing
+                // scrcpy. StartNew on an async method returns Task<Task>, so Unwrap() to get the task
+                // that completes when RunReadAudio actually returns.
+                _audioTask = Task.Factory.StartNew(RunReadAudio, TaskCreationOptions.LongRunning).Unwrap();
             }
         }
 
@@ -182,7 +186,16 @@ namespace TestRenderWpf
         private void Window_Closed(object sender, EventArgs e)
         {
             windowClosed = true;
+
+            // Stop the session first: this shuts down the scrcpy sockets, so the background audio
+            // read loop (RunReadAudio -> ScrcpyAudioStream.Read) sees IsConnected == false, Read
+            // returns 0, and the loop exits. We must WAIT for that thread to finish BEFORE disposing
+            // scrcpy below; otherwise it would call into an already-disposed Scrcpy (its IsConnected
+            // throws ObjectDisposedException on a background thread -> the whole app crashes).
             scrcpy?.Stop();
+            try { _audioTask?.Wait(TimeSpan.FromSeconds(3)); }
+            catch { /* ignore audio thread teardown errors */ }
+
             mainWindowVM.ScrcpyUiView?.Dispose();
             mainWindowVM.ScrcpyUiView = null;
             mainWindowVM.Control = null;
