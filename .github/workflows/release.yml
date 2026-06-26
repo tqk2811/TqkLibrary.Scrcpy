@@ -53,7 +53,7 @@ jobs:
           $exe = Get-ChildItem $dst -Recurse -Filter git-cliff.exe | Select-Object -First 1
           Add-Content -Path $env:GITHUB_PATH -Value $exe.DirectoryName
 
-      - name: Build + pack (native x64/Win32 + managed: Scrcpy + Scrcpy.Wpf)
+      - name: "Build + pack (native x64/Win32 + managed: Scrcpy + Scrcpy.Wpf)"
         shell: pwsh
         run: ./.github/workflows/BuildCI.ps1   # build + pack only; nuget push handled below
 
