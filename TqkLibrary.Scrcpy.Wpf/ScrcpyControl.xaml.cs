@@ -281,10 +281,18 @@ namespace TqkLibrary.Scrcpy.Wpf
 
         void SchedulePixelSizeUpdate(int pixelWidth, int pixelHeight)
         {
-            // Skip if we're already at this size and there's nothing pending.
+            // The display (window) pixel size drives AutoResizeFlexDisplay and changes independently of
+            // the letterboxed render size (drawRect). A window resize must NOT be skipped just because
+            // drawRect stayed the same (e.g. resizing only the letterboxed dimension), otherwise the
+            // resize_display message would never be sent.
+            bool displaySizeChanged = _pendingDisplayPixelWidth != _appliedDisplayPixelWidth
+                                   || _pendingDisplayPixelHeight != _appliedDisplayPixelHeight;
+
+            // Skip only if neither the render pixel size nor the display (window) size changed.
             if (!_hasPendingPixelSize
                 && pixelWidth == _appliedPixelWidth
-                && pixelHeight == _appliedPixelHeight)
+                && pixelHeight == _appliedPixelHeight
+                && !displaySizeChanged)
             {
                 return;
             }
