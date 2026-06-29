@@ -4,12 +4,13 @@
 	<metadata>
 		<id>TqkLibrary.Scrcpy.Wpf</id>
 		<version>$version$</version>
-		<description>my private lib</description>
+		<description>WPF controls for TqkLibrary.Scrcpy - stream screen and control android devices</description>
 		<releaseNotes>https://github.com/tqk2811/TqkLibrary.Scrcpy/releases</releaseNotes>
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
 		<license type="expression">MIT</license>
+		<readme>docs\README.md</readme>
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="TqkLibrary.Scrcpy" version="$version$" />
@@ -27,6 +28,8 @@
 	</metadata>
 
 	<files>
+		<file src="..\README.md" target="docs\README.md" />
+
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.dll" target="lib\" />
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.pdb" target="lib\" />
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.Wpf.xml" target="lib\" />
