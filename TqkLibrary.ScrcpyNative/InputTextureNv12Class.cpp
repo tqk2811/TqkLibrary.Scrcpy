@@ -218,8 +218,6 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 		device_ctx->Unmap(this->m_texture_v.Get(), 0);
 		ZeroMemory(&map, sizeof(D3D11_MAPPED_SUBRESOURCE));
 
-		device_ctx->Flush();//force upload resoure from cpu -> gpu
-
 		this->m_isPlanar = TRUE;
 		return TRUE;
 	}
