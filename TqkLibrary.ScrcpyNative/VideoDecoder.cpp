@@ -238,12 +238,6 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 		/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 		device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
 
-		D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
-		if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
-		{
-			device_ctx->Dispatch(this->_nativeConfig.GpuThreadX, this->_nativeConfig.GpuThreadY, 1);
-		}
-
 		this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 		device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
 
@@ -338,12 +332,6 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
 				renderSurface->SetViewPort(device_ctx.Get(), renderSurface->Width(), renderSurface->Height());
-
-				D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
-				if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
-				{
-					device_ctx->Dispatch(this->_nativeConfig.GpuThreadX, this->_nativeConfig.GpuThreadY, 1);
-				}
 
 				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);

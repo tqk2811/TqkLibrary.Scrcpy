@@ -9,8 +9,6 @@ struct ScrcpyNativeConfig {
 	bool IsVideo;
 	INT32 ConnectionTimeout;
 	D3D11_FILTER Filter;
-	UINT32 GpuThreadX;
-	UINT32 GpuThreadY;
 	BOOL IsForceUiGpuFlush;
 };
 #endif // !ScrcpyNativeConfig_H

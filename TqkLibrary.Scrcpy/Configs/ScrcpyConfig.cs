@@ -62,17 +62,6 @@ namespace TqkLibrary.Scrcpy.Configs
         public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
         /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, only support directx 10 or 11<br></br>
-        /// Range 1-32
-        /// </summary>
-        public uint GpuThreadX { get; set; } = 1;
-        /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, only support directx 10 or 11<br></br>
-        /// Range 1-32
-        /// </summary>
-        public uint GpuThreadY { get; set; } = 4;
-
-        /// <summary>
         /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true
         /// </summary>
         public bool IsForceUiGpuFlush { get; set; } = false;
@@ -111,10 +100,6 @@ namespace TqkLibrary.Scrcpy.Configs
             if (!isVideo && !isAudio && !isControl)
                 throw new InvalidOperationException("At least one stream (video, audio, control) must be enabled.");
 
-            if (GpuThreadX < 1) GpuThreadX = 1;
-            if (GpuThreadY < 1) GpuThreadY = 1;
-            if (GpuThreadX > 32) GpuThreadX = 32;
-            if (GpuThreadY > 32) GpuThreadY = 32;
             return new ScrcpyNativeConfig
             {
                 HwType = HwType,
@@ -125,8 +110,6 @@ namespace TqkLibrary.Scrcpy.Configs
                 IsVideo = isVideo,
                 ConnectionTimeout = ConnectionTimeout,
                 Filter = Filter,
-                GpuThreadX = GpuThreadX,
-                GpuThreadY = GpuThreadY,
                 IsForceUiGpuFlush = IsForceUiGpuFlush,
             };
         }
