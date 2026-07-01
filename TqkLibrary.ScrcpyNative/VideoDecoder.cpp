@@ -208,8 +208,6 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 	if (this->m_d3d11_renderTexture->Initialize(device.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height()) &&
 		this->m_d3d11_pixel_Nv12ToRgba->Initialize(device.Get(), this->_nativeConfig.Filter))
 	{
-		device_ctx->ClearState();
-
 		device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		this->m_vertex->Set(device_ctx.Get());
@@ -306,8 +304,6 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 			if (isNewFrame || isNewSurface)
 			{
-				device_ctx->ClearState();
-
 				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 				this->m_vertex->Set(device_ctx.Get());

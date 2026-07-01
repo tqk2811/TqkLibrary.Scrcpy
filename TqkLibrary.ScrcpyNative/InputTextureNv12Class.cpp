@@ -148,7 +148,6 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 		INT64 y_size = sourceFrame->linesize[0] * sourceFrame->height;
 		INT64 uv_size = sourceFrame->linesize[1] * uv_height;
 
-		device_ctx->ClearState();
 		HRESULT hr = 0;
 
 		D3D11_MAPPED_SUBRESOURCE map;
