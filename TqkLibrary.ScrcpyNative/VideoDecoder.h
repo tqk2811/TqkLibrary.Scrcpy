@@ -21,6 +21,9 @@ private:
 
 	ScrcpyNativeConfig _nativeConfig{};
 	AVFrame* _decoding_frame{ nullptr };
+	// Scratch frame the decode thread receives into OUTSIDE _mtx_frame, then swaps with
+	// _decoding_frame under the lock. Lets avcodec_receive_frame run without blocking the render thread.
+	AVFrame* _scratch_frame{ nullptr };
 	AVCodecContext* _codec_ctx{ nullptr };
 	const AVCodec* _codec{ nullptr };
 	AVHWDeviceType _hwType{ AV_HWDEVICE_TYPE_NONE };

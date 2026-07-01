@@ -13,6 +13,7 @@ VideoDecoder::VideoDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativ
 VideoDecoder::~VideoDecoder() {
 	avcodec_free_context(&_codec_ctx);
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
+	if (this->_scratch_frame != NULL) av_frame_free(&_scratch_frame);
 	DeleteHeap(this->m_vertex);
 	DeleteHeap(this->m_d3d11_inputNv12);
 	DeleteHeap(this->m_d3d11_pixel_Nv12ToRgba);
@@ -33,6 +34,10 @@ bool VideoDecoder::Init() {
 
 	this->_decoding_frame = av_frame_alloc();
 	if (this->_decoding_frame == NULL)
+		return FALSE;
+
+	this->_scratch_frame = av_frame_alloc();
+	if (this->_scratch_frame == NULL)
 		return FALSE;
 
 	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
@@ -110,12 +115,24 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 #endif
 	if (avcheck(avcodec_send_packet(_codec_ctx, packet)))
 	{
-		_mtx_frame.lock();//lock read frame
-		av_frame_unref(_decoding_frame);
-		result = avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame));
+		// Decode into a scratch frame OUTSIDE the lock. avcodec_receive_frame is the expensive step
+		// (software YUV decode on the CPU / HW surface retrieval) and only ever runs on this single
+		// decode thread, so _codec_ctx needs no lock. Keeping it out of _mtx_frame means the render
+		// thread (Draw/IsNewFrame) no longer stalls while a frame is being decoded.
+		av_frame_unref(_scratch_frame);
+		result = avcheck(avcodec_receive_frame(_codec_ctx, _scratch_frame));
 
 		if (result)
 		{
+			_mtx_frame.lock();
+			// Publish the freshly decoded frame with a cheap pointer swap, then upload it to the NV12
+			// texture. Both stay inside the lock because they touch state shared with the render thread:
+			// _decoding_frame, and the m_d3d11_inputNv12 texture drawn via the same D3D11 device context
+			// (SINGLETHREADED on the software path, so Copy and Draw must not run concurrently).
+			AVFrame* tmp = _decoding_frame;
+			_decoding_frame = _scratch_frame;
+			_scratch_frame = tmp;
+
 			if (_nativeConfig.IsUseD3D11ForUiRender &&
 				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
 					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
@@ -125,8 +142,8 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
 				}
 			}
+			_mtx_frame.unlock();
 		}
-		_mtx_frame.unlock();
 	}
 #if _DEBUG
 	auto finish(std::chrono::high_resolution_clock::now());
