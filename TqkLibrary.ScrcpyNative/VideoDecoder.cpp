@@ -40,11 +40,6 @@ bool VideoDecoder::Init() {
 	if (this->_scratch_frame == NULL)
 		return FALSE;
 
-	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
-		return FALSE;
-	}
-
-
 	if (this->_hwType != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
 	{
 		if (!avcheck(av_hwdevice_ctx_create(
@@ -54,6 +49,20 @@ bool VideoDecoder::Init() {
 			nullptr,
 			0)))
 			return FALSE;
+
+		// Zero-copy: route D3D11 frame-format negotiation through GetHwFormat so it can allocate a
+		// shader-readable pool. Enabled automatically when the driver supports it — GetHwFormat ->
+		// SetupHwFramesCtx gates on CheckFormatSupport and falls back to the copy path otherwise.
+		// Must be set before avcodec_open2; get_format itself runs at the first decode.
+		if (this->_hwType == AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA)
+		{
+			this->_codec_ctx->opaque = this;
+			this->_codec_ctx->get_format = &VideoDecoder::GetHwFormat;
+		}
+	}
+
+	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
+		return FALSE;
 	}
 
 	if (this->_nativeConfig.IsUseD3D11ForUiRender)
@@ -104,6 +113,69 @@ bool VideoDecoder::Init() {
 	return TRUE;
 }
 
+enum AVPixelFormat VideoDecoder::GetHwFormat(AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts) {
+	VideoDecoder* self = reinterpret_cast<VideoDecoder*>(ctx->opaque);
+	for (const enum AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p)
+	{
+		if (*p == AV_PIX_FMT_D3D11)
+		{
+			if (self != nullptr)
+				self->SetupHwFramesCtx(ctx);
+			return AV_PIX_FMT_D3D11;
+		}
+	}
+	// D3D11 not offered: fall back to the decoder's first (software) format.
+	return pix_fmts[0];
+}
+
+void VideoDecoder::SetupHwFramesCtx(AVCodecContext* ctx) {
+	// Early gate: only request a shader-readable pool if the driver can actually sample NV12 in a
+	// shader. CheckFormatSupport is cheap; av_hwframe_ctx_init and the per-slice SRV creation remain
+	// the final authority, hence the copy-path fallback kept everywhere below.
+	AVHWDeviceContext* hw_device_ctx = reinterpret_cast<AVHWDeviceContext*>(ctx->hw_device_ctx->data);
+	AVD3D11VADeviceContext* d3d11va_device_ctx = reinterpret_cast<AVD3D11VADeviceContext*>(hw_device_ctx->hwctx);
+
+	UINT nv12_support = 0;
+	if (FAILED(d3d11va_device_ctx->device->CheckFormatSupport(DXGI_FORMAT_NV12, &nv12_support)) ||
+		(nv12_support & D3D11_FORMAT_SUPPORT_SHADER_SAMPLE) == 0)
+	{
+#if _DEBUG
+		printf("VideoDecoder: driver can't shader-sample NV12, zero-copy disabled\r\n");
+#endif
+		return;// leave ctx->hw_frames_ctx null -> default decode-only pool + copy path
+	}
+
+	AVBufferRef* frames_ref = nullptr;
+	if (!avcheck(avcodec_get_hw_frames_parameters(ctx, ctx->hw_device_ctx, AV_PIX_FMT_D3D11, &frames_ref)) ||
+		frames_ref == nullptr)
+		return;// leave ctx->hw_frames_ctx null: the decoder allocates its default decode-only pool
+
+	AVHWFramesContext* frames_ctx = reinterpret_cast<AVHWFramesContext*>(frames_ref->data);
+	AVD3D11VAFramesContext* d3d11_frames = reinterpret_cast<AVD3D11VAFramesContext*>(frames_ctx->hwctx);
+
+	// Keep the decoder binding and add shader-resource so the renderer can create SRVs on the pool
+	// textures. Give the pool a little headroom: the scratch-frame swap (see Decode) keeps two
+	// frames referenced at once, on top of what the decoder itself needs.
+	d3d11_frames->BindFlags |= D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE;
+	if (frames_ctx->initial_pool_size > 0)
+		frames_ctx->initial_pool_size += 2;
+
+	if (avcheck(av_hwframe_ctx_init(frames_ref)))
+	{
+		ctx->hw_frames_ctx = frames_ref;// decoder takes ownership of the ref
+		this->_isHwShaderResourcePool = true;
+#if _DEBUG
+		printf("VideoDecoder: zero-copy D3D11 pool (SHADER_RESOURCE) ready\r\n");
+#endif
+	}
+	else
+	{
+		// Driver refused the combined bind flags: drop our pool so the decoder falls back to its
+		// default one and the existing copy path keeps working.
+		av_buffer_unref(&frames_ref);
+	}
+}
+
 bool VideoDecoder::Decode(const AVPacket* packet) {
 	if (packet == nullptr)
 		return false;
@@ -139,7 +211,7 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 			{
 				if (this->m_d3d11_inputNv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
 				{
-					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
+					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDevice(), this->m_d3d11->GetDeviceContext(), _decoding_frame, this->_isHwShaderResourcePool);
 				}
 			}
 			_mtx_frame.unlock();

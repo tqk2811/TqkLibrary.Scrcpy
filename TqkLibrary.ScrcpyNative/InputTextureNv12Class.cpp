@@ -116,16 +116,29 @@ void InputTextureNv12Class::Shutdown() {
 	m_uv_View.Reset();
 	m_u_View.Reset();
 	m_v_View.Reset();
+
+	m_slice_views.clear();
+	m_current_y_view = nullptr;
+	m_current_uv_view = nullptr;
+	m_isZeroCopy = false;
 }
 
-bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame) {
+bool InputTextureNv12Class::Copy(ID3D11Device* device, ID3D11DeviceContext* device_ctx, const AVFrame* sourceFrame, bool zeroCopy) {
 	if (sourceFrame->format == AV_PIX_FMT_D3D11 && sourceFrame->hw_frames_ctx != nullptr)
 	{
-		ComPtr<ID3D11Texture2D> texture = (ID3D11Texture2D*)sourceFrame->data[0];
-		const UINT64 texture_index = (UINT64)sourceFrame->data[1];
+		ID3D11Texture2D* texture = (ID3D11Texture2D*)sourceFrame->data[0];
+		const UINT texture_index = (UINT)(UINT64)sourceFrame->data[1];
 
-		D3D11_TEXTURE2D_DESC desc{ 0 };
-		texture->GetDesc(&desc);
+		// Zero-copy: point the shader at the decoder's own texture slice instead of copying it.
+		if (zeroCopy && this->GetOrCreateSliceViews(device, texture, texture_index))
+		{
+			this->m_isZeroCopy = true;
+			this->m_isPlanar = FALSE;
+			return true;
+		}
+
+		// Fallback: copy the decoded slice into our own shader-readable NV12 texture.
+		this->m_isZeroCopy = false;
 
 		D3D11_BOX box{ 0 };
 		box.left = 0;
@@ -137,13 +150,14 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 
 		device_ctx->CopySubresourceRegion(
 			this->m_texture_nv12.Get(), 0, 0, 0, 0,
-			texture.Get(), (UINT32)texture_index, &box
+			texture, texture_index, &box
 		);
 		this->m_isPlanar = FALSE;
 		return true;
 	}
 	else if (sourceFrame->format == AV_PIX_FMT_YUV420P)
 	{
+		this->m_isZeroCopy = false;
 		INT uv_height = sourceFrame->height / 2;
 		INT64 y_size = sourceFrame->linesize[0] * sourceFrame->height;
 		INT64 uv_size = sourceFrame->linesize[1] * uv_height;
@@ -222,4 +236,41 @@ bool InputTextureNv12Class::Copy(ID3D11DeviceContext* device_ctx, const AVFrame*
 		return TRUE;
 	}
 	return false;
+}
+
+bool InputTextureNv12Class::GetOrCreateSliceViews(ID3D11Device* device, ID3D11Texture2D* texture, UINT slice) {
+	auto key = std::make_pair(texture, slice);
+	auto it = this->m_slice_views.find(key);
+	if (it != this->m_slice_views.end())
+	{
+		this->m_current_y_view = it->second.first.Get();
+		this->m_current_uv_view = it->second.second.Get();
+		return true;
+	}
+
+	// The decoder pool is an NV12 Texture2DArray; view one slice's Y (R8) and UV (R8G8) planes.
+	// A TEXTURE2DARRAY view with ArraySize 1 also covers the non-array (per-frame texture) case.
+	D3D11_SHADER_RESOURCE_VIEW_DESC yDesc = {};
+	yDesc.Format = DXGI_FORMAT_R8_UNORM;
+	yDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	yDesc.Texture2DArray.MostDetailedMip = 0;
+	yDesc.Texture2DArray.MipLevels = 1;
+	yDesc.Texture2DArray.FirstArraySlice = slice;
+	yDesc.Texture2DArray.ArraySize = 1;
+
+	ComPtr<ID3D11ShaderResourceView> yView;
+	if (FAILED(device->CreateShaderResourceView(texture, &yDesc, yView.GetAddressOf())))
+		return false;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC uvDesc = yDesc;
+	uvDesc.Format = DXGI_FORMAT_R8G8_UNORM;
+
+	ComPtr<ID3D11ShaderResourceView> uvView;
+	if (FAILED(device->CreateShaderResourceView(texture, &uvDesc, uvView.GetAddressOf())))
+		return false;
+
+	this->m_current_y_view = yView.Get();
+	this->m_current_uv_view = uvView.Get();
+	this->m_slice_views[key] = std::make_pair(yView, uvView);
+	return true;
 }

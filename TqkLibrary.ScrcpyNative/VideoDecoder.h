@@ -19,6 +19,14 @@ private:
 	bool FFmpegTransfer(AVFrame* frame);
 	bool Nv12Convert(AVFrame* frame);
 
+	// get_format callback: when the decoder offers D3D11, request a shader-readable frames pool so
+	// the renderer can sample decoded textures directly (zero-copy). Static to match the C callback
+	// signature; reaches this instance through AVCodecContext::opaque.
+	static enum AVPixelFormat GetHwFormat(AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts);
+	void SetupHwFramesCtx(AVCodecContext* ctx);
+	// True once a D3D11 pool with D3D11_BIND_SHADER_RESOURCE was created (zero-copy available).
+	bool _isHwShaderResourcePool{ false };
+
 	ScrcpyNativeConfig _nativeConfig{};
 	AVFrame* _decoding_frame{ nullptr };
 	// Scratch frame the decode thread receives into OUTSIDE _mtx_frame, then swaps with
