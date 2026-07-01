@@ -27,6 +27,10 @@ bool VideoDecoder::Init() {
 	if (this->_codec_ctx == NULL)
 		return FALSE;
 
+	// Force low delay: output each decoded frame immediately without reorder buffering.
+	// scrcpy streams contain no B-frames, so this is safe and mirrors scrcpy's own decoder.
+	this->_codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
+
 	this->_decoding_frame = av_frame_alloc();
 	if (this->_decoding_frame == NULL)
 		return FALSE;
