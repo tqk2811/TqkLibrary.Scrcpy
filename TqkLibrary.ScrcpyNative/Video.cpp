@@ -99,7 +99,7 @@ void Video::threadStart() {
 	if (!this->_videoDecoder->Init())
 		return;
 
-	AVPacket packet;
+	AVPacket packet = {};
 	while (!this->_isStopMainLoop)
 	{
 		if (!this->_videoSock->ReadPackage(&packet))
