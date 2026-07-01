@@ -62,9 +62,14 @@ namespace TqkLibrary.Scrcpy.Configs
         public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
         /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true
+        /// Flush the D3D11 device after each UI draw so the rendered frame is submitted before the WPF
+        /// surface queue presents it. Rendering uses a different D3D11 device than the surface queue's
+        /// producer, so without this an isolated present (e.g. resizing the window while the device is
+        /// idle) can show a black screen.<br></br>
+        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true.<br></br>
+        /// Default: true
         /// </summary>
-        public bool IsForceUiGpuFlush { get; set; } = false;
+        public bool IsForceUiGpuFlush { get; set; } = true;
 
         /// <summary>
         /// Default: 3000

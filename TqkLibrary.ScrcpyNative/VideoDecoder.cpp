@@ -329,9 +329,12 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
 				renderSurface->SetViewPort(device_ctx.Get(), renderSurface->Width(), renderSurface->Height());
 
-				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
 
+				// Flush so our draw is submitted before the WPF surface queue picks up the surface: we
+				// render with a DIFFERENT D3D11 device (FFmpeg's hwaccel / the software device) than the
+				// queue's producer, so without a flush an isolated present (e.g. resizing the window
+				// while the device is idle) can show black. IsForceUiGpuFlush defaults to true.
 				if (this->_nativeConfig.IsForceUiGpuFlush)
 					device_ctx->Flush();
 			}
