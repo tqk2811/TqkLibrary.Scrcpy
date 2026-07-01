@@ -16,6 +16,7 @@ ScrcpyNativeExport INT64 ScrcpyReadAudioRaw(Scrcpy* scrcpy, BYTE* buffer, INT32 
 ScrcpyNativeExport RenderTextureSurfaceClass* D3DImageViewAlloc();
 ScrcpyNativeExport void D3DImageViewFree(RenderTextureSurfaceClass* renderSurface);
 ScrcpyNativeExport bool D3DImageViewRender(RenderTextureSurfaceClass* renderSurface, Scrcpy* scrcpy, IUnknown* surface, bool isNewSurface, bool& isNewtargetView);
+ScrcpyNativeExport bool ScrcpyIsNewFrame(Scrcpy* scrcpy, INT64& pts);
 
 typedef bool (*ClipboardReceivedDelegate)(BYTE* buffer, int length);
 typedef bool (*ClipboardAcknowledgementDelegate)(UINT64 sequence);

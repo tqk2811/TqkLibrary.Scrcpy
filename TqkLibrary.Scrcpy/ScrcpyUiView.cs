@@ -77,5 +77,22 @@ namespace TqkLibrary.Scrcpy
             }
             return result;
         }
+
+        long _lastPresentedPts;
+        /// <summary>
+        /// Returns <see langword="true"/> when the decoder holds a frame newer than the one this view
+        /// last presented (advancing the internal cursor). Lets the caller skip requesting a render when
+        /// nothing new has decoded, avoiding a full present on every display refresh.
+        /// </summary>
+        public bool HasNewFrame()
+        {
+            bool result = false;
+            if (countdownEvent.TryAddCount())
+            {
+                result = Scrcpy.IsNewFrame(ref _lastPresentedPts);
+                countdownEvent.Signal();
+            }
+            return result;
+        }
     }
 }

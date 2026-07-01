@@ -164,6 +164,8 @@ bool Video::GetCurrentRgbaFrame(AVFrame* frame) {
 }
 
 bool Video::IsNewFrame(INT64& pts) {
+	if (!this->_ishaveFrame || this->_videoDecoder == nullptr)
+		return false;
 	return this->_videoDecoder->IsNewFrame(pts);
 }
 
