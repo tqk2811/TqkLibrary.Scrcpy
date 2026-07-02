@@ -29,8 +29,6 @@ namespace TqkLibrary.Scrcpy.Configs
 
         public D3D11Filter Filter;
 
-        public uint GpuThreadX;
-        public uint GpuThreadY;
         [MarshalAs(UnmanagedType.Bool)]
         public bool IsForceUiGpuFlush;
     }

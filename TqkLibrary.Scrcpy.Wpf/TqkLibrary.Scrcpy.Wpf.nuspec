@@ -14,15 +14,15 @@
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="TqkLibrary.Scrcpy" version="$version$" />
-				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.1.21" />
 			</group>
 			<group targetFramework="net6.0-windows7.0">
 				<dependency id="TqkLibrary.Scrcpy" version="$version$" />
-				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.1.21" />
 			</group>
 			<group targetFramework="net7.0-windows7.0">
 				<dependency id="TqkLibrary.Scrcpy" version="$version$" />
-				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.0.1" />
+				<dependency id="TqkLibrary.Wpf.Interop.DirectX" version="1.1.21" />
 			</group>
 		</dependencies>
 	</metadata>

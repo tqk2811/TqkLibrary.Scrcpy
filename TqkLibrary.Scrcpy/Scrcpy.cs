@@ -491,6 +491,17 @@ namespace TqkLibrary.Scrcpy
             return result;
         }
 
+        internal bool IsNewFrame(ref long pts)
+        {
+            bool result = false;
+            if (countdownEvent.SafeTryAddCount())//must safe because this is call from ui thread
+            {
+                result = NativeWrapper.ScrcpyIsNewFrame(this._handle, ref pts);
+                countdownEvent.Signal();
+            }
+            return result;
+        }
+
         Size GetScreenSize()
         {
             int w = 0;
