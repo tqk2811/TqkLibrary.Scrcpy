@@ -10,6 +10,8 @@ SocketWrapper::SocketWrapper(SOCKET sock) {
 
 SocketWrapper::~SocketWrapper() {
 	// Socket is owned and closed by C# — do not closesocket here
+	if (this->_packetBufferPool)
+		av_buffer_pool_uninit(&this->_packetBufferPool);
 }
 
 int SocketWrapper::ReadAll(BYTE* buff, int length) {
@@ -66,9 +68,35 @@ bool SocketWrapper::ReadPackage(AVPacket* packet) {
 	UINT64 pts_flags = sc_read64be(header_buffer);
 	INT32 len = sc_read32be(header_buffer + 8);
 
-	if (!avcheck(av_new_packet(packet, len))) {
-		return false;
+	// Recycle a pooled, reference-counted buffer instead of allocating a new one per packet
+	// (what av_new_packet does). avcodec_send_packet takes its own reference, so a buffer only
+	// returns to the pool once every reference is dropped: reuse is always safe — if the decoder
+	// still holds it, the pool hands out a fresh buffer instead. Decoders may read up to
+	// AV_INPUT_BUFFER_PADDING_SIZE bytes past the data, so include that padding and zero it.
+	int required = len + AV_INPUT_BUFFER_PADDING_SIZE;
+	if (this->_packetBufferPool == nullptr || this->_packetBufferPoolSize < required)
+	{
+		if (this->_packetBufferPool)
+			av_buffer_pool_uninit(&this->_packetBufferPool);
+		// Grow with headroom so normal keyframe-size jitter doesn't rebuild the pool every frame.
+		this->_packetBufferPoolSize = required + required / 2;
+		this->_packetBufferPool = av_buffer_pool_init(this->_packetBufferPoolSize, nullptr);
+		if (this->_packetBufferPool == nullptr)
+		{
+			this->_packetBufferPoolSize = 0;
+			return false;
+		}
 	}
+
+	av_packet_unref(packet);
+	AVBufferRef* buffer = av_buffer_pool_get(this->_packetBufferPool);
+	if (buffer == nullptr)
+		return false;
+
+	packet->buf = buffer;
+	packet->data = buffer->data;
+	packet->size = len;
+	memset(packet->data + len, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 
 	if (this->ReadAll(packet->data, len) != len)
 	{
