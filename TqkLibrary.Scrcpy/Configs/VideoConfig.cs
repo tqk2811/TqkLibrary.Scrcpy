@@ -11,7 +11,7 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    ///
+    /// Display video stream configuration (used when the video source is the device display).
     /// </summary>
     public class VideoConfig : IConfig
     {

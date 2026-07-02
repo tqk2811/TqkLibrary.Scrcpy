@@ -10,7 +10,7 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// Audio stream configuration (enable, codec, bitrate, encoder).
     /// </summary>
     public class AudioConfig : IConfig
     {
