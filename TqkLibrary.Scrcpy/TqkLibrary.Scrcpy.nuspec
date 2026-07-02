@@ -35,6 +35,7 @@
 
 	<files>
 		<file src="..\LICENSE" target="LICENSE" />
+		<file src="..\THIRD-PARTY-NOTICES.txt" target="THIRD-PARTY-NOTICES.txt" />
 		<file src="..\README.md" target="docs\README.md" />
 
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.dll" target="lib\" />
