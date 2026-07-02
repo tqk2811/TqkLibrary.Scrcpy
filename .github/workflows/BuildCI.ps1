@@ -3,6 +3,11 @@
 # (GitHub Release asset + optional nuget.org). Resolves the repo root from this script's
 # location, so it can be invoked from anywhere.
 $ErrorActionPreference = 'Stop'
+# Quiet the .NET first-run experience/telemetry so freshly installed tools do not
+# print a banner to stdout that would contaminate captured command output.
+$env:DOTNET_NOLOGO = 'true'
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = 'true'
 $root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 Set-Location $root
 
@@ -16,7 +21,20 @@ if (-not (Get-Command dotnet-gitversion -ErrorAction SilentlyContinue)) {
     dotnet tool install -g GitVersion.Tool | Out-Host
     $env:PATH = "$env:PATH;$env:USERPROFILE\.dotnet\tools"
 }
-$gv = dotnet-gitversion /output json | ConvertFrom-Json
+# GitVersion stdout can be preceded by log lines on a fresh runner, and the freshly
+# installed tool may even exit non-zero on its first call. Relax the error preference
+# for the call (so a non-zero native exit does not terminate the script), capture all
+# output, then slice out the JSON object so parsing is robust regardless of noise.
+$eap = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$gvRaw = (dotnet-gitversion /output json 2>&1 | Out-String)
+$ErrorActionPreference = $eap
+$jsonStart = $gvRaw.IndexOf('{'); $jsonEnd = $gvRaw.LastIndexOf('}')
+if ($jsonStart -lt 0 -or $jsonEnd -le $jsonStart) {
+    Write-Host "GitVersion raw output:`n$gvRaw"
+    throw "dotnet-gitversion produced no JSON output"
+}
+$gv = $gvRaw.Substring($jsonStart, ($jsonEnd - $jsonStart + 1)) | ConvertFrom-Json
 $verMajor = [int]$gv.Major; $verMinor = [int]$gv.Minor; $verBuild = [int]$gv.CommitsSinceVersionSource
 Write-Host "Version: $verMajor.$verMinor.$verBuild"
 

@@ -99,7 +99,7 @@ void Video::threadStart() {
 	if (!this->_videoDecoder->Init())
 		return;
 
-	AVPacket packet;
+	AVPacket packet = {};
 	while (!this->_isStopMainLoop)
 	{
 		if (!this->_videoSock->ReadPackage(&packet))
@@ -164,6 +164,8 @@ bool Video::GetCurrentRgbaFrame(AVFrame* frame) {
 }
 
 bool Video::IsNewFrame(INT64& pts) {
+	if (!this->_ishaveFrame || this->_videoDecoder == nullptr)
+		return false;
 	return this->_videoDecoder->IsNewFrame(pts);
 }
 

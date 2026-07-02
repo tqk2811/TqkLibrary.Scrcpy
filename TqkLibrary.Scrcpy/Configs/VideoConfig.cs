@@ -11,7 +11,7 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// Display video stream configuration (used when the video source is the device display).
     /// </summary>
     public class VideoConfig : IConfig
     {
@@ -22,10 +22,12 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("display_id")]
         public int? DisplayId { get; set; }
         /// <summary>
+        /// Lock the captured video to a fixed orientation; <see cref="Orientations.Auto"/> follows the
+        /// device rotation.<br></br>
         /// Default: <see cref="Orientations.Auto"/>
         /// </summary>
         [OptionName("lock_video_orientation")]
-        public Orientations Orientation { get; set; } = Orientations.Auto;
+        public Orientations LockVideoOrientation { get; set; } = Orientations.Auto;
         /// <summary>
         /// Default: 0 or null (unlimit)
         /// </summary>
@@ -78,7 +80,7 @@ namespace TqkLibrary.Scrcpy.Configs
         public IEnumerable<string> GetArguments()
         {
             yield return this._GetArgument(x => x.DisplayId, x => x.HasValue);
-            yield return this._GetArgument(x => x.Orientation, x => x != Orientations.Auto);
+            yield return this._GetArgument(x => x.LockVideoOrientation, x => x != Orientations.Auto);
             yield return this._GetArgument(x => x.MaxFps, x => x > 0);
             yield return this._GetArgument(x => x.VideoBitrate, x => x > 0);
             yield return this._GetArgument(x => x.VideoCodec, string.IsNullOrWhiteSpace);

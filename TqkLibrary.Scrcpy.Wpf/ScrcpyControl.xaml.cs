@@ -340,7 +340,13 @@ namespace TqkLibrary.Scrcpy.Wpf
                     if (videoSize.HasValue) VideoSizeChanged?.Invoke(this, videoSize.Value);
                     host_SizeChanged(null, null);
                 }
-                InteropImage?.RequestRender();
+                // Only present when the decoder has a frame newer than we last drew — otherwise the
+                // render loop stays idle. Resize / DPI / new-surface repaint on their own via
+                // D3D11Image.SetPixelSize (its isNewSurface draw is flushed), so gating here is safe.
+                if (ScrcpyUiView?.HasNewFrame() ?? false)
+                {
+                    InteropImage?.RequestRender();
+                }
                 this.lastRender = args.RenderingTime;
             }
         }
