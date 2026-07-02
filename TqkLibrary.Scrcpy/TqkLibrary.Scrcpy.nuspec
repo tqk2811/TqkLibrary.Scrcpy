@@ -9,7 +9,7 @@
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
-		<license type="expression">MIT</license>
+		<license type="expression">GPL-3.0-or-later</license>
 		<readme>docs\README.md</readme>
 		<dependencies>
 			<group targetFramework="net462">
@@ -34,6 +34,8 @@
 	</metadata>
 
 	<files>
+		<file src="..\LICENSE" target="LICENSE" />
+		<file src="..\THIRD-PARTY-NOTICES.txt" target="THIRD-PARTY-NOTICES.txt" />
 		<file src="..\README.md" target="docs\README.md" />
 
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.dll" target="lib\" />
