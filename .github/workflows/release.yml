@@ -33,13 +33,25 @@ jobs:
         with:
           fetch-depth: 0
 
+      # The highest target framework is net8.0, and a newer SDK builds older TFMs via
+      # reference packs (net10/9/8 build net6/net7). So any SDK major >= 8 is enough;
+      # only run setup-dotnet when none is present (windows-latest already ships >= 8).
+      - name: Check installed .NET SDKs
+        id: dotnet_check
+        shell: pwsh
+        run: |
+          $sdks = if (Get-Command dotnet -ErrorAction SilentlyContinue) { @(dotnet --list-sdks 2>$null) } else { @() }
+          $haveSdk = [bool]($sdks | Where-Object { if ($_ -match '^(\d+)\.') { [int]$Matches[1] -ge 8 } })
+          $install = -not $haveSdk
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "install=$($install.ToString().ToLower())"
+          Write-Host "Installed SDKs:`n$($sdks -join "`n")"
+          Write-Host "Have .NET SDK >= 8: $haveSdk  -> install=$install"
+
       - name: Setup .NET
+        if: steps.dotnet_check.outputs.install == 'true'
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            6.0.x
-            7.0.x
-            8.0.x
+          dotnet-version: 8.0.x
 
       - name: Install git-cliff
         shell: pwsh
