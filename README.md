@@ -39,6 +39,8 @@ The bundled `scrcpy-server.jar` is taken, unmodified, from the [scrcpy](https://
 
 ## License
 
-`TqkLibrary.Scrcpy` is licensed under the **MIT License**.
+`TqkLibrary.Scrcpy` is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)** — see [LICENSE](LICENSE).
 
-The bundled scrcpy server is a separate work licensed under the **Apache License 2.0** by Genymobile; see the [scrcpy repository](https://github.com/Genymobile/scrcpy) for its license terms.
+This library links and redistributes **FFmpeg** built with `--enable-gpl --enable-version3` (and x264/x265), which is itself **GPL-3.0-or-later**. Because that FFmpeg build is GPL, the combined work — this library and any application that redistributes it — must be licensed under GPL-3.0-or-later, including making the corresponding source available to recipients.
+
+The bundled scrcpy server (`scrcpy-server.jar`) is a separate program by Genymobile, executed on the device (not linked into this library), licensed under the **Apache License 2.0**; see the [scrcpy repository](https://github.com/Genymobile/scrcpy) for its terms.
