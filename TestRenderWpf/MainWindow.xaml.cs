@@ -37,12 +37,10 @@ namespace TestRenderWpf
         readonly MainWindowVM mainWindowVM;
         readonly ScrcpyConfig scrcpyConfig = new ScrcpyConfig()
         {
-            //HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+            HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
             IsUseD3D11ForUiRender = true,
             IsUseD3D11ForConvert = true,
-            GpuThreadX = 1,
-            GpuThreadY = 4,
-            IsForceUiGpuFlush = false,
+            IsForceUiGpuFlush = true,
             ConnectionTimeout = 10000,
             ServerConfig = new ScrcpyServerConfig()
             {
@@ -57,6 +55,9 @@ namespace TestRenderWpf
                     StayAwake = true,
                     PowerOn = true,
                 },
+                // Cap the captured video's longer side to cut client decode/GPU load (biggest win when
+                // mirroring many devices at once). 0 = device native resolution; lower = lighter + softer.
+                MaxSize = 720,
                 VideoConfig = new VideoConfig()
                 {
                     MaxFps = 24,

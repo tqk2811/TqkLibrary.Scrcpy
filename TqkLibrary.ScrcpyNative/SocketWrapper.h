@@ -16,5 +16,9 @@ public:
 	AVCodecID ReadCodecId();
 private:
 	SOCKET _sock;
+	// Recycles packet data buffers across ReadPackage calls so we don't malloc/free one per frame.
+	// Owned by this wrapper (single read thread), torn down in the destructor.
+	AVBufferPool* _packetBufferPool{ nullptr };
+	int _packetBufferPoolSize{ 0 };
 };
 #endif // !SocketWrapper_H
