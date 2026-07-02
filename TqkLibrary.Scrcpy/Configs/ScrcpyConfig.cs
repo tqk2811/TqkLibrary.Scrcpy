@@ -11,7 +11,8 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// Top-level scrcpy client configuration: the server (device-side) config plus client-side
+    /// decoding/rendering options and connection settings.
     /// </summary>
     public class ScrcpyConfig
     {
@@ -72,16 +73,19 @@ namespace TqkLibrary.Scrcpy.Configs
         public bool IsForceUiGpuFlush { get; set; } = true;
 
         /// <summary>
+        /// Time in milliseconds to wait for the device to connect before giving up.<br></br>
         /// Default: 3000
         /// </summary>
         public int ConnectionTimeout { get; set; } = 3000;
 
         /// <summary>
+        /// Path to the adb executable used to talk to the device.<br></br>
         /// Default: adb.exe
         /// </summary>
         public string AdbPath { get; set; } = "adb.exe";
 
         /// <summary>
+        /// Path to the local scrcpy server jar that is pushed to the device.<br></br>
         /// Default: scrcpy-server.jar
         /// </summary>
         public string ScrcpyServerPath { get; set; } = "scrcpy-server.jar";

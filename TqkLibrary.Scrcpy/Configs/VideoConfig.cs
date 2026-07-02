@@ -11,7 +11,7 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// Display video stream configuration (used when the video source is the device display).
     /// </summary>
     public class VideoConfig : IConfig
     {
@@ -22,6 +22,8 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("display_id")]
         public int? DisplayId { get; set; }
         /// <summary>
+        /// Lock the captured video to a fixed orientation; <see cref="Orientations.Auto"/> follows the
+        /// device rotation.<br></br>
         /// Default: <see cref="Orientations.Auto"/>
         /// </summary>
         [OptionName("lock_video_orientation")]
