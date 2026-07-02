@@ -71,7 +71,7 @@ void Audio::threadStart() {
 
 	while (!this->_isStopMainLoop)
 	{
-		AVPacket packet;
+		AVPacket packet = {};
 		if (!this->_audioSock->ReadPackage(&packet))
 		{
 			av_packet_unref(&packet);
