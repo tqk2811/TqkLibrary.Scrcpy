@@ -33,7 +33,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Skip installing .NET when the runner already has SDK 6/7/8 (windows-latest ships them).
+      # Only run setup-dotnet if any required major is missing.
+      - name: Check installed .NET SDKs
+        id: dotnet_check
+        shell: pwsh
+        run: |
+          $sdks = if (Get-Command dotnet -ErrorAction SilentlyContinue) { @(dotnet --list-sdks 2>$null) } else { @() }
+          $missing = @('6.','7.','8.') | Where-Object { $maj = $_; -not ($sdks | Where-Object { $_.StartsWith($maj) }) }
+          $install = [bool]$missing
+          Add-Content -Path $env:GITHUB_OUTPUT -Value "install=$($install.ToString().ToLower())"
+          Write-Host "Installed SDKs:`n$($sdks -join "`n")"
+          Write-Host "Missing majors: $($missing -join ', ')  -> install=$install"
+
       - name: Setup .NET
+        if: steps.dotnet_check.outputs.install == 'true'
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |

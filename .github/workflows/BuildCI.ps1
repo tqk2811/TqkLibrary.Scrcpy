@@ -16,7 +16,15 @@ if (-not (Get-Command dotnet-gitversion -ErrorAction SilentlyContinue)) {
     dotnet tool install -g GitVersion.Tool | Out-Host
     $env:PATH = "$env:PATH;$env:USERPROFILE\.dotnet\tools"
 }
-$gv = dotnet-gitversion /output json | ConvertFrom-Json
+# GitVersion: write JSON to a file rather than piping stdout. On a fresh runner the
+# just-installed dotnet tool can emit a first-run banner to stdout on its first call,
+# which corrupts the piped JSON (ConvertFrom-Json then fails at line 1, position 1).
+# File output is immune to any console noise.
+$gvFile = Join-Path ([System.IO.Path]::GetTempPath()) 'gitversion.output.json'
+dotnet-gitversion /output file /outputfile $gvFile | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "dotnet-gitversion failed with exit code $LASTEXITCODE" }
+$gv = Get-Content $gvFile -Raw | ConvertFrom-Json
+Remove-Item $gvFile -Force -ErrorAction SilentlyContinue
 $verMajor = [int]$gv.Major; $verMinor = [int]$gv.Minor; $verBuild = [int]$gv.CommitsSinceVersionSource
 Write-Host "Version: $verMajor.$verMinor.$verBuild"
 
