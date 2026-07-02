@@ -27,7 +27,7 @@ namespace TqkLibrary.Scrcpy.Configs
         /// Default: <see cref="Orientations.Auto"/>
         /// </summary>
         [OptionName("lock_video_orientation")]
-        public Orientations Orientation { get; set; } = Orientations.Auto;
+        public Orientations LockVideoOrientation { get; set; } = Orientations.Auto;
         /// <summary>
         /// Default: 0 or null (unlimit)
         /// </summary>
@@ -80,7 +80,7 @@ namespace TqkLibrary.Scrcpy.Configs
         public IEnumerable<string> GetArguments()
         {
             yield return this._GetArgument(x => x.DisplayId, x => x.HasValue);
-            yield return this._GetArgument(x => x.Orientation, x => x != Orientations.Auto);
+            yield return this._GetArgument(x => x.LockVideoOrientation, x => x != Orientations.Auto);
             yield return this._GetArgument(x => x.MaxFps, x => x > 0);
             yield return this._GetArgument(x => x.VideoBitrate, x => x > 0);
             yield return this._GetArgument(x => x.VideoCodec, string.IsNullOrWhiteSpace);
