@@ -45,6 +45,9 @@ namespace TestRenderWpf
             ServerConfig = new ScrcpyServerConfig()
             {
                 IsControl = true,
+                // Cap the captured video's longer side to cut client decode/GPU load (biggest win when
+                // mirroring many devices at once). 0 = device native resolution; lower = lighter + softer.
+                MaxSize = 720,
                 VideoConfig = new VideoConfig()
                 {
                     MaxFps = 24
