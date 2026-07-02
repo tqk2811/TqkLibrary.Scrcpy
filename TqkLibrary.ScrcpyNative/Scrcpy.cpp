@@ -140,6 +140,19 @@ bool Scrcpy::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surface, b
 	return result;
 }
 
+bool Scrcpy::IsNewFrame(INT64& pts) {
+	_mutex.lock();
+
+	bool result = false;
+	if (this->_scrcpyInstance != nullptr &&
+		this->_scrcpyInstance->_video != nullptr) {
+		result = this->_scrcpyInstance->_video->IsNewFrame(pts);
+	}
+
+	_mutex.unlock();
+	return result;
+}
+
 bool Scrcpy::RegisterClipboardEvent(const ClipboardReceivedDelegate callback) {
 	this->clipboardCallback = callback;
 	return true;

@@ -13,6 +13,7 @@ VideoDecoder::VideoDecoder(const AVCodec* codec, const ScrcpyNativeConfig& nativ
 VideoDecoder::~VideoDecoder() {
 	avcodec_free_context(&_codec_ctx);
 	if (this->_decoding_frame != NULL) av_frame_free(&_decoding_frame);
+	if (this->_scratch_frame != NULL) av_frame_free(&_scratch_frame);
 	DeleteHeap(this->m_vertex);
 	DeleteHeap(this->m_d3d11_inputNv12);
 	DeleteHeap(this->m_d3d11_pixel_Nv12ToRgba);
@@ -27,14 +28,17 @@ bool VideoDecoder::Init() {
 	if (this->_codec_ctx == NULL)
 		return FALSE;
 
+	// Force low delay: output each decoded frame immediately without reorder buffering.
+	// scrcpy streams contain no B-frames, so this is safe and mirrors scrcpy's own decoder.
+	this->_codec_ctx->flags |= AV_CODEC_FLAG_LOW_DELAY;
+
 	this->_decoding_frame = av_frame_alloc();
 	if (this->_decoding_frame == NULL)
 		return FALSE;
 
-	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
+	this->_scratch_frame = av_frame_alloc();
+	if (this->_scratch_frame == NULL)
 		return FALSE;
-	}
-
 
 	if (this->_hwType != AVHWDeviceType::AV_HWDEVICE_TYPE_NONE)
 	{
@@ -45,6 +49,20 @@ bool VideoDecoder::Init() {
 			nullptr,
 			0)))
 			return FALSE;
+
+		// Zero-copy: route D3D11 frame-format negotiation through GetHwFormat so it can allocate a
+		// shader-readable pool. Enabled automatically when the driver supports it — GetHwFormat ->
+		// SetupHwFramesCtx gates on CheckFormatSupport and falls back to the copy path otherwise.
+		// Must be set before avcodec_open2; get_format itself runs at the first decode.
+		if (this->_hwType == AVHWDeviceType::AV_HWDEVICE_TYPE_D3D11VA)
+		{
+			this->_codec_ctx->opaque = this;
+			this->_codec_ctx->get_format = &VideoDecoder::GetHwFormat;
+		}
+	}
+
+	if (!avcheck(avcodec_open2(this->_codec_ctx, this->_codec, nullptr))) {
+		return FALSE;
 	}
 
 	if (this->_nativeConfig.IsUseD3D11ForUiRender)
@@ -95,6 +113,69 @@ bool VideoDecoder::Init() {
 	return TRUE;
 }
 
+enum AVPixelFormat VideoDecoder::GetHwFormat(AVCodecContext* ctx, const enum AVPixelFormat* pix_fmts) {
+	VideoDecoder* self = reinterpret_cast<VideoDecoder*>(ctx->opaque);
+	for (const enum AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p)
+	{
+		if (*p == AV_PIX_FMT_D3D11)
+		{
+			if (self != nullptr)
+				self->SetupHwFramesCtx(ctx);
+			return AV_PIX_FMT_D3D11;
+		}
+	}
+	// D3D11 not offered: fall back to the decoder's first (software) format.
+	return pix_fmts[0];
+}
+
+void VideoDecoder::SetupHwFramesCtx(AVCodecContext* ctx) {
+	// Early gate: only request a shader-readable pool if the driver can actually sample NV12 in a
+	// shader. CheckFormatSupport is cheap; av_hwframe_ctx_init and the per-slice SRV creation remain
+	// the final authority, hence the copy-path fallback kept everywhere below.
+	AVHWDeviceContext* hw_device_ctx = reinterpret_cast<AVHWDeviceContext*>(ctx->hw_device_ctx->data);
+	AVD3D11VADeviceContext* d3d11va_device_ctx = reinterpret_cast<AVD3D11VADeviceContext*>(hw_device_ctx->hwctx);
+
+	UINT nv12_support = 0;
+	if (FAILED(d3d11va_device_ctx->device->CheckFormatSupport(DXGI_FORMAT_NV12, &nv12_support)) ||
+		(nv12_support & D3D11_FORMAT_SUPPORT_SHADER_SAMPLE) == 0)
+	{
+#if _DEBUG
+		printf("VideoDecoder: driver can't shader-sample NV12, zero-copy disabled\r\n");
+#endif
+		return;// leave ctx->hw_frames_ctx null -> default decode-only pool + copy path
+	}
+
+	AVBufferRef* frames_ref = nullptr;
+	if (!avcheck(avcodec_get_hw_frames_parameters(ctx, ctx->hw_device_ctx, AV_PIX_FMT_D3D11, &frames_ref)) ||
+		frames_ref == nullptr)
+		return;// leave ctx->hw_frames_ctx null: the decoder allocates its default decode-only pool
+
+	AVHWFramesContext* frames_ctx = reinterpret_cast<AVHWFramesContext*>(frames_ref->data);
+	AVD3D11VAFramesContext* d3d11_frames = reinterpret_cast<AVD3D11VAFramesContext*>(frames_ctx->hwctx);
+
+	// Keep the decoder binding and add shader-resource so the renderer can create SRVs on the pool
+	// textures. Give the pool a little headroom: the scratch-frame swap (see Decode) keeps two
+	// frames referenced at once, on top of what the decoder itself needs.
+	d3d11_frames->BindFlags |= D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE;
+	if (frames_ctx->initial_pool_size > 0)
+		frames_ctx->initial_pool_size += 2;
+
+	if (avcheck(av_hwframe_ctx_init(frames_ref)))
+	{
+		ctx->hw_frames_ctx = frames_ref;// decoder takes ownership of the ref
+		this->_isHwShaderResourcePool = true;
+#if _DEBUG
+		printf("VideoDecoder: zero-copy D3D11 pool (SHADER_RESOURCE) ready\r\n");
+#endif
+	}
+	else
+	{
+		// Driver refused the combined bind flags: drop our pool so the decoder falls back to its
+		// default one and the existing copy path keeps working.
+		av_buffer_unref(&frames_ref);
+	}
+}
+
 bool VideoDecoder::Decode(const AVPacket* packet) {
 	if (packet == nullptr)
 		return false;
@@ -106,23 +187,35 @@ bool VideoDecoder::Decode(const AVPacket* packet) {
 #endif
 	if (avcheck(avcodec_send_packet(_codec_ctx, packet)))
 	{
-		_mtx_frame.lock();//lock read frame
-		av_frame_unref(_decoding_frame);
-		result = avcheck(avcodec_receive_frame(_codec_ctx, _decoding_frame));
+		// Decode into a scratch frame OUTSIDE the lock. avcodec_receive_frame is the expensive step
+		// (software YUV decode on the CPU / HW surface retrieval) and only ever runs on this single
+		// decode thread, so _codec_ctx needs no lock. Keeping it out of _mtx_frame means the render
+		// thread (Draw/IsNewFrame) no longer stalls while a frame is being decoded.
+		av_frame_unref(_scratch_frame);
+		result = avcheck(avcodec_receive_frame(_codec_ctx, _scratch_frame));
 
 		if (result)
 		{
+			_mtx_frame.lock();
+			// Publish the freshly decoded frame with a cheap pointer swap, then upload it to the NV12
+			// texture. Both stay inside the lock because they touch state shared with the render thread:
+			// _decoding_frame, and the m_d3d11_inputNv12 texture drawn via the same D3D11 device context
+			// (SINGLETHREADED on the software path, so Copy and Draw must not run concurrently).
+			AVFrame* tmp = _decoding_frame;
+			_decoding_frame = _scratch_frame;
+			_scratch_frame = tmp;
+
 			if (_nativeConfig.IsUseD3D11ForUiRender &&
 				((_decoding_frame->format == AV_PIX_FMT_D3D11 && _decoding_frame->hw_frames_ctx != nullptr) ||
 					_decoding_frame->format == AV_PIX_FMT_YUV420P))//on AV_PIX_FMT_D3D11 false or AV_HWDEVICE_TYPE_NONE
 			{
 				if (this->m_d3d11_inputNv12->Initialize(this->m_d3d11->GetDevice(), _decoding_frame->width, _decoding_frame->height))
 				{
-					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDeviceContext(), _decoding_frame);
+					result = this->m_d3d11_inputNv12->Copy(this->m_d3d11->GetDevice(), this->m_d3d11->GetDeviceContext(), _decoding_frame, this->_isHwShaderResourcePool);
 				}
 			}
+			_mtx_frame.unlock();
 		}
-		_mtx_frame.unlock();
 	}
 #if _DEBUG
 	auto finish(std::chrono::high_resolution_clock::now());
@@ -204,8 +297,6 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 	if (this->m_d3d11_renderTexture->Initialize(device.Get(), this->m_d3d11_inputNv12->Width(), this->m_d3d11_inputNv12->Height()) &&
 		this->m_d3d11_pixel_Nv12ToRgba->Initialize(device.Get(), this->_nativeConfig.Filter))
 	{
-		device_ctx->ClearState();
-
 		device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 		this->m_vertex->Set(device_ctx.Get());
@@ -233,12 +324,6 @@ bool VideoDecoder::Nv12Convert(AVFrame* frame) {
 
 		/*static FLOAT blendFactor[4] = { 0.f, 0.f, 0.f, 0.f };
 		device_ctx->OMSetBlendState(nullptr, blendFactor, 0xffffffff);*/
-
-		D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
-		if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
-		{
-			device_ctx->Dispatch(this->_nativeConfig.GpuThreadX, this->_nativeConfig.GpuThreadY, 1);
-		}
 
 		this->m_d3d11_renderTexture->ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 		device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
@@ -308,8 +393,6 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 
 			if (isNewFrame || isNewSurface)
 			{
-				device_ctx->ClearState();
-
 				device_ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 				this->m_vertex->Set(device_ctx.Get());
@@ -335,15 +418,12 @@ bool VideoDecoder::Draw(RenderTextureSurfaceClass* renderSurface, IUnknown* surf
 				renderSurface->SetRenderTarget(device_ctx.Get(), nullptr);
 				renderSurface->SetViewPort(device_ctx.Get(), renderSurface->Width(), renderSurface->Height());
 
-				D3D_FEATURE_LEVEL feature_level = device->GetFeatureLevel();
-				if (feature_level >= D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_10_0)
-				{
-					device_ctx->Dispatch(this->_nativeConfig.GpuThreadX, this->_nativeConfig.GpuThreadY, 1);
-				}
-
-				//view->m_renderTextureSurface.ClearRenderTarget(device_ctx.Get(), nullptr, 0, 0, 0, 0);
 				device_ctx->Draw(this->m_vertex->GetVertexCount(), 0);
 
+				// Flush so our draw is submitted before the WPF surface queue picks up the surface: we
+				// render with a DIFFERENT D3D11 device (FFmpeg's hwaccel / the software device) than the
+				// queue's producer, so without a flush an isolated present (e.g. resizing the window
+				// while the device is idle) can show black. IsForceUiGpuFlush defaults to true.
 				if (this->_nativeConfig.IsForceUiGpuFlush)
 					device_ctx->Flush();
 			}

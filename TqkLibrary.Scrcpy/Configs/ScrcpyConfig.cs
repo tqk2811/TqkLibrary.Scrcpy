@@ -11,7 +11,8 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// Top-level scrcpy client configuration: the server (device-side) config plus client-side
+    /// decoding/rendering options and connection settings.
     /// </summary>
     public class ScrcpyConfig
     {
@@ -62,32 +63,29 @@ namespace TqkLibrary.Scrcpy.Configs
         public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
 
         /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, only support directx 10 or 11<br></br>
-        /// Range 1-32
+        /// Flush the D3D11 device after each UI draw so the rendered frame is submitted before the WPF
+        /// surface queue presents it. Rendering uses a different D3D11 device than the surface queue's
+        /// producer, so without this an isolated present (e.g. resizing the window while the device is
+        /// idle) can show a black screen.<br></br>
+        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true.<br></br>
+        /// Default: true
         /// </summary>
-        public uint GpuThreadX { get; set; } = 1;
-        /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, only support directx 10 or 11<br></br>
-        /// Range 1-32
-        /// </summary>
-        public uint GpuThreadY { get; set; } = 4;
+        public bool IsForceUiGpuFlush { get; set; } = true;
 
         /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true
-        /// </summary>
-        public bool IsForceUiGpuFlush { get; set; } = false;
-
-        /// <summary>
+        /// Time in milliseconds to wait for the device to connect before giving up.<br></br>
         /// Default: 3000
         /// </summary>
         public int ConnectionTimeout { get; set; } = 3000;
 
         /// <summary>
+        /// Path to the adb executable used to talk to the device.<br></br>
         /// Default: adb.exe
         /// </summary>
         public string AdbPath { get; set; } = "adb.exe";
 
         /// <summary>
+        /// Path to the local scrcpy server jar that is pushed to the device.<br></br>
         /// Default: scrcpy-server.jar
         /// </summary>
         public string ScrcpyServerPath { get; set; } = "scrcpy-server.jar";
@@ -111,10 +109,6 @@ namespace TqkLibrary.Scrcpy.Configs
             if (!isVideo && !isAudio && !isControl)
                 throw new InvalidOperationException("At least one stream (video, audio, control) must be enabled.");
 
-            if (GpuThreadX < 1) GpuThreadX = 1;
-            if (GpuThreadY < 1) GpuThreadY = 1;
-            if (GpuThreadX > 32) GpuThreadX = 32;
-            if (GpuThreadY > 32) GpuThreadY = 32;
             return new ScrcpyNativeConfig
             {
                 HwType = HwType,
@@ -125,8 +119,6 @@ namespace TqkLibrary.Scrcpy.Configs
                 IsVideo = isVideo,
                 ConnectionTimeout = ConnectionTimeout,
                 Filter = Filter,
-                GpuThreadX = GpuThreadX,
-                GpuThreadY = GpuThreadY,
                 IsForceUiGpuFlush = IsForceUiGpuFlush,
             };
         }

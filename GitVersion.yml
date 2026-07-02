@@ -4,10 +4,13 @@ branches:
   master:
     regex: ^master$
     increment: None
+    label: ''
   main:
     regex: ^main$
     increment: None
+    label: ''
   version-branch:
     regex: .*
     increment: None
     source-branches: []
+    label: ''
