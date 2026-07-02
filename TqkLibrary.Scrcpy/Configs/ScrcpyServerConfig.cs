@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using TqkLibrary.Scrcpy.Attributes;
@@ -8,27 +8,28 @@ using TqkLibrary.Scrcpy.Interfaces;
 namespace TqkLibrary.Scrcpy.Configs
 {
     /// <summary>
-    /// 
+    /// scrcpy server (device-side) configuration: which streams to enable plus their video/audio/camera
+    /// options and how the session behaves.
     /// </summary>
     public class ScrcpyServerConfig : IConfig
     {
         /// <summary>
-        /// 
+        /// Device-side behaviour options (show touches, stay awake, power).
         /// </summary>
         public AndroidConfig? AndroidConfig { get; set; } = new AndroidConfig();
 
         /// <summary>
-        /// 
+        /// Display video stream options (used when the video source is the device display).
         /// </summary>
         public VideoConfig? VideoConfig { get; set; } = new VideoConfig();
 
         /// <summary>
-        /// 
+        /// Audio stream options.
         /// </summary>
         public AudioConfig? AudioConfig { get; set; } = new AudioConfig();
 
         /// <summary>
-        /// 
+        /// Camera capture options (used when the video source is a camera).
         /// </summary>
         public CameraConfig? CameraConfig { get; set; } = new CameraConfig();
 
@@ -40,7 +41,8 @@ namespace TqkLibrary.Scrcpy.Configs
         public bool IsVideo { get; set; } = true;
 
         /// <summary>
-        ///
+        /// Source of the video stream: the device display or a camera.<br></br>
+        /// Default: Display
         /// </summary>
         [OptionName("video_source")]
         public VideoSource VideoSource { get; set; } = VideoSource.Display;
@@ -53,7 +55,8 @@ namespace TqkLibrary.Scrcpy.Configs
         public bool IsControl { get; set; } = true;
 
         /// <summary>
-        /// 
+        /// Verbosity of the scrcpy server log.<br></br>
+        /// Default: Info
         /// </summary>
         [OptionName("log_level")]
         public LogLevel LogLevel { get; set; } = LogLevel.Info;
@@ -67,13 +70,16 @@ namespace TqkLibrary.Scrcpy.Configs
         public int SCID { get; set; } = -1;
 
         /// <summary>
-        /// 
+        /// Automatically keep the device and computer clipboards in sync.<br></br>
+        /// Default: false
         /// </summary>
         [OptionName("clipboard_autosync")]
         public bool ClipboardAutosync { get; set; } = false;
 
         /// <summary>
-        /// 
+        /// Run the server's cleanup step on exit to restore device settings changed during the session
+        /// (show touches, stay awake, ...).<br></br>
+        /// Default: false
         /// </summary>
         [OptionName("cleanup")]
         public bool Cleanup { get; set; } = false;
@@ -85,13 +91,16 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("tunnel_forward")]
         internal bool TunnelForward { get; } = false;
 
-        //unknow what is this for
         //https://github.com/Genymobile/scrcpy/blob/21df2c240e544b1c1eba7775e1474c1c772be04b/server/src/main/java/com/genymobile/scrcpy/ScreenInfo.java#L83
         /// <summary>
-        /// Default: 0
+        /// Limits the longer side of the captured video to this many pixels, preserving aspect ratio
+        /// (the shorter side scales down proportionally, rounded to a multiple of 8). Maps to scrcpy's
+        /// <c>--max-size</c>. Lowering it cuts client-side decode and GPU memory load — most useful when
+        /// mirroring many devices at once — at the cost of a softer image.<br></br>
+        /// Default: 0 (no limit — capture at the device's native resolution).
         /// </summary>
         [OptionName("max_size")]
-        public int MaxSize { get; } = 0;
+        public int MaxSize { get; set; } = 0;
 
         /// <summary>
         /// Turn the screen off after this delay (in milliseconds). -1 means no timeout (default).<br></br>
@@ -135,12 +144,12 @@ namespace TqkLibrary.Scrcpy.Configs
 
 
         /// <summary>
-        ///
+        /// Protocol/version string sent to the server; must match the deployed scrcpy-server.jar.
         /// </summary>
         public string ScrcpyServerVersion { get; } = Constant.ScrcpyServerVersion;
 
         /// <summary>
-        /// 
+        /// Path on the device where the scrcpy server jar is pushed and executed.
         /// </summary>
         public string ScrcpyServerAndroidPath { get; set; } = Constant.ScrcpyServerAndroidPath;
 
@@ -165,7 +174,7 @@ namespace TqkLibrary.Scrcpy.Configs
             if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public IEnumerable<string> GetArguments()

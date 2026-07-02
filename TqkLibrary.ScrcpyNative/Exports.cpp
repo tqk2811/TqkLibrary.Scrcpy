@@ -56,6 +56,10 @@ bool D3DImageViewRender(RenderTextureSurfaceClass* renderSurface, Scrcpy* scrcpy
 		return false;
 	return scrcpy->Draw(renderSurface, surface, isNewSurface, isNewtargetView);
 }
+bool ScrcpyIsNewFrame(Scrcpy* scrcpy, INT64& pts) {
+	if (scrcpy == nullptr) return false;
+	return scrcpy->IsNewFrame(pts);
+}
 
 
 
