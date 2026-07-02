@@ -85,13 +85,16 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("tunnel_forward")]
         internal bool TunnelForward { get; } = false;
 
-        //unknow what is this for
         //https://github.com/Genymobile/scrcpy/blob/21df2c240e544b1c1eba7775e1474c1c772be04b/server/src/main/java/com/genymobile/scrcpy/ScreenInfo.java#L83
         /// <summary>
-        /// Default: 0
+        /// Limits the longer side of the captured video to this many pixels, preserving aspect ratio
+        /// (the shorter side scales down proportionally, rounded to a multiple of 8). Maps to scrcpy's
+        /// <c>--max-size</c>. Lowering it cuts client-side decode and GPU memory load — most useful when
+        /// mirroring many devices at once — at the cost of a softer image.<br></br>
+        /// Default: 0 (no limit — capture at the device's native resolution).
         /// </summary>
         [OptionName("max_size")]
-        public int MaxSize { get; } = 0;
+        public int MaxSize { get; set; } = 0;
 
 
         /// <summary>
