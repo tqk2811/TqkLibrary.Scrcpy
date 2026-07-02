@@ -1,0 +1,44 @@
+THIRD-PARTY NOTICES
+===================
+
+TqkLibrary.Scrcpy is licensed under the GNU General Public License version 3 or
+later (GPL-3.0-or-later); see the LICENSE file. It redistributes the third-party
+components listed below under their own licenses.
+
+
+FFmpeg
+------
+This software uses code of FFmpeg (https://ffmpeg.org) licensed under the
+GNU General Public License version 3 or later (GPL-3.0-or-later,
+https://www.gnu.org/licenses/gpl-3.0.html), and its source can be downloaded
+here:
+
+    https://github.com/tqk2811/TqkLibrary.FFmpeg.GplShared
+
+The bundled FFmpeg shared libraries (avcodec, avformat, avutil, avfilter,
+avdevice, swresample, swscale) are built from FFmpeg 8.x with
+`--enable-gpl --enable-version3` and include x264 and x265. The build is
+unmodified relative to the configuration published in the repository above.
+Copyright (c) the FFmpeg developers; their copyright notices are retained.
+
+
+x264
+----
+The bundled FFmpeg links x264 (https://www.videolan.org/developers/x264.html),
+licensed under the GNU General Public License version 2 or later
+(GPL-2.0-or-later). Copyright (c) the x264 authors.
+
+
+x265
+----
+The bundled FFmpeg links x265 (https://www.videolan.org/developers/x265.html),
+licensed under the GNU General Public License version 2 or later
+(GPL-2.0-or-later). Copyright (c) MulticoreWare, Inc. and the x265 authors.
+
+
+scrcpy server (scrcpy-server.jar)
+---------------------------------
+The bundled `scrcpy-server.jar` is an unmodified program from the scrcpy project
+(https://github.com/Genymobile/scrcpy) by Genymobile (Romain Vimont and
+contributors), licensed under the Apache License 2.0. It is executed on the
+Android device as a separate program and is not linked into this library.
