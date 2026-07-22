@@ -12,10 +12,12 @@
 header = ""
 # Chi liet ke cac loai thay doi nguoi dung quan tam (loc o buoc hien thi).
 # Muon them/bot loai: sua danh sach trong `commit.group in [...]` ben duoi.
+# Moi muc co link toi commit: dat tren scope, commit khong scope thi dat tren (type).
+# '__REPO__' duoc release.yml thay bang $GITHUB_SERVER_URL/$GITHUB_REPOSITORY.
 body = """
 {% for commit in commits %}\
 {% if commit.group in ["feat", "fix", "perf", "revert"] %}\
-__SHA_{{ commit.id }}__ ({{ commit.group }}){% if commit.scope %} **{{ commit.scope }}**{% endif %} {{ commit.message | upper_first }}{% if commit.breaking %} [**breaking**]{% endif %}
+__SHA_{{ commit.id }}__ {% if commit.scope %}({{ commit.group }}) [**{{ commit.scope }}**](__REPO__/commit/{{ commit.id }}){% else %}[({{ commit.group }})](__REPO__/commit/{{ commit.id }}){% endif %} {{ commit.message | upper_first }}{% if commit.breaking %} [**breaking**]{% endif %}
 {% endif %}\
 {% endfor %}\
 """

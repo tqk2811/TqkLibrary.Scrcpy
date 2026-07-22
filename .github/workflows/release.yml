@@ -117,6 +117,8 @@ jobs:
             $prev = $r
           }
           $notes = ($out -join "`n").Trim()
+          # Link commit trong tung muc: template emit '__REPO__' -> URL repo hien tai
+          $notes = $notes -replace '__REPO__', "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)"
           if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "Release $tag" }
           Set-Content -Path RELEASE_NOTES.md -Value $notes -Encoding utf8
 
