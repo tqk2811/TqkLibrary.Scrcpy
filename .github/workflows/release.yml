@@ -2,6 +2,8 @@ name: Release
 
 # CI build + publish. KHONG chay mac dinh: chi build khi commit (head cua push) chua marker
 # '[release]'. Cung cho chay tay (workflow_dispatch).
+# Mode notes-only: marker '[release_notes_only]' (hoac dispatch voi input release_notes_only)
+# chi sinh lai GitHub Release notes (khong build/pack/upload/nuget); khong tinh HEAD la diem build.
 #
 # Mo hinh /releases: moi dong minor M.N co 1 GitHub Release ten theo tag 'vM.N.0'.
 # Moi lan chay -> build version 'M.N.<so-commit>' -> upload 2 nupkg (Scrcpy + Scrcpy.Wpf) lam
@@ -19,14 +21,22 @@ on:
       - master
       - '[0-9]*.[0-9]*'
   workflow_dispatch:
+    inputs:
+      release_notes_only:
+        description: 'Only regenerate GitHub Release notes (skip build/pack/upload/nuget)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
   release:
-    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]')
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]') || contains(github.event.head_commit.message, '[release_notes_only]')
     runs-on: windows-latest
+    env:
+      # 'true' khi chi sinh notes: dispatch chon release_notes_only, hoac head commit chua '[release_notes_only]'
+      NOTES_ONLY: ${{ inputs.release_notes_only || contains(github.event.head_commit.message, '[release_notes_only]') }}
     steps:
       - name: Checkout (full history + tags)
         uses: actions/checkout@v4
@@ -37,6 +47,7 @@ jobs:
       # reference packs (net10/9/8 build net6/net7). So any SDK major >= 8 is enough;
       # only run setup-dotnet when none is present (windows-latest already ships >= 8).
       - name: Check installed .NET SDKs
+        if: env.NOTES_ONLY != 'true'
         id: dotnet_check
         shell: pwsh
         run: |
@@ -48,7 +59,7 @@ jobs:
           Write-Host "Have .NET SDK >= 8: $haveSdk  -> install=$install"
 
       - name: Setup .NET
-        if: steps.dotnet_check.outputs.install == 'true'
+        if: ${{ env.NOTES_ONLY != 'true' && steps.dotnet_check.outputs.install == 'true' }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
@@ -66,6 +77,7 @@ jobs:
           Add-Content -Path $env:GITHUB_PATH -Value $exe.DirectoryName
 
       - name: "Build + pack (native x64/Win32 + managed: Scrcpy + Scrcpy.Wpf)"
+        if: env.NOTES_ONLY != 'true'
         shell: pwsh
         run: ./.github/workflows/BuildCI.ps1   # build + pack only; nuget push handled below
 
@@ -76,15 +88,29 @@ jobs:
           NUGET_KEY: ${{ secrets.nugetKey }}
         run: |
           $ErrorActionPreference = 'Stop'
-          $core = Get-ChildItem ./TqkLibrary.Scrcpy/bin/Release/*.nupkg | Select-Object -First 1
-          $wpf  = Get-ChildItem ./TqkLibrary.Scrcpy.Wpf/bin/Release/*.nupkg | Select-Object -First 1
-          if (-not $core) { throw "No TqkLibrary.Scrcpy .nupkg produced by BuildCI.ps1" }
-          if (-not $wpf)  { throw "No TqkLibrary.Scrcpy.Wpf .nupkg produced by BuildCI.ps1" }
-          if ($core.BaseName -notmatch '\.(\d+)\.(\d+)\.(\d+)$') { throw "Cannot parse version from $($core.Name)" }
-          $major = $Matches[1]; $minor = $Matches[2]
+          $notesOnly = $env:NOTES_ONLY -eq 'true'
+          if ($notesOnly) {
+            # Notes-only: khong co nupkg -> suy M.N tu ten branch (2.4 ... 4.0);
+            # branch khac (master) thi lay tag gan nhat trong lich su.
+            $bn = $env:GITHUB_REF_NAME
+            if ($bn -match '^(\d+)\.(\d+)$') { $major = $Matches[1]; $minor = $Matches[2] }
+            else {
+              $near = "$(git describe --tags --abbrev=0 --match "v[0-9]*")".Trim()
+              if ($near -notmatch '^v(\d+)\.(\d+)\.') { throw "Cannot derive minor line from branch '$bn' / tag '$near'" }
+              $major = $Matches[1]; $minor = $Matches[2]
+            }
+          } else {
+            $core = Get-ChildItem ./TqkLibrary.Scrcpy/bin/Release/*.nupkg | Select-Object -First 1
+            $wpf  = Get-ChildItem ./TqkLibrary.Scrcpy.Wpf/bin/Release/*.nupkg | Select-Object -First 1
+            if (-not $core) { throw "No TqkLibrary.Scrcpy .nupkg produced by BuildCI.ps1" }
+            if (-not $wpf)  { throw "No TqkLibrary.Scrcpy.Wpf .nupkg produced by BuildCI.ps1" }
+            if ($core.BaseName -notmatch '\.(\d+)\.(\d+)\.(\d+)$') { throw "Cannot parse version from $($core.Name)" }
+            $major = $Matches[1]; $minor = $Matches[2]
+          }
           $tag = "v$major.$minor.0"   # tags carry the 'v' prefix (v2.4.0 ... v4.0.0)
           $mn  = "$major.$minor"
-          Write-Host "core=$($core.Name)  wpf=$($wpf.Name)  release-tag=$tag"
+          if ($notesOnly) { Write-Host "notes-only  release-tag=$tag" }
+          else { Write-Host "core=$($core.Name)  wpf=$($wpf.Name)  release-tag=$tag" }
 
           # Release notes: moi BUILD la 1 header '- M.N.<zzz>' voi zzz = rev-list --count tag..R
           # (khop version nupkg vi GitVersion dem MOI commit). Diem build R = cac commit
@@ -98,8 +124,8 @@ jobs:
           }
           $fps = @(git rev-list --first-parent --reverse "$tag..HEAD")
           $points = @($fps | Where-Object { (git log -1 --format=%B $_) -match '\[release\]' })
-          if ($fps.Count -gt 0 -and ($points.Count -eq 0 -or $points[-1] -ne $fps[-1])) {
-            $points += $fps[-1]   # HEAD = build dang phat hanh boi run nay
+          if (-not $notesOnly -and $fps.Count -gt 0 -and ($points.Count -eq 0 -or $points[-1] -ne $fps[-1])) {
+            $points += $fps[-1]   # HEAD = build dang phat hanh boi run nay (bo qua khi notes-only)
           }
           $out = New-Object System.Collections.Generic.List[string]
           $prev = $tag
@@ -126,13 +152,17 @@ jobs:
             gh release create $tag --title $tag --notes-file RELEASE_NOTES.md --verify-tag
           }
 
-          # Dinh kem ca 2 nupkg cua lan build nay (clobber neu rebuild cung version).
-          gh release upload $tag $core.FullName $wpf.FullName --clobber
-
-          # Push nuget.org chi khi co secret nugetKey (push core truoc vi Wpf phu thuoc no).
-          if (-not [string]::IsNullOrWhiteSpace($env:NUGET_KEY)) {
-            dotnet nuget push $core.FullName -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
-            dotnet nuget push $wpf.FullName  -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+          if ($notesOnly) {
+            Write-Host "notes-only mode -> skip nupkg upload & nuget push"
           } else {
-            Write-Host "No 'nugetKey' secret -> skip nuget.org push"
+            # Dinh kem ca 2 nupkg cua lan build nay (clobber neu rebuild cung version).
+            gh release upload $tag $core.FullName $wpf.FullName --clobber
+
+            # Push nuget.org chi khi co secret nugetKey (push core truoc vi Wpf phu thuoc no).
+            if (-not [string]::IsNullOrWhiteSpace($env:NUGET_KEY)) {
+              dotnet nuget push $core.FullName -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+              dotnet nuget push $wpf.FullName  -k $env:NUGET_KEY -s https://api.nuget.org/v3/index.json --skip-duplicate
+            } else {
+              Write-Host "No 'nugetKey' secret -> skip nuget.org push"
+            }
           }
