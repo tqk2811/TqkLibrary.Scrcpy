@@ -133,6 +133,17 @@ namespace TqkLibrary.Scrcpy
                     {
                         return $"{optionNameAttribute.Name}={i}";
                     }
+                    // float/double MUST use InvariantCulture: comma-decimal locales would emit
+                    // "max_fps=24,5" which the scrcpy server fails to parse. Missing float case
+                    // silently dropped every float option (e.g. MaxFps since the int->float change).
+                    else if (select is float f)
+                    {
+                        return $"{optionNameAttribute.Name}={f.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+                    }
+                    else if (select is double d)
+                    {
+                        return $"{optionNameAttribute.Name}={d.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
+                    }
                     else if (select is string s)
                     {
                         return $"{optionNameAttribute.Name}={s}";
