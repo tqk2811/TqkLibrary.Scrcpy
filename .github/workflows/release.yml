@@ -86,10 +86,37 @@ jobs:
           $mn  = "$major.$minor"
           Write-Host "core=$($core.Name)  wpf=$($wpf.Name)  release-tag=$tag"
 
-          # Release notes: commit ke tu tag vM.N.0, tang dan, danh so M.N.<n>.
-          # Dung range '<tag>..HEAD' (topology dung); template emit '__MN__' -> thay bang M.N.
-          $notes = git-cliff --config cliff-release.toml "$tag..HEAD" | Out-String
-          $notes = ($notes -replace '__MN__', $mn).Trim()
+          # Release notes: moi BUILD la 1 header '- M.N.<zzz>' voi zzz = rev-list --count tag..R
+          # (khop version nupkg vi GitVersion dem MOI commit). Diem build R = cac commit
+          # first-parent co marker '[release]' + HEAD hien tai (build cua run nay, khong trung
+          # neu HEAD chinh la [release]). Muc con '  + ...' = moi commit moi reachable trong
+          # (R_truoc..R] — tu nhien gom ca commit merge tu branch khac (vd fix tren 2.4).
+          # git-cliff chi format tung commit, moi dong prefix '__SHA_<sha>__' de tra cuu.
+          $lineOf = @{}
+          foreach ($l in @(git-cliff --config cliff-release.toml "$tag..HEAD")) {
+            if ($l -match '^__SHA_([0-9a-f]+)__ (.*)$') { $lineOf[$Matches[1]] = $Matches[2] }
+          }
+          $fps = @(git rev-list --first-parent --reverse "$tag..HEAD")
+          $points = @($fps | Where-Object { (git log -1 --format=%B $_) -match '\[release\]' })
+          if ($fps.Count -gt 0 -and ($points.Count -eq 0 -or $points[-1] -ne $fps[-1])) {
+            $points += $fps[-1]   # HEAD = build dang phat hanh boi run nay
+          }
+          $out = New-Object System.Collections.Generic.List[string]
+          $prev = $tag
+          foreach ($r in $points) {
+            $n = [int](git rev-list --count "$tag..$r")
+            $subs = @()
+            foreach ($c in @(git rev-list --reverse $r --not $prev)) {
+              if ($lineOf.ContainsKey($c)) { $subs += "  + $($lineOf[$c])" }
+            }
+            # Bo header rong (build chi co chore/ci/docs/... da bi loc het)
+            if ($subs.Count -gt 0) {
+              $out.Add("- $mn.$n")
+              foreach ($s in $subs) { $out.Add($s) }
+            }
+            $prev = $r
+          }
+          $notes = ($out -join "`n").Trim()
           if ([string]::IsNullOrWhiteSpace($notes)) { $notes = "Release $tag" }
           Set-Content -Path RELEASE_NOTES.md -Value $notes -Encoding utf8
 
