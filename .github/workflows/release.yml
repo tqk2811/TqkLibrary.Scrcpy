@@ -105,14 +105,10 @@ jobs:
           $prev = $tag
           foreach ($r in $points) {
             $n = [int](git rev-list --count "$tag..$r")
-            $subs = @()
+            # Header luon hien, ke ca nhom rong (build khong co thay doi thuoc loai hien thi)
+            $out.Add("- $mn.$n")
             foreach ($c in @(git rev-list --reverse $r --not $prev)) {
-              if ($lineOf.ContainsKey($c)) { $subs += "  + $($lineOf[$c])" }
-            }
-            # Bo header rong (build chi co chore/ci/docs/... da bi loc het)
-            if ($subs.Count -gt 0) {
-              $out.Add("- $mn.$n")
-              foreach ($s in $subs) { $out.Add($s) }
+              if ($lineOf.ContainsKey($c)) { $out.Add("  + $($lineOf[$c])") }
             }
             $prev = $r
           }
