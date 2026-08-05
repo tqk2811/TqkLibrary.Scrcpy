@@ -6,22 +6,34 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TqkLibrary.Scrcpy.Configs;
+using TqkLibrary.Scrcpy.Exceptions;
 
 namespace TqkLibrary.Scrcpy.Helpers
 {
     internal static class AdbHelper
     {
+        /// <summary>
+        /// Pushes <see cref="ScrcpyDeployConfig.ScrcpyServerPath"/> to
+        /// <see cref="ScrcpyDeployConfig.GetResolvedAndroidPath"/> — the same device path
+        /// <see cref="Scrcpy.Connect(ScrcpyConfig?)"/> launches the server from.
+        /// </summary>
+        /// <exception cref="ScrcpyException">adb push exited non-zero.</exception>
         public static async Task PushServerAsync(
-            string adbPath,
+            ScrcpyDeployConfig deployConfig,
             string deviceId,
-            string scrcpyPath,
             CancellationToken cancellationToken = default)
         {
-            using Process process = CreateProcess(adbPath, $"-s {deviceId} push {scrcpyPath} /sdcard/scrcpy-server-tqk.jar");
+            string androidPath = deployConfig.GetResolvedAndroidPath();
+            using Process process = CreateProcess(deployConfig.AdbPath, $"-s {deviceId} push \"{deployConfig.ScrcpyServerPath}\" {androidPath}");
             var stdoutTask = process.StandardOutput.ReadToEndAsync();
             var stderrTask = process.StandardError.ReadToEndAsync();
             await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+            // Without this the caller runs app_process against a jar that may not be there, and the
+            // failure surfaces as an unrelated error from the server instead of the push that failed.
+            if (process.ExitCode != 0)
+                throw new ScrcpyException($"adb push '{deployConfig.ScrcpyServerPath}' -> '{androidPath}' failed (exit code {process.ExitCode}): {stderrTask.Result.Trim()}");
         }
 
 
