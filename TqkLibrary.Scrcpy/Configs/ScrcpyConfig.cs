@@ -79,16 +79,11 @@ namespace TqkLibrary.Scrcpy.Configs
         public int ConnectionTimeout { get; set; } = 3000;
 
         /// <summary>
-        /// Path to the adb executable used to talk to the device.<br></br>
-        /// Default: adb.exe
+        /// Where adb is, which scrcpy server jar to deploy and where it lives on the device.<br></br>
+        /// Also the single source of the adb path used for every device command while connecting
+        /// (pushing the jar, reverse tunnel, launching the server), so they can never disagree.
         /// </summary>
-        public string AdbPath { get; set; } = "adb.exe";
-
-        /// <summary>
-        /// Path to the local scrcpy server jar that is pushed to the device.<br></br>
-        /// Default: scrcpy-server.jar
-        /// </summary>
-        public string ScrcpyServerPath { get; set; } = "scrcpy-server.jar";
+        public ScrcpyDeployConfig DeployConfig { get; set; } = new ScrcpyDeployConfig();
 
         /// <summary>
         /// 

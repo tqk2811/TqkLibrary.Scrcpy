@@ -170,7 +170,7 @@ namespace TqkLibrary.Scrcpy
             if (countdownEvent.TryAddCount())
             {
                 if (config == null) config = new ScrcpyConfig();
-                _adbPath = config.AdbPath;
+                _adbPath = config.DeployConfig.AdbPath;
                 _physicalScreenSizeCache = null;
                 ScrcpyNativeConfig nativeConfig = config.NativeConfig();
                 result = ConnectInternal(config, ref nativeConfig);
@@ -183,8 +183,8 @@ namespace TqkLibrary.Scrcpy
         private bool ConnectInternal(ScrcpyConfig config, ref ScrcpyNativeConfig nativeConfig)
         {
             string scidPrefix = "localabstract:scrcpy";
-            string ScrcpyServerAndroidPath = config.ServerConfig?.ScrcpyServerAndroidPath ?? Constant.ScrcpyServerAndroidPath;
-            ScrcpyServerAndroidPath = ScrcpyServerAndroidPath.Replace("{ver}", Constant.ScrcpyServerVersion);
+            ScrcpyDeployConfig deployConfig = config.DeployConfig;
+            string ScrcpyServerAndroidPath = deployConfig.GetResolvedAndroidPath();
 
             int scid = config.ServerConfig?.SCID ?? -1;
             if (scid != -1)
@@ -201,14 +201,14 @@ namespace TqkLibrary.Scrcpy
             int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
 
             // adb setup
-            RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
-            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" {ScrcpyServerAndroidPath}") != 0)
+            RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
+            if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} push \"{deployConfig.ScrcpyServerPath}\" {ScrcpyServerAndroidPath}") != 0)
                 return false;
-            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
+            if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
                 return false;
 
             // Start scrcpy server process
-            Process? serverProcess = StartAdbProcess(config.AdbPath,
+            Process? serverProcess = StartAdbProcess(deployConfig.AdbPath,
                 $"-s {DeviceId} shell CLASSPATH={ScrcpyServerAndroidPath} app_process / com.genymobile.scrcpy.Server {config}");
             if (serverProcess is null)
                 return false;
