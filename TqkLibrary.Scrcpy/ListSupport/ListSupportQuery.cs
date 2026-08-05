@@ -1,22 +1,22 @@
 ﻿using System.Collections.Generic;
 using TqkLibrary.Scrcpy.Attributes;
+using TqkLibrary.Scrcpy.Configs;
 using TqkLibrary.Scrcpy.Interfaces;
 
 namespace TqkLibrary.Scrcpy.ListSupport
 {
     /// <summary>
-    /// 
+    ///
     /// </summary>
     public class ListSupportQuery : IConfig
     {
         /// <summary>
-        /// 
+        /// Where adb is, which scrcpy server jar to deploy and where it lives on the device.<br></br>
+        /// Pass the same instance as <see cref="ScrcpyConfig.DeployConfig"/> so the jar this query runs
+        /// is the very one <see cref="Scrcpy.Connect(ScrcpyConfig?)"/> launches, instead of a second
+        /// copy left behind at another path on the device.
         /// </summary>
-        public string AdbPath { get; set; } = "adb.exe";
-        /// <summary>
-        /// 
-        /// </summary>
-        public string ScrcpyPath { get; set; } = "scrcpy-server.jar";
+        public ScrcpyDeployConfig DeployConfig { get; set; } = new ScrcpyDeployConfig();
 
 
         /// <summary>
