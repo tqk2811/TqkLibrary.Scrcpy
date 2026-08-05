@@ -81,9 +81,23 @@ namespace TqkLibrary.Scrcpy.Configs
         /// <summary>
         /// Where adb is, which scrcpy server jar to deploy and where it lives on the device.<br></br>
         /// Also the single source of the adb path used for every device command while connecting
-        /// (pushing the jar, reverse tunnel, launching the server), so they can never disagree.
+        /// (reverse tunnel, launching the server), so client and deploy can never disagree.<br></br>
+        /// Pass this same instance to <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> when pushing
+        /// manually.
         /// </summary>
         public ScrcpyDeployConfig DeployConfig { get; set; } = new ScrcpyDeployConfig();
+
+        /// <summary>
+        /// Push <see cref="ScrcpyDeployConfig.ScrcpyServerPath"/> to the device on every connect.<br></br>
+        /// The jar stays on the device between connections, so pushing it again each time only costs
+        /// time. Set to false to skip the push and reconnect faster — the caller is then responsible
+        /// for the jar already being on the device at
+        /// <see cref="ScrcpyDeployConfig.ScrcpyServerAndroidPath"/> (call
+        /// <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> once, e.g. on the first connect),
+        /// otherwise the server fails to start and the connect fails.<br></br>
+        /// Default: true
+        /// </summary>
+        public bool ForcePush { get; set; } = true;
 
         /// <summary>
         /// 

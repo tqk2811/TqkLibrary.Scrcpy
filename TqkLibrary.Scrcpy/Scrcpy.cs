@@ -180,6 +180,27 @@ namespace TqkLibrary.Scrcpy
             return result;
         }
 
+        /// <summary>
+        /// Push the local scrcpy server jar to the device.<br></br>
+        /// The jar stays on the device between connections, so this only has to run once per device:
+        /// push it here, then set <see cref="ScrcpyConfig.ForcePush"/> to false so
+        /// <see cref="Connect(ScrcpyConfig?)"/> skips the push.
+        /// </summary>
+        /// <param name="config">Where adb is, which jar to send and where it lands on the device.
+        /// Pass <see cref="ScrcpyConfig.DeployConfig"/> of the config you connect with so both agree on
+        /// the device path. Null uses the defaults.</param>
+        /// <returns>true if <c>adb push</c> succeeded.</returns>
+        public bool PushServer(ScrcpyDeployConfig? config = null)
+        {
+            if (config == null) config = new ScrcpyDeployConfig();
+            return PushServerInternal(config, config.GetResolvedAndroidPath());
+        }
+
+        private bool PushServerInternal(ScrcpyDeployConfig config, string scrcpyServerAndroidPath)
+        {
+            return RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" {scrcpyServerAndroidPath}") == 0;
+        }
+
         private bool ConnectInternal(ScrcpyConfig config, ref ScrcpyNativeConfig nativeConfig)
         {
             string scidPrefix = "localabstract:scrcpy";
@@ -202,7 +223,7 @@ namespace TqkLibrary.Scrcpy
 
             // adb setup
             RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
-            if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} push \"{deployConfig.ScrcpyServerPath}\" {ScrcpyServerAndroidPath}") != 0)
+            if (config.ForcePush && !PushServerInternal(deployConfig, ScrcpyServerAndroidPath))
                 return false;
             if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
                 return false;

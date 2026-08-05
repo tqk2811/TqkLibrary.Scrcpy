@@ -9,8 +9,9 @@ namespace TqkLibrary.Scrcpy.Configs
     /// <summary>
     /// Everything needed to reach the device and deploy the scrcpy server jar onto it: where adb is,
     /// which local jar to send, and where it lands on the device.<br></br>
-    /// Held by <see cref="ScrcpyConfig.DeployConfig"/> — deploying is about files and tooling, so it
-    /// needs none of the video/audio/control options a mirroring session carries.
+    /// Held by <see cref="ScrcpyConfig.DeployConfig"/> and usable on its own with
+    /// <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> — deploying is a one-off step, so it needs
+    /// none of the video/audio/control options a mirroring session carries.
     /// </summary>
     public class ScrcpyDeployConfig
     {
