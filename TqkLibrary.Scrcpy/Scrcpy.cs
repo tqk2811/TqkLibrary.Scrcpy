@@ -426,9 +426,10 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        /// Pushes the server jar, then runs it once in query mode to read back what the device supports.
         /// </summary>
-        /// <param name="listSupportQuery"></param>
+        /// <param name="listSupportQuery">What to list, plus the
+        /// <see cref="ListSupportQuery.DeployConfig"/> saying where adb is and which jar to run.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public async Task<ScrcpyServerListSupport> ListSupportAsync(
@@ -437,13 +438,16 @@ namespace TqkLibrary.Scrcpy
         {
             if (listSupportQuery is null) throw new ArgumentNullException(nameof(listSupportQuery));
 
-            await AdbHelper.PushServerAsync(listSupportQuery.AdbPath, DeviceId, listSupportQuery.ScrcpyPath, cancellationToken);
+            ScrcpyDeployConfig deployConfig = listSupportQuery.DeployConfig;
+            string scrcpyServerAndroidPath = deployConfig.GetResolvedAndroidPath();
+
+            await AdbHelper.PushServerAsync(deployConfig, DeviceId, cancellationToken);
 
             string q = string.Join(" ", listSupportQuery.GetArguments().Where(x => !string.IsNullOrWhiteSpace(x)));
             var result = await AdbHelper.RunServerWithAdbAsync(
-                listSupportQuery.AdbPath,
+                deployConfig.AdbPath,
                 DeviceId,
-                $"shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar app_process / com.genymobile.scrcpy.Server {q}",
+                $"shell CLASSPATH={scrcpyServerAndroidPath} app_process / com.genymobile.scrcpy.Server {q}",
                 cancellationToken
                 );
 
