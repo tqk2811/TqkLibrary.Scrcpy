@@ -183,7 +183,7 @@ namespace TqkLibrary.Scrcpy
         /// <summary>
         /// Push the local scrcpy server jar to the device.<br></br>
         /// The jar stays on the device between connections, so this only has to run once per device:
-        /// push it here, then set <see cref="ScrcpyConfig.ForcePush"/> to false so
+        /// push it here, then set <see cref="ScrcpyDeployConfig.ForcePush"/> to false so
         /// <see cref="Connect(ScrcpyConfig?)"/> skips the push.
         /// </summary>
         /// <param name="config">Where adb is, which jar to send and where it lands on the device.
@@ -223,7 +223,7 @@ namespace TqkLibrary.Scrcpy
 
             // adb setup
             RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
-            if (config.ForcePush && !PushServerInternal(deployConfig, ScrcpyServerAndroidPath))
+            if (deployConfig.ForcePush && !PushServerInternal(deployConfig, ScrcpyServerAndroidPath))
                 return false;
             if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
                 return false;
@@ -423,7 +423,7 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// Work only when enable <see cref="ScrcpyConfig.IsUseD3D11ForUiRender"/>
+        /// Work only when enable <see cref="ClientConfig.IsUseD3D11ForUiRender"/>
         /// </summary>
         /// <returns></returns>
         public ScrcpyUiView InitScrcpyUiView()
