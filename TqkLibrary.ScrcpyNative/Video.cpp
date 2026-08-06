@@ -77,7 +77,7 @@ void Video::threadStart() {
 		|| codecId == AV_CODEC_ID_H265;
 
 
-	// scrcpy v4.0 wire format (ref app/src/demuxer.c @ v4.0):
+	// scrcpy v4.0 wire format, unchanged in v4.1 (ref app/src/demuxer.c @ v4.1):
 	// After codec_id, the video stream begins with a 12-byte "session" header
 	// (MSB of byte 0 set) carrying the initial width/height. It replaces the
 	// old 8-byte width/height block. The decoder re-derives the frame size from
@@ -90,9 +90,15 @@ void Video::threadStart() {
 	if (!(session_buffer[0] & 0x80))
 		return;
 
-#if _DEBUG
 	uint32_t width = sc_read32be(session_buffer + 4);
 	uint32_t height = sc_read32be(session_buffer + 8);
+
+	// v4.1 rejects a zero-sized session: the device failed to configure the capture,
+	// so the stream that follows is unusable.
+	if (!width || !height)
+		return;
+
+#if _DEBUG
 	bool client_resized = (session_buffer[3] & 1) != 0;
 	printf(std::string("width:").append(std::to_string(width)).append("\r\n").c_str());
 	printf(std::string("height:").append(std::to_string(height)).append("\r\n").c_str());

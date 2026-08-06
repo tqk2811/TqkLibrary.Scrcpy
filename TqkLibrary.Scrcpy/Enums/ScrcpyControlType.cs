@@ -27,5 +27,6 @@
         TYPE_CAMERA_ZOOM_IN = 19,
         TYPE_CAMERA_ZOOM_OUT = 20,
         TYPE_RESIZE_DISPLAY = 21,
+        TYPE_SCAN_FILE = 22,
     }
 }

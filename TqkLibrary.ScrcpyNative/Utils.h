@@ -60,6 +60,8 @@ static inline enum AVCodecID sc_demuxer_to_avcodec_id(uint32_t codec_id) {
 #define SC_CODEC_ID_H264 UINT32_C(0x68323634) // "h264" in ASCII
 #define SC_CODEC_ID_H265 UINT32_C(0x68323635) // "h265" in ASCII
 #define SC_CODEC_ID_AV1 UINT32_C(0x00617631) // "av1" in ASCII
+#define SC_CODEC_ID_VP8 UINT32_C(0x00767038) // "vp8" in ASCII
+#define SC_CODEC_ID_VP9 UINT32_C(0x00767039) // "vp9" in ASCII
 #define SC_CODEC_ID_OPUS UINT32_C(0x6f707573) // "opus" in ASCII
 #define SC_CODEC_ID_AAC UINT32_C(0x00616163) // "aac in ASCII"
 #define SC_CODEC_ID_RAW UINT32_C(0x00726177) // "raw" in ASCII
@@ -70,6 +72,10 @@ static inline enum AVCodecID sc_demuxer_to_avcodec_id(uint32_t codec_id) {
 		return AV_CODEC_ID_HEVC;
 	case SC_CODEC_ID_AV1:
 		return AV_CODEC_ID_AV1;
+	case SC_CODEC_ID_VP8:
+		return AV_CODEC_ID_VP8;
+	case SC_CODEC_ID_VP9:
+		return AV_CODEC_ID_VP9;
 	case SC_CODEC_ID_OPUS:
 		return AV_CODEC_ID_OPUS;
 	case SC_CODEC_ID_AAC:

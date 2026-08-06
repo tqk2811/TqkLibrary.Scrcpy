@@ -150,6 +150,17 @@ namespace TqkLibrary.Scrcpy.Configs
         [OptionName("keep_active")]
         public bool KeepActive { get; set; } = false;
 
+        /// <summary>
+        /// Ignore the encoder's advertised size/frame-rate limits when configuring the video encoder.<br></br>
+        /// By default the server clamps the capture size to what the encoder reports as supported; enable
+        /// this when the reported constraints are wrong and prevent capturing at the wanted resolution
+        /// (encoding may then fail on devices whose constraints were real).<br></br>
+        /// Default: false (omit)<br></br>
+        /// scrcpy 4.1 (--ignore-video-encoder-constraints)
+        /// </summary>
+        [OptionName("ignore_video_encoder_constraints")]
+        public bool IgnoreVideoEncoderConstraints { get; set; } = false;
+
 
         /// <summary>
         /// Protocol/version string sent to the server; must match the deployed scrcpy-server.jar.
@@ -175,6 +186,7 @@ namespace TqkLibrary.Scrcpy.Configs
             if (DisplayImePolicy.HasValue)
                 yield return $"display_ime_policy={DisplayImePolicy.Value.ToString().ToLower()}";
             yield return this._GetArgument(x => x.KeepActive, KeepActive);
+            yield return this._GetArgument(x => x.IgnoreVideoEncoderConstraints, IgnoreVideoEncoderConstraints);
             if (IsVideo) yield return this._GetArgument(x => x.VideoSource, x => x != VideoSource.Display, x => x.ToString().ToLower());
         }
         /// <summary>

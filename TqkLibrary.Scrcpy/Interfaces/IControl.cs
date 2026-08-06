@@ -207,5 +207,20 @@ namespace TqkLibrary.Scrcpy.Interfaces
         /// <param name="height">New display height in pixels (1..65535)</param>
         /// <returns></returns>
         bool ResizeDisplay(ushort width, ushort height);
+
+        /// <summary>
+        /// Ask the device's media scanner to index a file (or a whole directory) into the
+        /// MediaStore (scrcpy 4.1+).<br></br>
+        /// Call it after pushing a file with <c>adb push</c>: until it is scanned, the file exists
+        /// on disk but is unknown to the MediaStore, so gallery/player apps do not list it (it
+        /// usually only shows up after a reboot or a periodic rescan). scrcpy itself sends this
+        /// after each successful drag-and-drop push.<br></br>
+        /// The server just broadcasts <c>ACTION_MEDIA_SCANNER_SCAN_FILE</c> and never reports the
+        /// result back, so this returns as soon as the message is sent — and note some gallery apps
+        /// only show a fixed set of folders (typically <c>DCIM/Camera</c>) on their home screen.
+        /// </summary>
+        /// <param name="path">Absolute device-side path of the file or directory to scan (e.g. "/sdcard/DCIM/img.jpg" or "/sdcard/Download/")</param>
+        /// <returns></returns>
+        bool ScanFile(string path);
     }
 }

@@ -6,7 +6,7 @@ It pushes the scrcpy server to the device over ADB, then exposes the video, audi
 
 ## Features
 
-- Video stream (H.264 / H.265 / AV1)
+- Video stream (H.264 / H.265 / AV1 / VP8 / VP9)
 - Audio stream (Opus / AAC / FLAC / raw)
 - Device control: touch, key, text injection, scroll, clipboard (copy / paste, autosync)
 - Camera mirroring
@@ -27,6 +27,7 @@ Each package bundles a matching `scrcpy-server.jar` — the server must match th
 | 3.2 | 3.2 |
 | 3.3 | 3.3.4 |
 | 4.0 | 4.0 |
+| 4.1 | 4.1 |
 
 ## Platform
 

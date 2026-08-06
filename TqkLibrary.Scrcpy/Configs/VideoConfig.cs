@@ -51,7 +51,7 @@ namespace TqkLibrary.Scrcpy.Configs
         /// <summary>
         /// VideoCodec<br></br>
         /// Default: null (ignore)<br></br>
-        /// Support: h264, h265, av1, opus, aac, raw
+        /// Support: h264, h265, av1, vp8, vp9 (vp8/vp9 need scrcpy 4.1+)
         /// </summary>
         [OptionName("video_codec")]
         public string? VideoCodec { get; set; }

@@ -76,6 +76,8 @@ namespace TqkLibrary.Scrcpy.Control
             => SendControl(ScrcpyControlHelper.CameraZoomOut());
         public bool ResizeDisplay(ushort width, ushort height)
             => SendControl(ScrcpyControlHelper.ResizeDisplay(width, height));
+        public bool ScanFile(string path)
+            => SendControl(ScrcpyControlHelper.ScanFile(path));
         #endregion
 
         #region Event

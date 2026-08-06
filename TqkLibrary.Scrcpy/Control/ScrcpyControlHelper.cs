@@ -191,6 +191,16 @@ namespace TqkLibrary.Scrcpy.Control
             return stream.ToArray();
         }
 
+        internal static byte[] ScanFile(string path)
+        {
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+
+            byte[] utf8_path = Encoding.UTF8.GetBytes(path);
+            using MemoryStream stream = new MemoryStream();
+            stream.WriteHostToNetworkOrder(ScrcpyControlType.TYPE_SCAN_FILE, (UInt32)utf8_path.Length, utf8_path);
+            return stream.ToArray();
+        }
+
 
 
         static byte[] CreateEmpty(ScrcpyControlType type)

@@ -9,7 +9,7 @@ name: Release
 # Moi lan chay -> build version 'M.N.<so-commit>' -> upload 2 nupkg (Scrcpy + Scrcpy.Wpf) lam
 # asset vao Release 'vM.N.0' + cap nhat notes (tang dan, danh so) cac change ke tu 'vM.N.0'.
 #
-# Trigger: cac branch version (2.4 ... 4.0) + master. Vi master == dong moi nhat, push cung
+# Trigger: cac branch version (2.4 ... 4.1) + master. Vi master == dong moi nhat, push cung
 # commit len ca hai branch co the trigger 2 lan (vo hai: cung tag, --clobber + --skip-duplicate).
 #
 # Tien dieu kien: tag 'vM.N.0' phai ton tai tren origin truoc (moc GitVersion + ten Release).
@@ -90,7 +90,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $notesOnly = $env:NOTES_ONLY -eq 'true'
           if ($notesOnly) {
-            # Notes-only: khong co nupkg -> suy M.N tu ten branch (2.4 ... 4.0);
+            # Notes-only: khong co nupkg -> suy M.N tu ten branch (2.4 ... 4.1);
             # branch khac (master) thi lay tag gan nhat trong lich su.
             $bn = $env:GITHUB_REF_NAME
             if ($bn -match '^(\d+)\.(\d+)$') { $major = $Matches[1]; $minor = $Matches[2] }

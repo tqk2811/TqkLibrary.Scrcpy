@@ -132,6 +132,8 @@ namespace TqkLibrary.Scrcpy.Wpf
             => this.ForEach(x => x.CameraZoomOut());
         public bool ResizeDisplay(ushort width, ushort height)
             => this.ForEach(x => x.ResizeDisplay(width, height));
+        public bool ScanFile(string path)
+            => this.ForEach(x => x.ScanFile(path));
         #endregion
     }
 
