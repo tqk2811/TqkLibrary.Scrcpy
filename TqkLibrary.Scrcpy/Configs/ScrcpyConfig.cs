@@ -39,47 +39,8 @@ namespace TqkLibrary.Scrcpy.Configs
         public ScrcpyServerConfig? ServerConfig { get; set; } = new ScrcpyServerConfig();
 
         /// <summary>
-        /// Use directx 11 for convert image.<br>
-        /// </br>Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/> or <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/>
-        /// </summary>
-        public bool IsUseD3D11ForUiRender { get; set; } = false;
-
-        /// <summary>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true, and <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/>
-        /// </summary>
-        public bool IsUseD3D11ForConvert { get; set; } = false;
-
-        /// <summary>
-        /// Only work with <see cref="HwType"/> in mode <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA"/><br></br>
-        /// Default <see cref="D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT"/>
-        /// </summary>
-        public D3D11Filter Filter { get; set; } = D3D11Filter.D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-
-        /// <summary>
-        /// Use Hardware Accelerator for decode image<br>
-        /// </br>Default: <see cref="FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE"/><br>
-        /// </br>Use <see cref="GetHwSupports"/> for get support list.
-        /// </summary>
-        public FFmpegAVHWDeviceType HwType { get; set; } = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
-
-        /// <summary>
-        /// Flush the D3D11 device after each UI draw so the rendered frame is submitted before the WPF
-        /// surface queue presents it. Rendering uses a different D3D11 device than the surface queue's
-        /// producer, so without this an isolated present (e.g. resizing the window while the device is
-        /// idle) can show a black screen.<br></br>
-        /// To use this feature, please set <see cref="IsUseD3D11ForUiRender"/> to true.<br></br>
-        /// Default: true
-        /// </summary>
-        public bool IsForceUiGpuFlush { get; set; } = true;
-
-        /// <summary>
-        /// Time in milliseconds to wait for the device to connect before giving up.<br></br>
-        /// Default: 3000
-        /// </summary>
-        public int ConnectionTimeout { get; set; } = 3000;
-
-        /// <summary>
-        /// Where adb is, which scrcpy server jar to deploy and where it lives on the device.<br></br>
+        /// Where adb is, which scrcpy server jar to deploy and where it lives on the device, whether
+        /// to push it again on every connect, and how long to wait for the device.<br></br>
         /// Also the single source of the adb path used for every device command while connecting
         /// (reverse tunnel, launching the server), so client and deploy can never disagree.<br></br>
         /// Pass this same instance to <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> when pushing
@@ -88,19 +49,12 @@ namespace TqkLibrary.Scrcpy.Configs
         public ScrcpyDeployConfig DeployConfig { get; set; } = new ScrcpyDeployConfig();
 
         /// <summary>
-        /// Push <see cref="ScrcpyDeployConfig.ScrcpyServerPath"/> to the device on every connect.<br></br>
-        /// The jar stays on the device between connections, so pushing it again each time only costs
-        /// time. Set to false to skip the push and reconnect faster — the caller is then responsible
-        /// for the jar already being on the device at
-        /// <see cref="ScrcpyDeployConfig.ScrcpyServerAndroidPath"/> (call
-        /// <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> once, e.g. on the first connect),
-        /// otherwise the server fails to start and the connect fails.<br></br>
-        /// Default: true
+        /// Client-side decoding and rendering options. Nothing here is sent to the device.
         /// </summary>
-        public bool ForcePush { get; set; } = true;
+        public ClientConfig ClientConfig { get; set; } = new ClientConfig();
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <returns></returns>
         public override string ToString()
@@ -112,6 +66,8 @@ namespace TqkLibrary.Scrcpy.Configs
         internal ScrcpyNativeConfig NativeConfig()
         {
             if (ServerConfig is null) ServerConfig = new ScrcpyServerConfig();
+            if (DeployConfig is null) DeployConfig = new ScrcpyDeployConfig();
+            if (ClientConfig is null) ClientConfig = new ClientConfig();
             bool isVideo = ServerConfig.IsVideo;
             bool isAudio = ServerConfig.AudioConfig?.IsAudio ?? false;
             bool isControl = ServerConfig.IsControl;
@@ -120,15 +76,15 @@ namespace TqkLibrary.Scrcpy.Configs
 
             return new ScrcpyNativeConfig
             {
-                HwType = HwType,
+                HwType = ClientConfig.HwType,
                 IsControl = isControl,
-                IsUseD3D11ForUiRender = IsUseD3D11ForUiRender,
-                IsUseD3D11ForConvert = IsUseD3D11ForConvert,
+                IsUseD3D11ForUiRender = ClientConfig.IsUseD3D11ForUiRender,
+                IsUseD3D11ForConvert = ClientConfig.IsUseD3D11ForConvert,
                 IsAudio = isAudio,
                 IsVideo = isVideo,
-                ConnectionTimeout = ConnectionTimeout,
-                Filter = Filter,
-                IsForceUiGpuFlush = IsForceUiGpuFlush,
+                ConnectionTimeout = DeployConfig.ConnectionTimeout,
+                Filter = ClientConfig.Filter,
+                IsForceUiGpuFlush = ClientConfig.IsForceUiGpuFlush,
             };
         }
 
