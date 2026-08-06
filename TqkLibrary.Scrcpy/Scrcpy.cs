@@ -378,7 +378,13 @@ namespace TqkLibrary.Scrcpy
                     Size size = GetScreenSize();
                     if (size.Width <= 0 || size.Height <= 0) return null;
 
-                    int width = size.Width % 16 == 0 ? size.Width : size.Width + 16 - (size.Width % 16);
+                    // Must reproduce FrameConventer::Convert exactly: `int fix_w = w + w % 16;`.
+                    // The native side rejects the call when `linesizes[0] != lineSize`, so a padded
+                    // width computed any other way makes GetScreenShot fail silently (returns null).
+                    // Rounding up to the next multiple of 16 only happens to agree with the native
+                    // formula when `w % 16` is 0 or 8 - which is why 1080-wide displays worked while
+                    // e.g. a 1050-wide capture returned nothing at all.
+                    int width = size.Width + size.Width % 16;
                     Size fix_size = new Size(width, size.Height);
 
                     Bitmap bitmap = new Bitmap(fix_size.Width, fix_size.Height, PixelFormat.Format32bppArgb);
