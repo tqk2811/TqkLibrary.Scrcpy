@@ -14,10 +14,16 @@ namespace TestConsole
         {
             return new ScrcpyConfig()
             {
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
-                IsUseD3D11ForConvert = false,
-                IsUseD3D11ForUiRender = false,
-                ConnectionTimeout = 10000,
+                ClientConfig = new ClientConfig()
+                {
+                    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_NONE,
+                    IsUseD3D11ForConvert = false,
+                    IsUseD3D11ForUiRender = false,
+                },
+                DeployConfig = new ScrcpyDeployConfig()
+                {
+                    ConnectionTimeout = 10000,
+                },
                 ServerConfig = new ScrcpyServerConfig()
                 {
                     IsControl = true,
@@ -42,10 +48,16 @@ namespace TestConsole
         {
             return new ScrcpyConfig()
             {
-                HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
-                IsUseD3D11ForConvert = true,
-                IsUseD3D11ForUiRender = true,
-                ConnectionTimeout = 10000,
+                ClientConfig = new ClientConfig()
+                {
+                    HwType = FFmpegAVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA,
+                    IsUseD3D11ForConvert = true,
+                    IsUseD3D11ForUiRender = true,
+                },
+                DeployConfig = new ScrcpyDeployConfig()
+                {
+                    ConnectionTimeout = 10000,
+                },
                 ServerConfig = new ScrcpyServerConfig()
                 {
                     IsControl = false,
