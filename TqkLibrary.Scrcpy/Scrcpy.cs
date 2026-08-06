@@ -170,7 +170,7 @@ namespace TqkLibrary.Scrcpy
             if (countdownEvent.TryAddCount())
             {
                 if (config == null) config = new ScrcpyConfig();
-                _adbPath = config.AdbPath;
+                _adbPath = config.DeployConfig.AdbPath;
                 _physicalScreenSizeCache = null;
                 ScrcpyNativeConfig nativeConfig = config.NativeConfig();
                 result = ConnectInternal(config, ref nativeConfig);
@@ -180,11 +180,32 @@ namespace TqkLibrary.Scrcpy
             return result;
         }
 
+        /// <summary>
+        /// Push the local scrcpy server jar to the device.<br></br>
+        /// The jar stays on the device between connections, so this only has to run once per device:
+        /// push it here, then set <see cref="ScrcpyDeployConfig.ForcePush"/> to false so
+        /// <see cref="Connect(ScrcpyConfig?)"/> skips the push.
+        /// </summary>
+        /// <param name="config">Where adb is, which jar to send and where it lands on the device.
+        /// Pass <see cref="ScrcpyConfig.DeployConfig"/> of the config you connect with so both agree on
+        /// the device path. Null uses the defaults.</param>
+        /// <returns>true if <c>adb push</c> succeeded.</returns>
+        public bool PushServer(ScrcpyDeployConfig? config = null)
+        {
+            if (config == null) config = new ScrcpyDeployConfig();
+            return PushServerInternal(config, config.GetResolvedAndroidPath());
+        }
+
+        private bool PushServerInternal(ScrcpyDeployConfig config, string scrcpyServerAndroidPath)
+        {
+            return RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" {scrcpyServerAndroidPath}") == 0;
+        }
+
         private bool ConnectInternal(ScrcpyConfig config, ref ScrcpyNativeConfig nativeConfig)
         {
             string scidPrefix = "localabstract:scrcpy";
-            string ScrcpyServerAndroidPath = config.ServerConfig?.ScrcpyServerAndroidPath ?? Constant.ScrcpyServerAndroidPath;
-            ScrcpyServerAndroidPath = ScrcpyServerAndroidPath.Replace("{ver}", Constant.ScrcpyServerVersion);
+            ScrcpyDeployConfig deployConfig = config.DeployConfig;
+            string ScrcpyServerAndroidPath = deployConfig.GetResolvedAndroidPath();
 
             int scid = config.ServerConfig?.SCID ?? -1;
             if (scid != -1)
@@ -201,14 +222,14 @@ namespace TqkLibrary.Scrcpy
             int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
 
             // adb setup
-            RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
-            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} push \"{config.ScrcpyServerPath}\" {ScrcpyServerAndroidPath}") != 0)
+            RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse --remove {scidPrefix}");
+            if (deployConfig.ForcePush && !PushServerInternal(deployConfig, ScrcpyServerAndroidPath))
                 return false;
-            if (RunAdbSync(config.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
+            if (RunAdbSync(deployConfig.AdbPath, $"-s {DeviceId} reverse {scidPrefix} tcp:{port}") != 0)
                 return false;
 
             // Start scrcpy server process
-            Process? serverProcess = StartAdbProcess(config.AdbPath,
+            Process? serverProcess = StartAdbProcess(deployConfig.AdbPath,
                 $"-s {DeviceId} shell CLASSPATH={ScrcpyServerAndroidPath} app_process / com.genymobile.scrcpy.Server {config}");
             if (serverProcess is null)
                 return false;
@@ -357,7 +378,13 @@ namespace TqkLibrary.Scrcpy
                     Size size = GetScreenSize();
                     if (size.Width <= 0 || size.Height <= 0) return null;
 
-                    int width = size.Width % 16 == 0 ? size.Width : size.Width + 16 - (size.Width % 16);
+                    // Must reproduce FrameConventer::Convert exactly: `int fix_w = w + w % 16;`.
+                    // The native side rejects the call when `linesizes[0] != lineSize`, so a padded
+                    // width computed any other way makes GetScreenShot fail silently (returns null).
+                    // Rounding up to the next multiple of 16 only happens to agree with the native
+                    // formula when `w % 16` is 0 or 8 - which is why 1080-wide displays worked while
+                    // e.g. a 1050-wide capture returned nothing at all.
+                    int width = size.Width + size.Width % 16;
                     Size fix_size = new Size(width, size.Height);
 
                     Bitmap bitmap = new Bitmap(fix_size.Width, fix_size.Height, PixelFormat.Format32bppArgb);
@@ -396,7 +423,7 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// Work only when enable <see cref="ScrcpyConfig.IsUseD3D11ForUiRender"/>
+        /// Work only when enable <see cref="ClientConfig.IsUseD3D11ForUiRender"/>
         /// </summary>
         /// <returns></returns>
         public ScrcpyUiView InitScrcpyUiView()
@@ -405,9 +432,10 @@ namespace TqkLibrary.Scrcpy
         }
 
         /// <summary>
-        /// 
+        /// Pushes the server jar, then runs it once in query mode to read back what the device supports.
         /// </summary>
-        /// <param name="listSupportQuery"></param>
+        /// <param name="listSupportQuery">What to list, plus the
+        /// <see cref="ListSupportQuery.DeployConfig"/> saying where adb is and which jar to run.</param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public async Task<ScrcpyServerListSupport> ListSupportAsync(
@@ -416,13 +444,16 @@ namespace TqkLibrary.Scrcpy
         {
             if (listSupportQuery is null) throw new ArgumentNullException(nameof(listSupportQuery));
 
-            await AdbHelper.PushServerAsync(listSupportQuery.AdbPath, DeviceId, listSupportQuery.ScrcpyPath, cancellationToken);
+            ScrcpyDeployConfig deployConfig = listSupportQuery.DeployConfig;
+            string scrcpyServerAndroidPath = deployConfig.GetResolvedAndroidPath();
+
+            await AdbHelper.PushServerAsync(deployConfig, DeviceId, cancellationToken);
 
             string q = string.Join(" ", listSupportQuery.GetArguments().Where(x => !string.IsNullOrWhiteSpace(x)));
             var result = await AdbHelper.RunServerWithAdbAsync(
-                listSupportQuery.AdbPath,
+                deployConfig.AdbPath,
                 DeviceId,
-                $"shell CLASSPATH=/sdcard/scrcpy-server-tqk.jar app_process / com.genymobile.scrcpy.Server {q}",
+                $"shell CLASSPATH={scrcpyServerAndroidPath} app_process / com.genymobile.scrcpy.Server {q}",
                 cancellationToken
                 );
 

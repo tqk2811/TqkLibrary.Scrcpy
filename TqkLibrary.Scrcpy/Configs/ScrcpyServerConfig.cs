@@ -156,11 +156,6 @@ namespace TqkLibrary.Scrcpy.Configs
         /// </summary>
         public string ScrcpyServerVersion { get; } = Constant.ScrcpyServerVersion;
 
-        /// <summary>
-        /// Path on the device where the scrcpy server jar is pushed and executed.
-        /// </summary>
-        public string ScrcpyServerAndroidPath { get; set; } = Constant.ScrcpyServerAndroidPath;
-
         IEnumerable<string> _GetArguments()
         {
             yield return ScrcpyServerVersion;
