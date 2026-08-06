@@ -38,6 +38,23 @@ namespace TqkLibrary.Scrcpy.Configs
         public string ScrcpyServerAndroidPath { get; set; } = Constant.ScrcpyServerAndroidPath;
 
         /// <summary>
+        /// Push <see cref="ScrcpyServerPath"/> to the device on every connect.<br></br>
+        /// The jar stays on the device between connections, so pushing it again each time only costs
+        /// time. Set to false to skip the push and reconnect faster — the caller is then responsible
+        /// for the jar already being on the device at <see cref="ScrcpyServerAndroidPath"/> (call
+        /// <see cref="Scrcpy.PushServer(ScrcpyDeployConfig?)"/> once, e.g. on the first connect),
+        /// otherwise the server fails to start and the connect fails.<br></br>
+        /// Default: true
+        /// </summary>
+        public bool ForcePush { get; set; } = true;
+
+        /// <summary>
+        /// Time in milliseconds to wait for the device to connect before giving up.<br></br>
+        /// Default: 3000
+        /// </summary>
+        public int ConnectionTimeout { get; set; } = 3000;
+
+        /// <summary>
         /// <see cref="ScrcpyServerAndroidPath"/> with <c>{ver}</c> resolved — the real path on the device.
         /// </summary>
         /// <returns></returns>
