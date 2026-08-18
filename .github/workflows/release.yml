@@ -118,8 +118,14 @@ jobs:
           # neu HEAD chinh la [release]). Muc con '  + ...' = moi commit moi reachable trong
           # (R_truoc..R] — tu nhien gom ca commit merge tu branch khac (vd fix tren 2.4).
           # git-cliff chi format tung commit, moi dong prefix '__SHA_<sha>__' de tra cuu.
+          # Range cho git-cliff lay tu '<commit cua tag>^' de CO ca chinh commit mang tag
+          # (vd 'feat!: support scrcpy server 4.1' = build M.N.0); dau range cua git la
+          # exclusive nen '<tag>..HEAD' se bo mat commit do.
+          $tagCommit = "$(git rev-list -n 1 $tag)".Trim()
+          $tagParent = "$(git rev-parse --verify --quiet "$tagCommit^")".Trim()
+          $cliffRange = if ($tagParent) { "$tagCommit^..HEAD" } else { "$tag..HEAD" }
           $lineOf = @{}
-          foreach ($l in @(git-cliff --config cliff-release.toml "$tag..HEAD")) {
+          foreach ($l in @(git-cliff --config cliff-release.toml $cliffRange)) {
             if ($l -match '^__SHA_([0-9a-f]+)__ (.*)$') { $lineOf[$Matches[1]] = $Matches[2] }
           }
           $fps = @(git rev-list --first-parent --reverse "$tag..HEAD")
@@ -133,8 +139,7 @@ jobs:
           # base = merge-base(tag, branch cua dong truoc) = commit cuoi cua dong truoc ma tag nay
           # chua; K = rev-list --count prevTag..base (dem MOI commit, cung cach nhu GitVersion).
           $baseLine = $null
-          $tagCommit = "$(git rev-list -n 1 $tag)".Trim()
-          if ("$(git rev-parse --verify --quiet "$tagCommit^")".Trim()) {
+          if ($tagParent) {
             $prevTag = @(git tag --list 'v[0-9]*' --merged "$tagCommit^" --sort=-v:refname) |
               Where-Object { $_ -ne $tag } | Select-Object -First 1
             if ($prevTag -match '^v(\d+\.\d+)\.\d+$') {
@@ -163,6 +168,13 @@ jobs:
               if ($lineOf.ContainsKey($c)) { $out.Add("  + $($lineOf[$c])") }
             }
             $prev = $r
+          }
+          # Build M.N.0 = chinh commit mang tag (tinh nang khai sinh dong nay). Chi hien khi
+          # commit do theo Conventional Commits (co trong $lineOf) de khong sinh header rong
+          # o cac dong cu (vd 'bumb 2.5', 'Support scrcpy server 4.0').
+          if ($lineOf.ContainsKey($tagCommit)) {
+            $out.Insert(0, "  + $($lineOf[$tagCommit])")
+            $out.Insert(0, "- $mn.0")
           }
           # Dong dau notes: cho biet dong nay noi tiep tu ban nao cua dong truoc.
           if ($baseLine) { $out.Insert(0, ''); $out.Insert(0, $baseLine) }
