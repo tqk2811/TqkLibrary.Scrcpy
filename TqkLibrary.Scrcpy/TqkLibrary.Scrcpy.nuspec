@@ -9,28 +9,28 @@
 		<authors>tqk2811</authors>
 		<projectUrl>https://github.com/tqk2811/TqkLibrary.Scrcpy</projectUrl>
 		<repository type="git" url="https://github.com/tqk2811/TqkLibrary.Scrcpy.git"/>
-		<license type="expression">GPL-3.0-or-later</license>
+		<license type="expression">MIT</license>
 		<readme>docs\README.md</readme>
 		<dependencies>
 			<group targetFramework="net462">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x64" version="8.1.2.21" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x86" version="8.1.2.21" />
 			</group>
 			<group targetFramework="net6.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x64" version="8.1.2.21" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x86" version="8.1.2.21" />
 			</group>
 			<group targetFramework="net8.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x64" version="8.1.2.21" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x86" version="8.1.2.21" />
 			</group>
 			<group targetFramework="net10.0-windows7.0">
 				<dependency id="System.Drawing.Common" version="8.0.4" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x64" version="8.0.1.48" />
-				<dependency id="TqkLibrary.FFmpeg.Native.Win.x86" version="8.0.1.48" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x64" version="8.1.2.21" />
+				<dependency id="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x86" version="8.1.2.21" />
 			</group>
 		</dependencies>
 		<contentFiles>
@@ -41,6 +41,8 @@
 	<files>
 		<file src="..\LICENSE" target="LICENSE" />
 		<file src="..\THIRD-PARTY-NOTICES.txt" target="THIRD-PARTY-NOTICES.txt" />
+		<file src="..\licenses\LGPL-2.1.txt" target="licenses\LGPL-2.1.txt" />
+		<file src="..\licenses\Apache-2.0.txt" target="licenses\Apache-2.0.txt" />
 		<file src="..\README.md" target="docs\README.md" />
 
 		<file src="bin\Release\**\TqkLibrary.Scrcpy.dll" target="lib\" />
