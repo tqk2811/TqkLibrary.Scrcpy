@@ -127,6 +127,32 @@ jobs:
           if (-not $notesOnly -and $fps.Count -gt 0 -and ($points.Count -eq 0 -or $points[-1] -ne $fps[-1])) {
             $points += $fps[-1]   # HEAD = build dang phat hanh boi run nay (bo qua khi notes-only)
           }
+          # Diem noi tiep dong truoc: dong M.N bat dau tu commit nao cua dong truoc (vd 4.1.0
+          # noi tiep 4.0.<K>) - de nguoi doc biet release nay ke thua tu ban nao.
+          # prevTag = tag 'vX.Y.0' lon nhat la ancestor cua commit tag hien tai;
+          # base = merge-base(tag, branch cua dong truoc) = commit cuoi cua dong truoc ma tag nay
+          # chua; K = rev-list --count prevTag..base (dem MOI commit, cung cach nhu GitVersion).
+          $baseLine = $null
+          $tagCommit = "$(git rev-list -n 1 $tag)".Trim()
+          if ("$(git rev-parse --verify --quiet "$tagCommit^")".Trim()) {
+            $prevTag = @(git tag --list 'v[0-9]*' --merged "$tagCommit^" --sort=-v:refname) |
+              Where-Object { $_ -ne $tag } | Select-Object -First 1
+            if ($prevTag -match '^v(\d+\.\d+)\.\d+$') {
+              $prevMn = $Matches[1]
+              # Branch cua dong truoc (vd 'origin/4.0' / '4.0'); khong co thi lui ve parent dau.
+              $prevRef = @("origin/$prevMn", $prevMn) |
+                Where-Object { "$(git rev-parse --verify --quiet "$_^{commit}")".Trim() } |
+                Select-Object -First 1
+              $base = if ($prevRef) { "$(git merge-base $tagCommit $prevRef)".Trim() }
+                      else { "$(git rev-list -n 1 "$tagCommit^")".Trim() }
+              if ($base) {
+                $k = [int](git rev-list --count "$prevTag..$base")
+                $baseLine = "Continues the $prevMn line from [$prevMn.$k](__REPO__/commit/$base)"
+                Write-Host "branch point: $mn.0 <- $prevMn.$k ($base)"
+              }
+            }
+          }
+
           $out = New-Object System.Collections.Generic.List[string]
           $prev = $tag
           foreach ($r in $points) {
@@ -138,6 +164,8 @@ jobs:
             }
             $prev = $r
           }
+          # Dong dau notes: cho biet dong nay noi tiep tu ban nao cua dong truoc.
+          if ($baseLine) { $out.Insert(0, ''); $out.Insert(0, $baseLine) }
           $notes = ($out -join "`n").Trim()
           # Link commit trong tung muc: template emit '__REPO__' -> URL repo hien tai
           $notes = $notes -replace '__REPO__', "$($env:GITHUB_SERVER_URL)/$($env:GITHUB_REPOSITORY)"
