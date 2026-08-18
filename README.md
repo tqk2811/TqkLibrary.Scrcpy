@@ -40,10 +40,14 @@ The bundled `scrcpy-server.jar` is taken, unmodified, from the [scrcpy](https://
 
 ## License
 
-`TqkLibrary.Scrcpy` is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)** — see [LICENSE](LICENSE).
+`TqkLibrary.Scrcpy` is licensed under the **MIT License** — see [LICENSE](LICENSE). Your application does **not** have to be open source to use it.
 
-This software uses code of **FFmpeg** (https://ffmpeg.org) licensed under the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html) and its source can be downloaded here: https://github.com/tqk2811/TqkLibrary.FFmpeg.GplShared. The bundled FFmpeg build uses `--enable-gpl --enable-version3` and links **x264**/**x265**, so the combined work — this library and any application that redistributes it — must be licensed under GPL-3.0-or-later, and its corresponding source must be made available to recipients.
+This software uses libraries from **FFmpeg** (https://ffmpeg.org) licensed under the [LGPL-2.1-or-later](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html); the build is configured without `--enable-gpl` and contains no x264/x265, because this library only ever *decodes* (the device does the encoding). Build scripts and sources: https://github.com/tqk2811/FFmpegBuild.
 
-See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) for the full attribution of FFmpeg, x264, x265, and the scrcpy server.
+FFmpeg is linked dynamically as separate DLLs, so LGPL-2.1 §6 is satisfied and you may swap in your own FFmpeg build. If you redistribute your application, keep the FFmpeg notice and the LGPL-2.1 text ([licenses/LGPL-2.1.txt](licenses/LGPL-2.1.txt)) with it.
+
+See [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt) for the full attribution of FFmpeg and the scrcpy server.
+
+> Versions released **before** this change were licensed under GPL-3.0-or-later (they bundled a GPL FFmpeg build); that license still applies to those older packages.
 
 The bundled scrcpy server (`scrcpy-server.jar`) is a separate program by Genymobile, executed on the device (not linked into this library), licensed under the **Apache License 2.0**; see the [scrcpy repository](https://github.com/Genymobile/scrcpy) for its terms.
