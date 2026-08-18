@@ -35,8 +35,8 @@
 	
 	<ItemGroup>
 		<PackageReference Include="System.Drawing.Common" Version="8.0.4" />
-		<PackageReference Include="TqkLibrary.FFmpeg.Native.Win.x64" Version="8.0.1.48" />
-		<PackageReference Include="TqkLibrary.FFmpeg.Native.Win.x86" Version="8.0.1.48" />
+		<PackageReference Include="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x64" Version="8.1.2.21" />
+		<PackageReference Include="TqkLibrary.FFmpeg.Lgpl2.Native.Win.x86" Version="8.1.2.21" />
 	</ItemGroup>
 
 	<ItemGroup>
