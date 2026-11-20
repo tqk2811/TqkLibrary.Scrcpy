@@ -1,5 +1,4 @@
 #pragma warning(disable: 26812)
-extern bool HW_AVX2;
 #define _DISABLE_CONSTEXPR_MUTEX_CONSTRUCTOR
 #ifndef _H_ScrcpyNativePCH_H_
 #define _H_ScrcpyNativePCH_H_
